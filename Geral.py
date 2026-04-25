@@ -1,13 +1,26 @@
 import streamlit as st
 import pandas as pd
+import requests
+from bs4 import BeautifulSoup
 import json
 import os
+import time
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+import networkx as nx
+from itertools import combinations
 from collections import Counter
 import streamlit.components.v1 as components
 import re
+from google.api_core import exceptions as google_exceptions
+
+# Bibliotecas de IA (Novo SDK do Gemini) e ML
+from google import genai
+from google.genai import types
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 
 # Funções utilitárias
 from utils import (
