@@ -13,6 +13,7 @@ from itertools import combinations
 from collections import Counter
 import streamlit.components.v1 as components
 import re
+from google.api_core import exceptions as google_exceptions
 
 # Bibliotecas de IA (Novo SDK do Gemini) e ML
 from google import genai
@@ -448,47 +449,43 @@ def construir_grafo_cooccorrencia(df, coluna='Palavras-Chaves', top_n=30, min_pe
 
 
 def responder_chat(mensagens_historico, dataframe, metricas):
-    """Envia o histórico, contexto completo do JSON e métricas para o Gemini com Busca Híbrida."""
+    """Chatbot RAG Otimizado: Gasta menos tokens e lida com erros de Cota (429) do nível Gratuito."""
     if not IA_CONFIGURADA:
         return "⚠️ Erro: API Key não configurada."
 
-    # 1. MOTOR DE BUSCA INTERNO (O segredo para precisão exata)
-    # Pega a última pergunta do usuário
     pergunta_usuario = mensagens_historico[-1]["content"]
-    
-    # Limpa a pontuação e separa as palavras
     palavras = re.sub(r'[^\w\s]', '', pergunta_usuario).split()
     
-    # Ignora palavras comuns para focar na entidade real (ex: IFSC, Tritão, Saudade)
-    stopwords_busca = {"quais", "quantas", "quantos", "sobre", "noticias", "notícias", "citam", "falam", "tem", "que", "para", "como", "qual", "onde"}
+    # Ignora palavras comuns
+    stopwords_busca = {"quais", "quantas", "quantos", "sobre", "noticias", "notícias", "citam", "falam", "tem", "que", "para", "como", "qual", "onde", "sobre", "das", "dos"}
     termos_busca = [p for p in palavras if len(p) > 3 and p.lower() not in stopwords_busca]
     
-    relatorio_busca = "🔍 RESULTADO DA BUSCA INTERNA NO BANCO DE DADOS (Use estes números, eles são a contagem exata!):\n"
+    relatorio_busca = "🔍 RESULTADO DA BUSCA INTERNA NO BANCO DE DADOS:\n"
+    noticias_relevantes = [] # Vai guardar APENAS as notícias que importam
     
+    # 1. BUSCA INTELIGENTE (PANDAS)
     for termo in termos_busca:
-        # O Pandas faz a busca exata ignorando maiúsculas/minúsculas
         mask = dataframe['Conteúdo'].str.contains(termo, case=False, na=False) | \
                dataframe['Título'].str.contains(termo, case=False, na=False) | \
                dataframe['Palavras-Chaves'].str.contains(termo, case=False, na=False)
         df_busca = dataframe[mask]
         
         if len(df_busca) > 0:
-            relatorio_busca += f"- O termo '{termo}' aparece em EXATAMENTE {len(df_busca)} notícias no banco de dados.\n"
-            # Passamos apenas os Títulos e URLs encontrados para a IA citar, sem sobrecarregar a memória
-            noticias_encontradas = df_busca[['Título', 'URL']].to_json(orient='records', force_ascii=False)
-            relatorio_busca += f"  Referências para você citar com hiperlink: {noticias_encontradas}\n\n"
+            relatorio_busca += f"- O termo '{termo}' aparece em EXATAMENTE {len(df_busca)} notícias.\n"
+            # Pegamos no máximo 15 notícias por termo para não estourar a cota de 250k tokens do Free Tier
+            noticias_relevantes.append(df_busca.head(15))
 
-    # 2. CONTEXTO GERAL (Para análises de sentimento e leitura do conteúdo)
-    colunas_completas = [
-        'ID', 'Título', 'Data', 'URL', 'Conteúdo', 'Categorias', 
-        'Palavras-Chaves', 'É Evento', 'Tipo do Evento', 'Data do Evento', 
-        'Data Fim Evento', 'Local do Evento', 'Horário do Evento', 
-        'É Pago', 'Valor do Evento'
-    ]
-    colunas_finais = [c for c in colunas_completas if c in dataframe.columns]
-    contexto_noticias = dataframe[colunas_finais].to_json(orient='records', force_ascii=False)
+    # 2. MONTA UM CONTEXTO ENXUTO (Economia drástica de tokens)
+    if noticias_relevantes:
+        # Junta todas as notícias encontradas, remove duplicatas e gera o JSON
+        df_contexto = pd.concat(noticias_relevantes).drop_duplicates(subset=['URL'])
+        # Enviamos apenas colunas essenciais para responder à pergunta
+        colunas_uteis = [c for c in ['Título', 'Data', 'URL', 'Conteúdo', 'Categorias', 'É Evento', 'Local do Evento'] if c in df_contexto.columns]
+        contexto_noticias = df_contexto[colunas_uteis].to_json(orient='records', force_ascii=False)
+    else:
+        contexto_noticias = "Nenhuma notícia específica encontrada para os termos buscados. Responda apenas com base nas Estatísticas Gerais."
 
-    # 3. CONSTRUÇÃO DO PROMPT MESTRE
+    # 3. PROMPT DO SISTEMA
     instrucao_sistema = f"""
     Você é o Consultor Editorial Sênior da Folha de Coqueiros. 
     
@@ -497,32 +494,46 @@ def responder_chat(mensagens_historico, dataframe, metricas):
 
     {relatorio_busca}
 
-    BASE DE DADOS COMPLETA (Para leitura de contexto):
+    NOTÍCIAS FILTRADAS (Apenas conteúdo relevante para a pergunta atual):
     {contexto_noticias}
 
     DIRETRIZES DE RESPOSTA:
-    1. PRIORIDADE DE CONTAGEM: Se o usuário perguntar quantidades exatas sobre um termo (ex: 'quantas vezes', 'quais notícias'), confie CEGAMENTE nos números da seção 'RESULTADO DA BUSCA INTERNA'. Não tente recontar usando o JSON completo.
-    2. CITAÇÕES RÍGIDAS: Cite as notícias usando OBRIGATORIAMENTE o formato Markdown: [Título da Notícia](URL).
-    3. SEJA DIRETO E ANALÍTICO: Liste os acontecimentos de forma estruturada. Se houverem dezenas de resultados, cite os 5 mais relevantes e resuma o tema central das demais.
+    1. CITAÇÕES RÍGIDAS: Cite as notícias usando OBRIGATORIAMENTE o formato Markdown: [Título da Notícia](URL).
+    2. ECONOMIA DE TEXTO: Seja direto. Se o usuário perguntar quantidades, confie no RESULTADO DA BUSCA INTERNA.
+    3. INFORMAÇÃO GERAL: Se perguntarem algo genérico (ex: total de notícias), use as ESTATÍSTICAS CONSOLIDADAS.
     """
 
-    # 4. TRADUÇÃO PARA API GEMINI
-    conteudo_formatado = []
-    for msg in mensagens_historico:
-        papel = "model" if msg["role"] == "assistant" else "user"
-        conteudo_formatado.append(
-            types.Content(role=papel, parts=[types.Part.from_text(text=msg["content"])])
-        )
+    conteudo_formatado = [
+        types.Content(role="model" if msg["role"] == "assistant" else "user", 
+                      parts=[types.Part.from_text(text=msg["content"])])
+        for msg in mensagens_historico
+    ]
 
-    try:
-        response = client.models.generate_content(
-            model='gemini-2.5-flash-lite',
-            contents=conteudo_formatado,
-            config=types.GenerateContentConfig(
-                system_instruction=instrucao_sistema,
-                temperature=0.1 # Temperatura reduzida quase a zero para forçar o foco nos dados exatos
+    # 4. AMORTECEDOR DE ERRO (Retry/Backoff)
+    tentativas = 0
+    max_tentativas = 3
+    
+    while tentativas < max_tentativas:
+        try:
+            response = client.models.generate_content(
+                model='gemini-2.5-flash-lite',
+                contents=conteudo_formatado,
+                config=types.GenerateContentConfig(
+                    system_instruction=instrucao_sistema,
+                    temperature=0.2 
+                )
             )
-        )
-        return response.text
-    except Exception as e:
-        return f"❌ Erro na comunicação com a IA: {str(e)}"
+            return response.text
+        
+        except Exception as e:
+            erro_str = str(e)
+            if "429" in erro_str or "RESOURCE_EXHAUSTED" in erro_str:
+                tentativas += 1
+                tempo_espera = 25 # Se der o erro, o código trava por 25 segundos e tenta sozinho de novo
+                print(f"Cota excedida. Aguardando {tempo_espera}s (Tentativa {tentativas}/{max_tentativas})...")
+                time.sleep(tempo_espera)
+            else:
+                # Se for outro tipo de erro (sem internet, erro interno), retorna o erro
+                return f"❌ Erro na comunicação com a IA: {erro_str}"
+                
+    return "❌ Falha após 3 tentativas: A cota gratuita da API do Google está esgotada para este minuto. Aguarde 1 minuto e pergunte novamente."
