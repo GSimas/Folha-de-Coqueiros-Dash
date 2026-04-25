@@ -282,7 +282,7 @@ def processar_ia(limite_ia):
         prompt = _construir_prompt_ia(noticia)
         try:
             resp = client.models.generate_content(
-                model='gemini-2.5-flash-lite',
+                model='gemini-3.1-flash-lite-preview',
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
@@ -516,7 +516,7 @@ def responder_chat(mensagens_historico, dataframe, metricas):
     while tentativas < max_tentativas:
         try:
             response = client.models.generate_content(
-                model='gemini-2.5-flash-lite',
+                model='gemini-3.1-flash-lite-preview',
                 contents=conteudo_formatado,
                 config=types.GenerateContentConfig(
                     system_instruction=instrucao_sistema,

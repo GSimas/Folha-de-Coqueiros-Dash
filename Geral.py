@@ -40,7 +40,7 @@ st.title("🗞️ Dashboard Analítico e IA - Folha de Coqueiros")
 with st.sidebar:
     # 1. Exibição da Logo
     if os.path.exists("folhadecoqueiros-logo.jpg"):
-        st.image("folhadecoqueiros-logo.jpg", use_container_width=True)
+        st.image("folhadecoqueiros-logo.jpg", width='stretch')
     else:
         st.warning("⚠️ Arquivo 'folhadecoqueiros-logo.jpg' não encontrado na pasta.")
         
@@ -156,7 +156,7 @@ with col_n1:
     if not df_cat.empty:
         fig = px.pie(df_cat, names='Categorias', hole=0.4)
         fig.update_traces(textposition='inside', textinfo='percent+label')
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
     else:
         st.info("Nenhuma notícia categorizada no período.")
 
@@ -174,7 +174,7 @@ with col_n2:
             fig2 = px.bar(df_tempo, x='Mes_Ano', y='Qtd', color='Categorias')
                 
         fig2.update_layout(xaxis_title="Mês/Ano", yaxis_title="Nº de Artigos")
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, width='stretch')
 
 # ------------------------------ NUVEM DE PALAVRAS -----------------------------
 st.markdown("**Nuvem de Palavras Interativa**")
@@ -208,7 +208,7 @@ if not df_eventos.empty:
         if not df_tipo.empty:
             fig_t = px.pie(df_tipo, names='Tipo do Evento', hole=0.4)
             fig_t.update_traces(textposition='inside', textinfo='percent+label')
-            st.plotly_chart(fig_t, use_container_width=True)
+            st.plotly_chart(fig_t, width='stretch')
     with col_e2:
         st.markdown("**Eventos Pagos vs Gratuitos**")
         df_pago = df_eventos.assign(
@@ -217,7 +217,7 @@ if not df_eventos.empty:
         fig_p = px.histogram(df_pago, x='Tipo do Evento', color='Custo',
                              barmode='group')
         fig_p.update_layout(xaxis_title="", yaxis_title="Qtd. eventos")
-        st.plotly_chart(fig_p, use_container_width=True)
+        st.plotly_chart(fig_p, width='stretch')
 
     cols_evt = ['ID', 'Título', 'Data do Evento', 'Data Fim Evento',
                 'Tipo do Evento', 'Local do Evento', 'Horário do Evento',
@@ -225,7 +225,7 @@ if not df_eventos.empty:
     cols_evt = [c for c in cols_evt if c in df_eventos.columns]
     st.dataframe(
         df_eventos[cols_evt].sort_values('Data do Evento'),
-        use_container_width=True,
+        width='stretch',
         column_config={
             "URL": st.column_config.LinkColumn("Link"),
             "É Pago": st.column_config.CheckboxColumn("Pago?"),
@@ -299,7 +299,7 @@ if not df_g.empty:
                 margin=dict(l=10, r=10, t=10, b=10),
                 height=550,
             )
-            st.plotly_chart(fig_g, use_container_width=True)
+            st.plotly_chart(fig_g, width='stretch')
 else:
     st.info("Nenhuma notícia com palavras-chave no período.")
 
@@ -325,7 +325,7 @@ cols = [c for c in cols if c in df_view.columns]
 
 st.dataframe(
     df_view[cols].sort_values('ID'),
-    use_container_width=True,
+    width='stretch',
     column_config={
         "URL": st.column_config.LinkColumn("Link"),
         "É Evento": st.column_config.CheckboxColumn("Evento?"),
