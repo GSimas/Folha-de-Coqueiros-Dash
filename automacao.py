@@ -106,7 +106,6 @@ def rodar_backend():
     if client and novos_dados:
         print("🧠 Iniciando categorização com Gemini API...")
         
-        # Inserimos as listas oficiais no script para forçar a IA a usá-las
         CATEGORIAS_VALIDAS = [
             'Comunidade e Sociedade', 'Infraestrutura e Mobilidade', 'Educação',
             'Economia e Negócios', 'Cultura, Eventos e Gastronomia', 'Meio Ambiente',
@@ -135,32 +134,49 @@ def rodar_backend():
             "e_evento" (boolean), "tipo_evento" (string ou null), "data_evento" (DD/MM/AAAA ou null), 
             "data_fim_evento" (DD/MM/AAAA ou null), "local_evento" (string ou null), "e_pago" (boolean), "valor_evento" (string ou null).
             """
-            try:
-                resposta = client.models.generate_content(
-                    model='gemini-3.1-flash-lite-preview', 
-                    contents=prompt, 
-                    config=types.GenerateContentConfig(response_mime_type="application/json", temperature=0.1)
-                )
-                
-                # LIMPEZA DE SEGURANÇA: Remove aspas de markdown caso a IA desobedeça
-                texto_limpo = resposta.text.replace("```json", "").replace("```", "").strip()
-                res = json.loads(texto_limpo)
-                
-                noticia.update({
-                    'Categorias': res.get('categoria_sugerida', 'Comunidade e Sociedade'),
-                    'Palavras-Chaves': res.get('palavras_chave', 'N/A'),
-                    'É Evento': res.get('e_evento', False),
-                    'Tipo do Evento': res.get('tipo_evento'),
-                    'Data do Evento': res.get('data_evento'),
-                    'Data Fim Evento': res.get('data_fim_evento'),
-                    'Local do Evento': res.get('local_evento'),
-                    'É Pago': res.get('e_pago', False),
-                    'Valor do Evento': res.get('valor_evento')
-                })
-                print(f"   ✅ IA processou: {noticia['Título']}")
-            except Exception as e:
-                print(f"   ⚠️ Erro na IA ao processar '{noticia['Título']}': {e}")
             
+            # AMORTECEDOR DE FALHAS: Tenta até 3 vezes se o servidor estiver ocupado
+            sucesso = False
+            tentativas = 0
+            max_tentativas = 3
+            
+            while not sucesso and tentativas < max_tentativas:
+                try:
+                    resposta = client.models.generate_content(
+                        model='gemini-3.1-flash-lite-preview', 
+                        contents=prompt, 
+                        config=types.GenerateContentConfig(response_mime_type="application/json", temperature=0.1)
+                    )
+                    
+                    texto_limpo = resposta.text.replace("```json", "").replace("```", "").strip()
+                    res = json.loads(texto_limpo)
+                    
+                    noticia.update({
+                        'Categorias': res.get('categoria_sugerida', 'Comunidade e Sociedade'),
+                        'Palavras-Chaves': res.get('palavras_chave', 'N/A'),
+                        'É Evento': res.get('e_evento', False),
+                        'Tipo do Evento': res.get('tipo_evento'),
+                        'Data do Evento': res.get('data_evento'),
+                        'Data Fim Evento': res.get('data_fim_evento'),
+                        'Local do Evento': res.get('local_evento'),
+                        'É Pago': res.get('e_pago', False),
+                        'Valor do Evento': res.get('valor_evento')
+                    })
+                    print(f"   ✅ IA processou: {noticia['Título']}")
+                    sucesso = True # Deu certo, sai do loop de tentativas
+                    
+                except Exception as e:
+                    erro_str = str(e)
+                    tentativas += 1
+                    # Se for erro de superlotação (503) ou cota (429)
+                    if "503" in erro_str or "429" in erro_str or "UNAVAILABLE" in erro_str:
+                        print(f"   ⏳ Servidor ocupado. Aguardando 30s... (Tentativa {tentativas}/{max_tentativas})")
+                        time.sleep(30)
+                    else:
+                        print(f"   ⚠️ Erro crítico na IA ao processar '{noticia['Título']}': {erro_str}")
+                        break # Se for outro tipo de erro, não adianta tentar de novo
+            
+            # Pausa padrão de segurança entre uma notícia e outra
             time.sleep(15)
             
     # 4. SALVAR E CONSOLIDAR
