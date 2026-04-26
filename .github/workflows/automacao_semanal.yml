@@ -1,16 +1,19 @@
 name: Atualização Semanal de Notícias
 
-# Configura o gatilho para rodar todo domingo às 03:00 da manhã (UTC)
 on:
   schedule:
     - cron: '0 3 * * 0'
-  workflow_dispatch: # Permite que você clique em um botão no GitHub para testar manualmente
+  workflow_dispatch:
+
+# Adicionado para forçar o uso do Node.js 24 e remover os avisos de depreciação
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   atualizar_banco:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Dá permissão para o robô salvar o arquivo no seu repositório
+      contents: write
 
     steps:
       - name: Baixar o repositório
@@ -35,5 +38,4 @@ jobs:
           git config --global user.name "Robô Folha de Coqueiros"
           git config --global user.email "automacao@folhadecoqueiros.com"
           git add noticias.json
-          # O comando abaixo só faz o commit se houver alguma mudança no arquivo
           git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 Atualização automática do banco de notícias" && git push)

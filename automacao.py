@@ -17,12 +17,19 @@ client = genai.Client(api_key=API_KEY) if API_KEY else None
 def rodar_backend():
     print("🚀 Iniciando automação semanal...")
     
-    # 1. Carrega o banco atual
+    # 1. Carrega o banco atual e define o próximo ID
     if os.path.exists(ARQUIVO_JSON):
         with open(ARQUIVO_JSON, 'r', encoding='utf-8') as f:
             dados_existentes = json.load(f)
     else:
         dados_existentes = []
+
+    # Cálculo do próximo ID único
+    if dados_existentes:
+        # Pega o maior ID presente e soma 1
+        id_proximo = max([int(d.get("ID", -1)) for d in dados_existentes]) + 1
+    else:
+        id_proximo = 0
         
     urls_conhecidas = {d["URL"] for d in dados_existentes}
     
@@ -69,13 +76,28 @@ def rodar_backend():
             data = soup.find('span', class_='elementor-post-info__item--type-date').get_text(strip=True)
             conteudo = soup.find('div', class_='elementor-widget-theme-post-content').get_text(separator='\n', strip=True)
             
-            novos_dados.append({
-                "URL": url, "Título": titulo, "Data": data, "Conteúdo": conteudo,
-                "Categorias": "Não categorizado", "Palavras-Chaves": "N/A", "É Evento": False, 
-                "Tipo do Evento": None, "Data do Evento": None, "Data Fim Evento": None, 
-                "Local do Evento": None, "Horário do Evento": None, "É Pago": False, "Valor do Evento": None
-            })
-            print(f"   - Extraído: {titulo}")
+            nova_entrada = {
+                "ID": id_proximo, 
+                "Título": titulo,
+                "Data": data,
+                "URL": url,
+                "Conteúdo": conteudo,
+                "Categorias": "Não categorizado",
+                "Palavras-Chaves": "N/A",
+                "É Evento": False,
+                "Tipo do Evento": None,
+                "Data do Evento": None,
+                "Data Fim Evento": None,
+                "Local do Evento": None,
+                "Horário do Evento": None,
+                "É Pago": False,
+                "Valor do Evento": None
+            }
+            novos_dados.append(nova_entrada)
+            print(f"   - Extraído [ID {id_proximo}]: {titulo}")
+            
+            id_proximo += 1 # Prepara o ID para a próxima notícia da lista
+            
         except Exception as e:
             print(f"   ❌ Erro ao extrair {url}: {e}")
         time.sleep(1)
@@ -83,15 +105,35 @@ def rodar_backend():
     # 3. INTELIGÊNCIA ARTIFICIAL (Classifica as novas)
     if client and novos_dados:
         print("🧠 Iniciando categorização com Gemini API...")
+        
+        # Inserimos as listas oficiais no script para forçar a IA a usá-las
+        CATEGORIAS_VALIDAS = [
+            'Comunidade e Sociedade', 'Infraestrutura e Mobilidade', 'Educação',
+            'Economia e Negócios', 'Cultura, Eventos e Gastronomia', 'Meio Ambiente',
+            'Saúde e Bem-estar', 'Segurança', 'Política e Gestão Pública',
+            'Obituário', 'Esportes'
+        ]
+
+        TIPOS_EVENTO_VALIDOS = [
+            'Reuniões e Gestão Comunitária', 'Feiras e Mercados', 'Saúde e Meio Ambiente',
+            'Artes, Cultura e Entretenimento', 'Outros / Institucional', 'Festas e Celebrações',
+            'Esportes e Lazer', 'Educação, Palestras e Oficinas'
+        ]
+
         for idx, noticia in enumerate(novos_dados):
             prompt = f"""
             Analise a notícia e extraia os metadados em JSON estrito.
             Data: {noticia['Data']} | Título: {noticia['Título']} | Conteúdo: {noticia['Conteúdo']}
             
+            REGRAS OBRIGATÓRIAS:
+            1. "categoria_sugerida" DEVE ser EXATAMENTE uma destas opções: {CATEGORIAS_VALIDAS}
+            2. "tipo_evento" DEVE ser EXATAMENTE uma destas opções (se for evento) ou null: {TIPOS_EVENTO_VALIDOS}
+            3. Não use formatação markdown (```json). Retorne apenas o objeto {{}}.
+            
             RETORNE APENAS JSON COM AS CHAVES:
             "categoria_sugerida" (string), "palavras_chave" (string com termos separados por virgula), 
-            "e_evento" (boolean), "tipo_evento" (string), "data_evento" (DD/MM/AAAA), 
-            "data_fim_evento" (DD/MM/AAAA), "local_evento" (string), "e_pago" (boolean), "valor_evento" (string).
+            "e_evento" (boolean), "tipo_evento" (string ou null), "data_evento" (DD/MM/AAAA ou null), 
+            "data_fim_evento" (DD/MM/AAAA ou null), "local_evento" (string ou null), "e_pago" (boolean), "valor_evento" (string ou null).
             """
             try:
                 resposta = client.models.generate_content(
@@ -99,10 +141,13 @@ def rodar_backend():
                     contents=prompt, 
                     config=types.GenerateContentConfig(response_mime_type="application/json", temperature=0.1)
                 )
-                res = json.loads(resposta.text)
+                
+                # LIMPEZA DE SEGURANÇA: Remove aspas de markdown caso a IA desobedeça
+                texto_limpo = resposta.text.replace("```json", "").replace("```", "").strip()
+                res = json.loads(texto_limpo)
                 
                 noticia.update({
-                    'Categorias': res.get('categoria_sugerida', 'Diversos'),
+                    'Categorias': res.get('categoria_sugerida', 'Comunidade e Sociedade'),
                     'Palavras-Chaves': res.get('palavras_chave', 'N/A'),
                     'É Evento': res.get('e_evento', False),
                     'Tipo do Evento': res.get('tipo_evento'),
@@ -114,9 +159,8 @@ def rodar_backend():
                 })
                 print(f"   ✅ IA processou: {noticia['Título']}")
             except Exception as e:
-                print(f"   ⚠️ Erro na IA: {e}")
+                print(f"   ⚠️ Erro na IA ao processar '{noticia['Título']}': {e}")
             
-            # Pausa de 15s para não estourar a cota gratuita do Gemini (5 RPM)
             time.sleep(15)
             
     # 4. SALVAR E CONSOLIDAR
