@@ -1,0 +1,39 @@
+name: Atualização Semanal de Notícias
+
+# Configura o gatilho para rodar todo domingo às 03:00 da manhã (UTC)
+on:
+  schedule:
+    - cron: '0 3 * * 0'
+  workflow_dispatch: # Permite que você clique em um botão no GitHub para testar manualmente
+
+jobs:
+  atualizar_banco:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Dá permissão para o robô salvar o arquivo no seu repositório
+
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependências
+        run: |
+          pip install requests beautifulsoup4 google-genai
+
+      - name: Executar script de automação
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python automacao.py
+
+      - name: Salvar (Commit) o novo noticias.json no repositório
+        run: |
+          git config --global user.name "Robô Folha de Coqueiros"
+          git config --global user.email "automacao@folhadecoqueiros.com"
+          git add noticias.json
+          # O comando abaixo só faz o commit se houver alguma mudança no arquivo
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 Atualização automática do banco de notícias" && git push)
