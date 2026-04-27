@@ -1,0 +1,178 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 600px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+             #config {
+                 float: left;
+                 width: 400px;
+                 height: 600px;
+             }
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+            <div id="config"></div>
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#1A5276", "font": {"color": "#333"}, "id": "Coqueiros", "label": "Coqueiros", "shape": "dot", "size": 54.922779922779924, "title": "Termo: Coqueiros\nFrequ\u00eancia: 546"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Florian\u00f3polis", "label": "Florian\u00f3polis", "shape": "dot", "size": 44.65250965250965, "title": "Termo: Florian\u00f3polis\nFrequ\u00eancia: 413"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Prefeitura", "label": "Prefeitura", "shape": "dot", "size": 31.44787644787645, "title": "Termo: Prefeitura\nFrequ\u00eancia: 242"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Infraestrutura", "label": "Infraestrutura", "shape": "dot", "size": 24.65250965250965, "title": "Termo: Infraestrutura\nFrequ\u00eancia: 154"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Mobilidade", "label": "Mobilidade", "shape": "dot", "size": 20.868725868725868, "title": "Termo: Mobilidade\nFrequ\u00eancia: 105"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Feira", "label": "Feira", "shape": "dot", "size": 20.79150579150579, "title": "Termo: Feira\nFrequ\u00eancia: 104"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Pr\u00f3-Coqueiros", "label": "Pr\u00f3-Coqueiros", "shape": "dot", "size": 20.55984555984556, "title": "Termo: Pr\u00f3-Coqueiros\nFrequ\u00eancia: 101"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Educa\u00e7\u00e3o", "label": "Educa\u00e7\u00e3o", "shape": "dot", "size": 20.096525096525095, "title": "Termo: Educa\u00e7\u00e3o\nFrequ\u00eancia: 95"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Cultura", "label": "Cultura", "shape": "dot", "size": 19.942084942084943, "title": "Termo: Cultura\nFrequ\u00eancia: 93"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Conseg", "label": "Conseg", "shape": "dot", "size": 19.247104247104247, "title": "Termo: Conseg\nFrequ\u00eancia: 84"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Sa\u00fade", "label": "Sa\u00fade", "shape": "dot", "size": 18.552123552123554, "title": "Termo: Sa\u00fade\nFrequ\u00eancia: 75"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Continente", "label": "Continente", "shape": "dot", "size": 18.08880308880309, "title": "Termo: Continente\nFrequ\u00eancia: 69"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Comunidade", "label": "Comunidade", "shape": "dot", "size": 18.011583011583014, "title": "Termo: Comunidade\nFrequ\u00eancia: 68"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Evento", "label": "Evento", "shape": "dot", "size": 17.934362934362934, "title": "Termo: Evento\nFrequ\u00eancia: 67"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Centro De Sa\u00fade", "label": "Centro De Sa\u00fade", "shape": "dot", "size": 17.393822393822393, "title": "Termo: Centro De Sa\u00fade\nFrequ\u00eancia: 60"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Pol\u00edtica", "label": "Pol\u00edtica", "shape": "dot", "size": 16.93050193050193, "title": "Termo: Pol\u00edtica\nFrequ\u00eancia: 54"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Escola", "label": "Escola", "shape": "dot", "size": 16.853281853281853, "title": "Termo: Escola\nFrequ\u00eancia: 53"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Itagua\u00e7u", "label": "Itagua\u00e7u", "shape": "dot", "size": 16.46718146718147, "title": "Termo: Itagua\u00e7u\nFrequ\u00eancia: 48"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Seguran\u00e7a", "label": "Seguran\u00e7a", "shape": "dot", "size": 16.158301158301157, "title": "Termo: Seguran\u00e7a\nFrequ\u00eancia: 44"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Gastronomia", "label": "Gastronomia", "shape": "dot", "size": 15.926640926640927, "title": "Termo: Gastronomia\nFrequ\u00eancia: 41"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Funda\u00e7\u00e3o Hassis", "label": "Funda\u00e7\u00e3o Hassis", "shape": "dot", "size": 15.926640926640927, "title": "Termo: Funda\u00e7\u00e3o Hassis\nFrequ\u00eancia: 41"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Economia", "label": "Economia", "shape": "dot", "size": 15.772200772200772, "title": "Termo: Economia\nFrequ\u00eancia: 39"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Bom Abrigo", "label": "Bom Abrigo", "shape": "dot", "size": 15.694980694980694, "title": "Termo: Bom Abrigo\nFrequ\u00eancia: 38"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Sociedade", "label": "Sociedade", "shape": "dot", "size": 15.694980694980694, "title": "Termo: Sociedade\nFrequ\u00eancia: 38"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Gest\u00e3o P\u00fablica", "label": "Gest\u00e3o P\u00fablica", "shape": "dot", "size": 15.54054054054054, "title": "Termo: Gest\u00e3o P\u00fablica\nFrequ\u00eancia: 36"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Vacina\u00e7\u00e3o", "label": "Vacina\u00e7\u00e3o", "shape": "dot", "size": 15.463320463320464, "title": "Termo: Vacina\u00e7\u00e3o\nFrequ\u00eancia: 35"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Ufsc", "label": "Ufsc", "shape": "dot", "size": 15.463320463320464, "title": "Termo: Ufsc\nFrequ\u00eancia: 35"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Com\u00e9rcio", "label": "Com\u00e9rcio", "shape": "dot", "size": 15.386100386100386, "title": "Termo: Com\u00e9rcio\nFrequ\u00eancia: 34"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Meio Ambiente", "label": "Meio Ambiente", "shape": "dot", "size": 15.154440154440154, "title": "Termo: Meio Ambiente\nFrequ\u00eancia: 31"}, {"color": "#1A5276", "font": {"color": "#333"}, "id": "Abra\u00e3o", "label": "Abra\u00e3o", "shape": "dot", "size": 15.0, "title": "Termo: Abra\u00e3o\nFrequ\u00eancia: 29"}]);
+                  edges = new vis.DataSet([{"color": "#dfe6e9", "from": "Coqueiros", "to": "Cultura", "value": 58}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Feira", "value": 64}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Florian\u00f3polis", "value": 262}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Sa\u00fade", "value": 46}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Vacina\u00e7\u00e3o", "value": 15}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Educa\u00e7\u00e3o", "value": 74}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Comunidade", "value": 55}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Gastronomia", "value": 15}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Pr\u00f3-Coqueiros", "value": 97}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Evento", "value": 42}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Seguran\u00e7a", "value": 29}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Infraestrutura", "value": 128}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Escola", "value": 34}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Continente", "value": 52}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Centro De Sa\u00fade", "value": 36}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Abra\u00e3o", "value": 14}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Bom Abrigo", "value": 30}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Itagua\u00e7u", "value": 18}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Funda\u00e7\u00e3o Hassis", "value": 5}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Prefeitura", "value": 175}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Mobilidade", "value": 83}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Conseg", "value": 72}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Meio Ambiente", "value": 22}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Com\u00e9rcio", "value": 29}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Economia", "value": 33}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Pol\u00edtica", "value": 28}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Gest\u00e3o P\u00fablica", "value": 13}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Sociedade", "value": 28}, {"color": "#dfe6e9", "from": "Coqueiros", "to": "Ufsc", "value": 20}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Sa\u00fade", "value": 51}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Vacina\u00e7\u00e3o", "value": 22}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Pr\u00f3-Coqueiros", "value": 53}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Bom Abrigo", "value": 6}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Gastronomia", "value": 15}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Infraestrutura", "value": 96}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Mobilidade", "value": 61}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Comunidade", "value": 28}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Cultura", "value": 48}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Ufsc", "value": 25}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Evento", "value": 26}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Abra\u00e3o", "value": 8}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Funda\u00e7\u00e3o Hassis", "value": 8}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Itagua\u00e7u", "value": 7}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Seguran\u00e7a", "value": 30}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Educa\u00e7\u00e3o", "value": 43}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Continente", "value": 14}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Prefeitura", "value": 205}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Centro De Sa\u00fade", "value": 38}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Escola", "value": 22}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Pol\u00edtica", "value": 41}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Conseg", "value": 46}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Feira", "value": 36}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Meio Ambiente", "value": 16}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Gest\u00e3o P\u00fablica", "value": 27}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Sociedade", "value": 12}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Com\u00e9rcio", "value": 9}, {"color": "#dfe6e9", "from": "Florian\u00f3polis", "to": "Economia", "value": 10}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Mobilidade", "value": 45}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Pr\u00f3-Coqueiros", "value": 38}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Seguran\u00e7a", "value": 15}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Comunidade", "value": 20}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Centro De Sa\u00fade", "value": 24}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Sa\u00fade", "value": 34}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Infraestrutura", "value": 84}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Educa\u00e7\u00e3o", "value": 17}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Escola", "value": 7}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Pol\u00edtica", "value": 30}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Cultura", "value": 21}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Evento", "value": 9}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Conseg", "value": 28}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Vacina\u00e7\u00e3o", "value": 7}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Continente", "value": 22}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Abra\u00e3o", "value": 5}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Meio Ambiente", "value": 8}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Sociedade", "value": 8}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Gest\u00e3o P\u00fablica", "value": 20}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Gastronomia", "value": 2}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Ufsc", "value": 8}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Bom Abrigo", "value": 8}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Feira", "value": 18}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Economia", "value": 6}, {"color": "#dfe6e9", "from": "Prefeitura", "to": "Com\u00e9rcio", "value": 3}, {"color": "#dfe6e9", "from": "Infraestrutura", "to": "Itagua\u00e7u", "value": 5}, {"color": "#dfe6e9", "from": "Infraestrutura", "to": "Mobilidade", "value": 103}, {"color": "#dfe6e9", "from": "Infraestrutura", "to": "Pr\u00f3-Coqueiros", "value": 19}, {"color": "#dfe6e9", "from": "Infraestrutura", "to": "Conseg", "value": 19}, {"color": "#dfe6e9", "from": "Infraestrutura", "to": "Feira", "value": 27}, {"color": "#dfe6e9", "from": "Infraestrutura", "to": "Continente", "value": 20}, {"color": "#dfe6e9", "from": "Infraestrutura", "to": "Abra\u00e3o", "value": 2}, {"color": "#dfe6e9", "from": "Infraestrutura", "to": "Bom Abrigo", "value": 10}, {"color": "#dfe6e9", "from": "Infraestrutura", "to": "Ufsc", "value": 4}, {"color": "#dfe6e9", "from": "Mobilidade", "to": "Pr\u00f3-Coqueiros", "value": 3}, {"color": "#dfe6e9", "from": "Mobilidade", "to": "Itagua\u00e7u", "value": 4}, {"color": "#dfe6e9", "from": "Mobilidade", "to": "Conseg", "value": 8}, {"color": "#dfe6e9", "from": "Mobilidade", "to": "Feira", "value": 27}, {"color": "#dfe6e9", "from": "Mobilidade", "to": "Continente", "value": 14}, {"color": "#dfe6e9", "from": "Mobilidade", "to": "Bom Abrigo", "value": 6}, {"color": "#dfe6e9", "from": "Mobilidade", "to": "Ufsc", "value": 2}, {"color": "#dfe6e9", "from": "Feira", "to": "Cultura", "value": 7}, {"color": "#dfe6e9", "from": "Feira", "to": "Gastronomia", "value": 7}, {"color": "#dfe6e9", "from": "Feira", "to": "Evento", "value": 7}, {"color": "#dfe6e9", "from": "Feira", "to": "Gest\u00e3o P\u00fablica", "value": 13}, {"color": "#dfe6e9", "from": "Feira", "to": "Pol\u00edtica", "value": 13}, {"color": "#dfe6e9", "from": "Feira", "to": "Meio Ambiente", "value": 11}, {"color": "#dfe6e9", "from": "Feira", "to": "Pr\u00f3-Coqueiros", "value": 2}, {"color": "#dfe6e9", "from": "Feira", "to": "Centro De Sa\u00fade", "value": 7}, {"color": "#dfe6e9", "from": "Feira", "to": "Sa\u00fade", "value": 7}, {"color": "#dfe6e9", "from": "Feira", "to": "Vacina\u00e7\u00e3o", "value": 7}, {"color": "#dfe6e9", "from": "Feira", "to": "Itagua\u00e7u", "value": 5}, {"color": "#dfe6e9", "from": "Feira", "to": "Educa\u00e7\u00e3o", "value": 6}, {"color": "#dfe6e9", "from": "Feira", "to": "Escola", "value": 6}, {"color": "#dfe6e9", "from": "Feira", "to": "Abra\u00e3o", "value": 3}, {"color": "#dfe6e9", "from": "Feira", "to": "Com\u00e9rcio", "value": 11}, {"color": "#dfe6e9", "from": "Feira", "to": "Economia", "value": 11}, {"color": "#dfe6e9", "from": "Feira", "to": "Continente", "value": 5}, {"color": "#dfe6e9", "from": "Feira", "to": "Comunidade", "value": 8}, {"color": "#dfe6e9", "from": "Feira", "to": "Sociedade", "value": 8}, {"color": "#dfe6e9", "from": "Feira", "to": "Bom Abrigo", "value": 3}, {"color": "#dfe6e9", "from": "Feira", "to": "Seguran\u00e7a", "value": 4}, {"color": "#dfe6e9", "from": "Feira", "to": "Conseg", "value": 3}, {"color": "#dfe6e9", "from": "Pr\u00f3-Coqueiros", "to": "Seguran\u00e7a", "value": 3}, {"color": "#dfe6e9", "from": "Pr\u00f3-Coqueiros", "to": "Comunidade", "value": 25}, {"color": "#dfe6e9", "from": "Pr\u00f3-Coqueiros", "to": "Centro De Sa\u00fade", "value": 4}, {"color": "#dfe6e9", "from": "Pr\u00f3-Coqueiros", "to": "Cultura", "value": 2}, {"color": "#dfe6e9", "from": "Pr\u00f3-Coqueiros", "to": "Sa\u00fade", "value": 4}, {"color": "#dfe6e9", "from": "Pr\u00f3-Coqueiros", "to": "Meio Ambiente", "value": 4}, {"color": "#dfe6e9", "from": "Pr\u00f3-Coqueiros", "to": "Bom Abrigo", "value": 5}, {"color": "#dfe6e9", "from": "Pr\u00f3-Coqueiros", "to": "Conseg", "value": 9}, {"color": "#dfe6e9", "from": "Pr\u00f3-Coqueiros", "to": "Educa\u00e7\u00e3o", "value": 21}, {"color": "#dfe6e9", "from": "Pr\u00f3-Coqueiros", "to": "Abra\u00e3o", "value": 3}, {"color": "#dfe6e9", "from": "Pr\u00f3-Coqueiros", "to": "Continente", "value": 13}, {"color": "#dfe6e9", "from": "Pr\u00f3-Coqueiros", "to": "Pol\u00edtica", "value": 11}, {"color": "#dfe6e9", "from": "Pr\u00f3-Coqueiros", "to": "Sociedade", "value": 6}, {"color": "#dfe6e9", "from": "Pr\u00f3-Coqueiros", "to": "Ufsc", "value": 5}, {"color": "#dfe6e9", "from": "Pr\u00f3-Coqueiros", "to": "Gest\u00e3o P\u00fablica", "value": 2}, {"color": "#dfe6e9", "from": "Pr\u00f3-Coqueiros", "to": "Escola", "value": 2}, {"color": "#dfe6e9", "from": "Educa\u00e7\u00e3o", "to": "Funda\u00e7\u00e3o Hassis", "value": 3}, {"color": "#dfe6e9", "from": "Educa\u00e7\u00e3o", "to": "Itagua\u00e7u", "value": 5}, {"color": "#dfe6e9", "from": "Educa\u00e7\u00e3o", "to": "Escola", "value": 52}, {"color": "#dfe6e9", "from": "Educa\u00e7\u00e3o", "to": "Continente", "value": 8}, {"color": "#dfe6e9", "from": "Educa\u00e7\u00e3o", "to": "Ufsc", "value": 17}, {"color": "#dfe6e9", "from": "Educa\u00e7\u00e3o", "to": "Conseg", "value": 12}, {"color": "#dfe6e9", "from": "Educa\u00e7\u00e3o", "to": "Bom Abrigo", "value": 4}, {"color": "#dfe6e9", "from": "Educa\u00e7\u00e3o", "to": "Abra\u00e3o", "value": 4}, {"color": "#dfe6e9", "from": "Cultura", "to": "Funda\u00e7\u00e3o Hassis", "value": 18}, {"color": "#dfe6e9", "from": "Cultura", "to": "Itagua\u00e7u", "value": 21}, {"color": "#dfe6e9", "from": "Cultura", "to": "Evento", "value": 63}, {"color": "#dfe6e9", "from": "Cultura", "to": "Gastronomia", "value": 30}, {"color": "#dfe6e9", "from": "Cultura", "to": "Continente", "value": 12}, {"color": "#dfe6e9", "from": "Cultura", "to": "Bom Abrigo", "value": 2}, {"color": "#dfe6e9", "from": "Cultura", "to": "Conseg", "value": 6}, {"color": "#dfe6e9", "from": "Cultura", "to": "Ufsc", "value": 3}, {"color": "#dfe6e9", "from": "Cultura", "to": "Abra\u00e3o", "value": 2}, {"color": "#dfe6e9", "from": "Conseg", "to": "Centro De Sa\u00fade", "value": 2}, {"color": "#dfe6e9", "from": "Conseg", "to": "Sa\u00fade", "value": 6}, {"color": "#dfe6e9", "from": "Conseg", "to": "Vacina\u00e7\u00e3o", "value": 2}, {"color": "#dfe6e9", "from": "Conseg", "to": "Bom Abrigo", "value": 11}, {"color": "#dfe6e9", "from": "Conseg", "to": "Evento", "value": 3}, {"color": "#dfe6e9", "from": "Conseg", "to": "Pol\u00edtica", "value": 6}, {"color": "#dfe6e9", "from": "Conseg", "to": "Continente", "value": 5}, {"color": "#dfe6e9", "from": "Conseg", "to": "Itagua\u00e7u", "value": 4}, {"color": "#dfe6e9", "from": "Conseg", "to": "Economia", "value": 6}, {"color": "#dfe6e9", "from": "Conseg", "to": "Seguran\u00e7a", "value": 15}, {"color": "#dfe6e9", "from": "Conseg", "to": "Abra\u00e3o", "value": 4}, {"color": "#dfe6e9", "from": "Conseg", "to": "Comunidade", "value": 7}, {"color": "#dfe6e9", "from": "Conseg", "to": "Escola", "value": 2}, {"color": "#dfe6e9", "from": "Conseg", "to": "Meio Ambiente", "value": 4}, {"color": "#dfe6e9", "from": "Conseg", "to": "Ufsc", "value": 2}, {"color": "#dfe6e9", "from": "Conseg", "to": "Com\u00e9rcio", "value": 2}, {"color": "#dfe6e9", "from": "Conseg", "to": "Funda\u00e7\u00e3o Hassis", "value": 2}, {"color": "#dfe6e9", "from": "Conseg", "to": "Sociedade", "value": 2}, {"color": "#dfe6e9", "from": "Sa\u00fade", "to": "Vacina\u00e7\u00e3o", "value": 33}, {"color": "#dfe6e9", "from": "Sa\u00fade", "to": "Seguran\u00e7a", "value": 2}, {"color": "#dfe6e9", "from": "Sa\u00fade", "to": "Centro De Sa\u00fade", "value": 58}, {"color": "#dfe6e9", "from": "Sa\u00fade", "to": "Itagua\u00e7u", "value": 2}, {"color": "#dfe6e9", "from": "Sa\u00fade", "to": "Bom Abrigo", "value": 4}, {"color": "#dfe6e9", "from": "Sa\u00fade", "to": "Abra\u00e3o", "value": 5}, {"color": "#dfe6e9", "from": "Sa\u00fade", "to": "Continente", "value": 5}, {"color": "#dfe6e9", "from": "Sa\u00fade", "to": "Ufsc", "value": 7}, {"color": "#dfe6e9", "from": "Continente", "to": "Seguran\u00e7a", "value": 5}, {"color": "#dfe6e9", "from": "Continente", "to": "Evento", "value": 10}, {"color": "#dfe6e9", "from": "Continente", "to": "Escola", "value": 4}, {"color": "#dfe6e9", "from": "Continente", "to": "Ufsc", "value": 6}, {"color": "#dfe6e9", "from": "Continente", "to": "Gest\u00e3o P\u00fablica", "value": 3}, {"color": "#dfe6e9", "from": "Continente", "to": "Pol\u00edtica", "value": 4}, {"color": "#dfe6e9", "from": "Continente", "to": "Comunidade", "value": 7}, {"color": "#dfe6e9", "from": "Continente", "to": "Meio Ambiente", "value": 3}, {"color": "#dfe6e9", "from": "Continente", "to": "Centro De Sa\u00fade", "value": 3}, {"color": "#dfe6e9", "from": "Continente", "to": "Sociedade", "value": 2}, {"color": "#dfe6e9", "from": "Continente", "to": "Com\u00e9rcio", "value": 2}, {"color": "#dfe6e9", "from": "Continente", "to": "Economia", "value": 3}, {"color": "#dfe6e9", "from": "Comunidade", "to": "Abra\u00e3o", "value": 2}, {"color": "#dfe6e9", "from": "Comunidade", "to": "Sociedade", "value": 38}, {"color": "#dfe6e9", "from": "Comunidade", "to": "Bom Abrigo", "value": 6}, {"color": "#dfe6e9", "from": "Evento", "to": "Funda\u00e7\u00e3o Hassis", "value": 11}, {"color": "#dfe6e9", "from": "Evento", "to": "Itagua\u00e7u", "value": 15}, {"color": "#dfe6e9", "from": "Evento", "to": "Gastronomia", "value": 29}, {"color": "#dfe6e9", "from": "Evento", "to": "Bom Abrigo", "value": 2}, {"color": "#dfe6e9", "from": "Evento", "to": "Abra\u00e3o", "value": 2}, {"color": "#dfe6e9", "from": "Centro De Sa\u00fade", "to": "Abra\u00e3o", "value": 5}, {"color": "#dfe6e9", "from": "Centro De Sa\u00fade", "to": "Vacina\u00e7\u00e3o", "value": 32}, {"color": "#dfe6e9", "from": "Centro De Sa\u00fade", "to": "Itagua\u00e7u", "value": 2}, {"color": "#dfe6e9", "from": "Centro De Sa\u00fade", "to": "Bom Abrigo", "value": 3}, {"color": "#dfe6e9", "from": "Centro De Sa\u00fade", "to": "Ufsc", "value": 2}, {"color": "#dfe6e9", "from": "Pol\u00edtica", "to": "Gest\u00e3o P\u00fablica", "value": 36}, {"color": "#dfe6e9", "from": "Pol\u00edtica", "to": "Abra\u00e3o", "value": 2}, {"color": "#dfe6e9", "from": "Pol\u00edtica", "to": "Bom Abrigo", "value": 2}, {"color": "#dfe6e9", "from": "Escola", "to": "Itagua\u00e7u", "value": 2}, {"color": "#dfe6e9", "from": "Escola", "to": "Ufsc", "value": 9}, {"color": "#dfe6e9", "from": "Escola", "to": "Abra\u00e3o", "value": 4}, {"color": "#dfe6e9", "from": "Itagua\u00e7u", "to": "Funda\u00e7\u00e3o Hassis", "value": 28}, {"color": "#dfe6e9", "from": "Itagua\u00e7u", "to": "Abra\u00e3o", "value": 2}, {"color": "#dfe6e9", "from": "Itagua\u00e7u", "to": "Bom Abrigo", "value": 2}, {"color": "#dfe6e9", "from": "Itagua\u00e7u", "to": "Gastronomia", "value": 11}, {"color": "#dfe6e9", "from": "Itagua\u00e7u", "to": "Com\u00e9rcio", "value": 2}, {"color": "#dfe6e9", "from": "Itagua\u00e7u", "to": "Economia", "value": 2}, {"color": "#dfe6e9", "from": "Seguran\u00e7a", "to": "Bom Abrigo", "value": 2}, {"color": "#dfe6e9", "from": "Gastronomia", "to": "Bom Abrigo", "value": 3}, {"color": "#dfe6e9", "from": "Gastronomia", "to": "Funda\u00e7\u00e3o Hassis", "value": 6}, {"color": "#dfe6e9", "from": "Economia", "to": "Com\u00e9rcio", "value": 34}, {"color": "#dfe6e9", "from": "Economia", "to": "Bom Abrigo", "value": 4}, {"color": "#dfe6e9", "from": "Bom Abrigo", "to": "Abra\u00e3o", "value": 2}, {"color": "#dfe6e9", "from": "Bom Abrigo", "to": "Vacina\u00e7\u00e3o", "value": 2}, {"color": "#dfe6e9", "from": "Bom Abrigo", "to": "Sociedade", "value": 4}, {"color": "#dfe6e9", "from": "Bom Abrigo", "to": "Com\u00e9rcio", "value": 2}, {"color": "#dfe6e9", "from": "Gest\u00e3o P\u00fablica", "to": "Abra\u00e3o", "value": 2}, {"color": "#dfe6e9", "from": "Ufsc", "to": "Meio Ambiente", "value": 2}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": true,
+        "filter": [
+            "physics"
+        ]
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "barnesHut": {
+            "avoidOverlap": 0.1,
+            "centralGravity": 0.1,
+            "damping": 0.4,
+            "gravitationalConstant": -4000,
+            "springConstant": 0.04,
+            "springLength": 400
+        },
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 200,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+                  // if this network requires displaying the configure window,
+                  // put it in its div
+                  options.configure["container"] = document.getElementById("config");
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>
