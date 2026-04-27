@@ -5,6 +5,9 @@ beautifulsoup4
 numpy
 plotly
 networkx
-google-genai
 google-api-core
+google-genai
 scikit-learn
+pyvis
+streamlit-agraph
+ipysigma
