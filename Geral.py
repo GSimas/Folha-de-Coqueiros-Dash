@@ -631,7 +631,18 @@ st.caption(f"Mostrando {len(df_view)} de {len(df)} notícias. Arquivo: `{ARQUIVO
 st.divider()
 st.subheader("💬 Assistente Editorial - Inteligência Coletiva")
 st.caption(
-    "Consulte tendências, indicadores e detalhes específicos do acervo com citações diretas."
+    "Consulte tendências, indicadores e detalhes específicos do acervo com citações diretas. Sempre verifique as respostas com cuidado, o chatbot pode alucinar, prover respostas imprecisas (modelo Gemini 2.5 Flash Lite)"
+)
+
+modelo_selecionado = st.selectbox(
+    "⚙️ Escolha o modelo de IA:",
+    options=[
+        "gemini-3.1-flash-lite-preview",
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite",
+    ],
+    index=0,  # Deixa o 3.1 como opção padrão pré-selecionada
+    help="Modelos 'Lite' são mais rápidos. O modelo 'Flash' normal demora um pouco mais, mas tem raciocínio mais profundo.",
 )
 
 # 1. Preparação do dicionário de métricas (Contexto de BI para a IA)
@@ -654,23 +665,30 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # 4. Interface de entrada do usuário
-if prompt_usuario := st.chat_input(
-    "Ex: Quais as principais notícias sobre a Praia da Saudade em 2026?"
-):
-    # Adiciona pergunta ao histórico
-    st.session_state.messages.append({"role": "user", "content": prompt_usuario})
-
+# ==========================================
+# ÁREA DO CHATBOT
+# ==========================================
+if prompt := st.chat_input("Pergunte sobre as notícias ou atores de Coqueiros..."):
+    # 1. Exibe a mensagem do usuário na tela e salva no histórico
+    st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.markdown(prompt_usuario)
+        st.markdown(prompt)
 
-    # Resposta da Assistente
+    # 2. Exibe a resposta do assistente
     with st.chat_message("assistant"):
-        with st.spinner("Cruzando dados e acervo..."):
-            from utils import responder_chat
+        # O spinner agora mostra qual modelo está processando
+        with st.spinner(f"Processando com {modelo_selecionado}... ⏳"):
+            df_atores_sna = obter_tabela_atores_com_sna()
 
-            # Enviamos as mensagens, o dataframe atual e o dicionário de métricas calculado
-            resposta = responder_chat(st.session_state.messages, df, metricas_para_chat)
-            st.markdown(resposta)
+            # Chama a IA passando todo o contexto E O MODELO SELECIONADO
+            resposta = responder_chat(
+                st.session_state.messages,
+                df_f,
+                df_atores_sna,
+                str(st.session_state.get("metricas_gerais", "")),
+                modelo_escolhido=modelo_selecionado,  # <-- Passa a variável do selectbox para a função
+            )
 
-    # Adiciona resposta ao histórico
-    st.session_state.messages.append({"role": "assistant", "content": resposta})
+        # 3. Exibe o texto final e salva no histórico
+        st.markdown(resposta)
+        st.session_state.messages.append({"role": "assistant", "content": resposta})

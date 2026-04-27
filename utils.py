@@ -669,15 +669,21 @@ def construir_grafo_cooccorrencia(df, coluna="Palavras-Chaves", top_n=30, min_pe
     return G, pos, contagem
 
 
-def responder_chat(mensagens_historico, dataframe, metricas):
-    """Chatbot RAG Otimizado: Gasta menos tokens e lida com erros de Cota (429) do nível Gratuito."""
+def responder_chat(
+    mensagens_historico,
+    dataframe_noticias,
+    dataframe_atores,
+    metricas,
+    modelo_escolhido="gemini-3.1-flash-lite-preview",
+):
+    """Chatbot RAG: Agora com contexto completo de Notícias e Rede de Atores (SNA)."""
     if not IA_CONFIGURADA:
         return "⚠️ Erro: API Key não configurada."
 
     pergunta_usuario = mensagens_historico[-1]["content"]
-    palavras = re.sub(r"[^\w\s]", "", pergunta_usuario).split()
 
-    # Ignora palavras comuns
+    # Limpeza básica para busca
+    palavras = re.sub(r"[^\w\s]", "", pergunta_usuario).split()
     stopwords_busca = {
         "quais",
         "quantas",
@@ -696,70 +702,77 @@ def responder_chat(mensagens_historico, dataframe, metricas):
         "sobre",
         "das",
         "dos",
+        "quem",
+        "é",
+        "o",
+        "a",
     }
     termos_busca = [
-        p for p in palavras if len(p) > 3 and p.lower() not in stopwords_busca
+        p for p in palavras if len(p) > 2 and p.lower() not in stopwords_busca
     ]
 
-    relatorio_busca = "🔍 RESULTADO DA BUSCA INTERNA NO BANCO DE DADOS:\n"
-    noticias_relevantes = []  # Vai guardar APENAS as notícias que importam
+    relatorio_busca = "🔍 RESULTADO DA BUSCA INTERNA:\n"
+    contexto_noticias = ""
+    contexto_atores = ""
 
-    # 1. BUSCA INTELIGENTE (PANDAS)
-    for termo in termos_busca:
-        mask = (
-            dataframe["Conteúdo"].str.contains(termo, case=False, na=False)
-            | dataframe["Título"].str.contains(termo, case=False, na=False)
-            | dataframe["Palavras-Chaves"].str.contains(termo, case=False, na=False)
-        )
-        df_busca = dataframe[mask]
+    # 1. BUSCA NOS ATORES (Entidades e Métricas SNA)
+    atores_encontrados = []
+    if not dataframe_atores.empty:
+        for termo in termos_busca:
+            mask_atores = dataframe_atores["Nome"].str.contains(
+                termo, case=False, na=False
+            ) | dataframe_atores["Descrição"].str.contains(termo, case=False, na=False)
+            df_atores_filtro = dataframe_atores[mask_atores]
+            if not df_atores_filtro.empty:
+                atores_encontrados.append(df_atores_filtro)
 
-        if len(df_busca) > 0:
-            relatorio_busca += (
-                f"- O termo '{termo}' aparece em EXATAMENTE {len(df_busca)} notícias.\n"
+        if atores_encontrados:
+            df_atores_contexto = (
+                pd.concat(atores_encontrados).drop_duplicates(subset=["Nome"]).head(10)
             )
-            # Pegamos no máximo 15 notícias por termo para não estourar a cota de 250k tokens do Free Tier
-            noticias_relevantes.append(df_busca.head(15))
+            contexto_atores = df_atores_contexto.to_json(
+                orient="records", force_ascii=False
+            )
+            relatorio_busca += f"- Encontrados {len(df_atores_contexto)} atores relevantes para a consulta.\n"
 
-    # 2. MONTA UM CONTEXTO ENXUTO (Economia drástica de tokens)
+    # 2. BUSCA NAS NOTÍCIAS
+    noticias_relevantes = []
+    for termo in termos_busca:
+        mask_noticias = dataframe_noticias["Conteúdo"].str.contains(
+            termo, case=False, na=False
+        ) | dataframe_noticias["Título"].str.contains(termo, case=False, na=False)
+        df_noticias_filtro = dataframe_noticias[mask_noticias]
+        if not df_noticias_filtro.empty:
+            noticias_relevantes.append(df_noticias_filtro.head(10))
+
     if noticias_relevantes:
-        # Junta todas as notícias encontradas, remove duplicatas e gera o JSON
-        df_contexto = pd.concat(noticias_relevantes).drop_duplicates(subset=["URL"])
-        # Enviamos apenas colunas essenciais para responder à pergunta
-        colunas_uteis = [
-            c
-            for c in [
-                "Título",
-                "Data",
-                "URL",
-                "Conteúdo",
-                "Categorias",
-                "É Evento",
-                "Local do Evento",
-            ]
-            if c in df_contexto.columns
-        ]
-        contexto_noticias = df_contexto[colunas_uteis].to_json(
-            orient="records", force_ascii=False
+        df_noticias_contexto = (
+            pd.concat(noticias_relevantes).drop_duplicates(subset=["URL"]).head(15)
         )
-    else:
-        contexto_noticias = "Nenhuma notícia específica encontrada para os termos buscados. Responda apenas com base nas Estatísticas Gerais."
+        contexto_noticias = df_noticias_contexto[
+            ["Título", "Data", "URL", "Categorias", "Conteúdo"]
+        ].to_json(orient="records", force_ascii=False)
+        relatorio_busca += (
+            f"- Encontradas {len(df_noticias_contexto)} notícias relacionadas.\n"
+        )
 
-    # 3. PROMPT DO SISTEMA
+    # 3. PROMPT DO SISTEMA ENRIQUECIDO
     instrucao_sistema = f"""
-    Você é o Consultor Editorial Sênior da Folha de Coqueiros. 
+    Você é o Consultor Editorial e Analista de Redes da Folha de Coqueiros.
     
-    ESTATÍSTICAS CONSOLIDADAS:
+    CONTEXTO DE REDE (ATORES):
+    {contexto_atores if contexto_atores else "Nenhum ator específico identificado na busca inicial."}
+
+    ESTATÍSTICAS GERAIS:
     {metricas}
 
-    {relatorio_busca}
+    NOTÍCIAS FILTRADAS:
+    {contexto_noticias if contexto_noticias else "Nenhuma notícia específica encontrada."}
 
-    NOTÍCIAS FILTRADAS (Apenas conteúdo relevante para a pergunta atual):
-    {contexto_noticias}
-
-    DIRETRIZES DE RESPOSTA:
-    1. CITAÇÕES RÍGIDAS: Cite as notícias usando OBRIGATORIAMENTE o formato Markdown: [Título da Notícia](URL).
-    2. ECONOMIA DE TEXTO: Seja direto. Se o usuário perguntar quantidades, confie no RESULTADO DA BUSCA INTERNA.
-    3. INFORMAÇÃO GERAL: Se perguntarem algo genérico (ex: total de notícias), use as ESTATÍSTICAS CONSOLIDADAS.
+    DIRETRIZES:
+    1. Se perguntarem sobre pessoas, empresas ou órgãos, use os dados de SNA (Centralidade, Betweenness) para explicar a importância deles no bairro.
+    2. Cite atores e notícias de forma natural. Se citar uma notícia, use: [Título](URL).
+    3. Seja preciso sobre quem é quem, usando as descrições dos atores.
     """
 
     conteudo_formatado = [
@@ -770,14 +783,14 @@ def responder_chat(mensagens_historico, dataframe, metricas):
         for msg in mensagens_historico
     ]
 
-    # 4. AMORTECEDOR DE ERRO (Retry/Backoff)
+    # 4. EXECUÇÃO COM RETRY
     tentativas = 0
     max_tentativas = 3
 
     while tentativas < max_tentativas:
         try:
             response = client.models.generate_content(
-                model="gemini-3.1-flash-lite-preview",
+                model=modelo_escolhido,  # <-- AQUI ESTÁ A MUDANÇA: Usa o modelo selecionado pelo usuário
                 contents=conteudo_formatado,
                 config=types.GenerateContentConfig(
                     system_instruction=instrucao_sistema, temperature=0.2
@@ -787,15 +800,14 @@ def responder_chat(mensagens_historico, dataframe, metricas):
 
         except Exception as e:
             erro_str = str(e)
-            if "429" in erro_str or "RESOURCE_EXHAUSTED" in erro_str:
+            if "429" in erro_str or "503" in erro_str or "UNAVAILABLE" in erro_str:
                 tentativas += 1
-                tempo_espera = 25  # Se der o erro, o código trava por 25 segundos e tenta sozinho de novo
-                print(
-                    f"Cota excedida. Aguardando {tempo_espera}s (Tentativa {tentativas}/{max_tentativas})..."
-                )
-                time.sleep(tempo_espera)
+                if tentativas < max_tentativas:
+                    print(
+                        f"Servidor do Google ocupado. Aguardando 20s... (Tentativa {tentativas}/{max_tentativas})"
+                    )
+                    time.sleep(20)
             else:
-                # Se for outro tipo de erro (sem internet, erro interno), retorna o erro
-                return f"❌ Erro na comunicação com a IA: {erro_str}"
+                return f"❌ Erro crítico de comunicação: {erro_str}"
 
-    return "❌ Falha após 3 tentativas: A cota gratuita da API do Google está esgotada para este minuto. Aguarde 1 minuto e pergunte novamente."
+    return "❌ Os servidores da IA estão superlotados no momento. Por favor, aguarde uns 30 segundos e envie sua pergunta novamente."
