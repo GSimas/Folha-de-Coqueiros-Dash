@@ -133,7 +133,7 @@ def obter_tabela_atores_com_sna():
     # Betweenness (Intermediação): Atores que servem de "ponte" entre grupos isolados
     betweenness = nx.betweenness_centrality(G, weight=None)
     # Closeness (Proximidade): Quão perto o ator está de todos os outros da rede
-    closeness = nx.width = "content"(G)
+    closeness = nx.closeness_centrality(G)
 
     # 3. Monta os dados para a Tabela
     dados_tabela = []
@@ -199,7 +199,7 @@ def construir_grafo_atores(top_n=30, min_peso=1):
 
     # Calcula métricas SNA globais para este recorte
     betweenness = nx.betweenness_centrality(G, weight=None)
-    closeness = nx.width = "content"(G)
+    closeness = nx.closeness_centrality(G)
 
     for n in G.nodes():
         G.nodes[n]["SNA_Grau"] = G.degree[n]
