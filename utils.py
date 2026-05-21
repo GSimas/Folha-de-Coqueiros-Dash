@@ -466,7 +466,7 @@ def processar_ia(limite_ia):
             # ETAPA 1: CLASSIFICAÇÃO E METADADOS DA NOTÍCIA
             # ==========================================================
             resp = client.models.generate_content(
-                model="gemini-3.1-flash-lite-preview",
+                model="gemini-3.1-flash-lite",
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
@@ -510,7 +510,7 @@ def processar_ia(limite_ia):
             )
 
             res_ia_atores = client.models.generate_content(
-                model="gemini-3.1-flash-lite-preview",
+                model="gemini-3.1-flash-lite",
                 contents=prompt_entidades,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json", temperature=0.1
@@ -674,7 +674,7 @@ def responder_chat(
     dataframe_noticias,
     dataframe_atores,
     metricas,
-    modelo_escolhido="gemini-3.1-flash-lite-preview",
+    modelo_escolhido="gemini-3.1-flash-lite",
 ):
     """Chatbot RAG: Agora com contexto completo de Notícias e Rede de Atores (SNA)."""
     if not IA_CONFIGURADA:

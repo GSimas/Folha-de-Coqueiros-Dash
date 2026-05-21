@@ -637,7 +637,7 @@ st.caption(
 modelo_selecionado = st.selectbox(
     "⚙️ Escolha o modelo de IA:",
     options=[
-        "gemini-3.1-flash-lite-preview",
+        "gemini-3.1-flash-lite",
         "gemini-2.5-flash",
         "gemini-2.5-flash-lite",
     ],
