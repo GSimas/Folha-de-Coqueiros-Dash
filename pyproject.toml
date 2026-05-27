@@ -1,2 +1,9 @@
+[project]
+name = "folha-de-coqueiros-dash"
+version = "0.1.0"
+description = "Dashboard de Análise de Redes e Causalidade para a Folha de Coqueiros"
+requires-python = ">=3.11"
+dependencies = []
+
 [tool.vercel]
-entrypoint = "app.py"
+entrypoint = "api/index.py"
