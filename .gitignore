@@ -2,3 +2,30 @@
 .venv/
 __pycache__/
 .claude/
+
+# Node / Vite
+node_modules/
+dist/
+.tmp-fn/
+*.local
+*.tsbuildinfo
+
+# Netlify
+.netlify/
+
+# Variáveis de ambiente (GEMINI_API_KEY)
+.env
+.env.*
+!.env.example
+
+# Logs
+npm-debug.log*
+yarn-error.log*
+
+# SO / editor
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+
+# Gerado pelo Netlify CLI (edge functions)
+deno.lock

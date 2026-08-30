@@ -1,0 +1,42 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[functions]
+  node_bundler = "esbuild"
+  # O @google/genai depende de google-auth-library, que faz `require()` dinâmico
+  # de módulos nativos. Empacotá-lo em ESM quebra no runtime com
+  # "Dynamic require of child_process is not supported", então ele é enviado
+  # como dependência resolvida pelo Node em vez de ser embutido no bundle.
+  external_node_modules = ["@google/genai"]
+
+# As funções serverless respondem em /api/* (ex.: /api/chat, /api/causal).
+# Em desenvolvimento, esse mesmo mapeamento é feito pelo proxy do Vite
+# (ver `server.proxy` em vite.config.ts).
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
+
+# Fallback de SPA — precisa vir DEPOIS do redirect de /api.
+#
+# Atenção ao desenvolvimento: esta regra intercepta qualquer caminho, então o
+# `netlify dev` acaba devolvendo os módulos ES do Vite (/src/*.tsx,
+# /@vite/client) como HTML e a página fica em branco. Por isso o fluxo local
+# recomendado é `npm run dev:full` (Vite + netlify functions:serve), e não
+# `netlify dev`. Em produção esta regra só age quando nenhum arquivo estático
+# corresponde ao caminho, que é exatamente o comportamento desejado.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/data/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
