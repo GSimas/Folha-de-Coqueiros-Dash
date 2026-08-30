@@ -1,4 +1,12 @@
-import { CalendarRange, Filter, RotateCcw, Search, Tag, X } from 'lucide-react';
+import {
+  CalendarRange,
+  Filter,
+  PanelLeftClose,
+  RotateCcw,
+  Search,
+  Tag,
+  X,
+} from 'lucide-react';
 import type { Filtros } from '@/types';
 import { corDaCategoria } from '@/lib/constantes';
 
@@ -14,6 +22,9 @@ interface SidebarFiltersProps {
   /** Controle de visibilidade no layout mobile. */
   aberto: boolean;
   onFechar: () => void;
+  /** Estado recolhido no desktop (independente da gaveta mobile). */
+  recolhida: boolean;
+  onRecolher: () => void;
 }
 
 export default function SidebarFilters({
@@ -25,6 +36,8 @@ export default function SidebarFilters({
   totalGeral,
   aberto,
   onFechar,
+  recolhida,
+  onRecolher,
 }: SidebarFiltersProps) {
   const atualizar = <K extends keyof Filtros>(chave: K, valor: Filtros[K]) => {
     onMudarFiltros({ ...filtros, [chave]: valor });
@@ -52,25 +65,39 @@ export default function SidebarFilters({
 
       <aside
         className={`fixed inset-y-0 left-0 z-40 w-80 shrink-0 overflow-y-auto border-r border-slate-200 bg-white
-                    transition-transform duration-300 lg:sticky lg:top-16 lg:z-0 lg:h-[calc(100vh-4rem)] lg:translate-x-0
-                    ${aberto ? 'translate-x-0' : '-translate-x-full'}`}
+                    transition-transform duration-300
+                    lg:sticky lg:top-16 lg:z-0 lg:h-[calc(100vh-4rem)] lg:translate-x-0
+                    ${aberto ? 'translate-x-0' : '-translate-x-full'}
+                    ${recolhida ? 'lg:hidden' : ''}`}
+        aria-hidden={recolhida}
       >
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-          <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-slate-700">
-            <Filter size={16} className="text-brand-600" />
-            Filtros
-          </h2>
-          <button
-            type="button"
-            onClick={onFechar}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 lg:hidden"
-            aria-label="Fechar filtros"
-          >
-            <X size={18} />
-          </button>
-        </div>
+        {/* Largura fixa: mantém o conteúdo estável independentemente do container */}
+        <div className="w-80">
+          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-slate-700">
+              <Filter size={16} className="text-brand-600" />
+              Filtros
+            </h2>
+            <button
+              type="button"
+              onClick={onFechar}
+              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 lg:hidden"
+              aria-label="Fechar filtros"
+            >
+              <X size={18} />
+            </button>
+            <button
+              type="button"
+              onClick={onRecolher}
+              className="hidden rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-brand-700 lg:inline-flex"
+              aria-label="Recolher painel de filtros"
+              title="Recolher filtros"
+            >
+              <PanelLeftClose size={18} />
+            </button>
+          </div>
 
-        <div className="space-y-6 p-5">
+          <div className="space-y-6 p-5">
           {/* Resumo do recorte ativo */}
           <div className="rounded-lg bg-brand-50 p-4">
             <p className="text-2xl font-bold text-brand-800">
@@ -192,11 +219,20 @@ export default function SidebarFilters({
           {/* Créditos */}
           <div className="border-t border-slate-100 pt-4 text-center">
             <p className="text-xs text-slate-500">
-              Desenvolvido por <strong className="text-slate-700">Gustavo Simas</strong>
+              Desenvolvido por{' '}
+              <a
+                href="https://gustavosimas.com"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 transition hover:text-brand-800 hover:decoration-brand-500"
+              >
+                Gustavo Simas
+              </a>
             </p>
             <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
               Inteligência de dados territoriais aplicada ao jornalismo local.
             </p>
+          </div>
           </div>
         </div>
       </aside>

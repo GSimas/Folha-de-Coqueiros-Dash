@@ -30,7 +30,9 @@ export default function App() {
   const [tipoRede, setTipoRede] = useState<TipoRede>('atores');
   const [topN, setTopN] = useState(30);
   const [chatAberto, setChatAberto] = useState(false);
+  // Gaveta de filtros no mobile; recolhimento da barra lateral no desktop.
   const [filtrosAbertos, setFiltrosAbertos] = useState(false);
+  const [sidebarRecolhida, setSidebarRecolhida] = useState(false);
 
   // --- Carregamento inicial dos datasets ---
   useEffect(() => {
@@ -166,6 +168,8 @@ export default function App() {
       <Navbar
         onAbrirChat={() => setChatAberto(true)}
         onAlternarFiltros={() => setFiltrosAbertos((v) => !v)}
+        onAlternarRecolhida={() => setSidebarRecolhida((v) => !v)}
+        sidebarRecolhida={sidebarRecolhida}
       />
 
       <div className="mx-auto flex max-w-[1600px]">
@@ -184,6 +188,8 @@ export default function App() {
           totalGeral={noticias.length}
           aberto={filtrosAbertos}
           onFechar={() => setFiltrosAbertos(false)}
+          recolhida={sidebarRecolhida}
+          onRecolher={() => setSidebarRecolhida(true)}
         />
 
         <main className="min-w-0 flex-1 space-y-6 px-4 py-6 sm:px-6">
@@ -241,7 +247,15 @@ export default function App() {
               </span>
             </p>
             <p className="mt-1">
-              Desenvolvido por <strong className="text-slate-600">Gustavo Simas</strong>
+              Desenvolvido por{' '}
+              <a
+                href="https://gustavosimas.com"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 transition hover:text-brand-800 hover:decoration-brand-500"
+              >
+                Gustavo Simas
+              </a>
             </p>
           </footer>
         </main>
