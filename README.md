@@ -82,15 +82,18 @@ Em produção, defina a variável em **Netlify → Site settings → Environment
 
 ### 3. Desenvolvimento
 
-Para o painel completo, **com** as funções de IA funcionando:
+Painel completo, **com** as funções de IA — sobe o Vite (`:5174`) e o servidor de funções (`:9999`) juntos:
 ```bash
-npx netlify dev
+npm run dev:full
 ```
+Abra <http://localhost:5174>.
 
-Só o frontend (o chat e o mapa causal retornarão erro de rede, o resto funciona):
+Só o frontend — tudo funciona, exceto o chat e o mapa causal, que dependem das funções:
 ```bash
 npm run dev
 ```
+
+> **Por que não `netlify dev`?** O fallback de SPA (`/* → /index.html`) do `netlify.toml` é necessário em produção, mas em desenvolvimento ele intercepta os módulos ES do Vite (`/src/*.tsx`, `/@vite/client`) e os devolve como HTML — a página fica em branco. O `dev:full` evita isso reproduzindo o mapeamento `/api/*` pelo proxy do Vite, sem o catch-all.
 
 ### 4. Build de produção
 ```bash
