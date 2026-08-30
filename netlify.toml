@@ -1,0 +1,33 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[functions]
+  node_bundler = "esbuild"
+  # O @google/genai depende de google-auth-library, que faz `require()` dinâmico
+  # de módulos nativos. Empacotá-lo em ESM quebra no runtime com
+  # "Dynamic require of child_process is not supported", então ele é enviado
+  # como dependência resolvida pelo Node em vez de ser embutido no bundle.
+  external_node_modules = ["@google/genai"]
+
+# As funções serverless respondem em /api/* (ex.: /api/chat, /api/causal)
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
+
+# Fallback de SPA — precisa vir depois do redirect de /api
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/data/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"

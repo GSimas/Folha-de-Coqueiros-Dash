@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-800 antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  /* Barras de rolagem discretas, para não competir com os gráficos */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-100;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-slate-300;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border border-slate-200 bg-white shadow-sm;
+  }
+
+  .card-titulo {
+    @apply flex items-center gap-2 border-b border-slate-100 px-5 py-4 text-sm font-semibold uppercase tracking-wide text-slate-700;
+  }
+
+  .botao {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .botao-primario {
+    @apply botao bg-brand-700 text-white hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-400;
+  }
+
+  .botao-secundario {
+    @apply botao border border-slate-300 bg-white text-slate-700 hover:bg-slate-50;
+  }
+
+  .campo {
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800
+           placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100;
+  }
+
+  .etiqueta {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Tooltip do vis-network: a biblioteca injeta o elemento fora da árvore React,
+   então o estilo precisa ser global.
+   -------------------------------------------------------------------------- */
+div.vis-tooltip {
+  position: absolute;
+  visibility: hidden;
+  padding: 10px 12px;
+  white-space: pre-wrap;
+  font-family: 'Inter', system-ui, sans-serif !important;
+  font-size: 12px !important;
+  line-height: 1.5;
+  color: #f8fafc !important;
+  background-color: rgba(15, 23, 42, 0.96) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  z-index: 20;
+  max-width: 320px;
+}
+
+/* React Flow: fundo e controles alinhados à paleta do painel */
+.react-flow__attribution {
+  display: none;
+}
