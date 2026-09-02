@@ -195,8 +195,10 @@ export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  /** Marca mensagens em carregamento para renderizar o skeleton. */
+  /** Marca mensagens em carregamento para renderizar o skeleton (nenhum caractere revelado ainda). */
   carregando?: boolean;
+  /** `true` enquanto o texto ainda está sendo revelado em efeito de máquina de escrever. */
+  streaming?: boolean;
   erro?: boolean;
 }
 

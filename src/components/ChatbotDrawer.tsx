@@ -29,17 +29,25 @@ const SUGESTOES = [
   'Quais problemas de infraestrutura aparecem com mais frequência?',
 ];
 
-/** Três barras pulsando enquanto a resposta não chega. */
+/**
+ * Indicador de "processando" enquanto a resposta não chega: rótulo explícito +
+ * barra de progresso indeterminada (não sabemos a duração real da chamada ao
+ * Gemini, então o preenchimento desliza em loop, como um loading bar).
+ *
+ * A largura da trilha é fixa em PIXELS (`w-44`), de propósito — o balão que a
+ * envolve é um item flex sem largura própria, então uma largura percentual
+ * colapsaria para 0px e a barra ficaria invisível.
+ */
 function EsqueletoResposta() {
   return (
-    <div className="space-y-2 py-1">
-      {[100, 88, 62].map((largura, indice) => (
-        <div
-          key={largura}
-          className="h-2.5 animate-pulse rounded bg-slate-200"
-          style={{ width: `${largura}%`, animationDelay: `${indice * 140}ms` }}
-        />
-      ))}
+    <div className="min-w-[180px] py-0.5">
+      <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-slate-400">
+        <Sparkles size={12} className="animate-pulse text-brand-500" />
+        Analisando o acervo…
+      </p>
+      <div className="relative h-1.5 w-44 overflow-hidden rounded-full bg-slate-200">
+        <div className="absolute inset-y-0 w-1/3 animate-barra-carregando rounded-full bg-brand-500" />
+      </div>
     </div>
   );
 }
@@ -240,6 +248,15 @@ export default function ChatbotDrawer({
                     <EsqueletoResposta />
                   ) : mensagem.role === 'user' ? (
                     <p className="whitespace-pre-wrap">{mensagem.content}</p>
+                  ) : mensagem.streaming ? (
+                    // Enquanto o texto ainda está sendo revelado, markdown parcial
+                    // (ex.: um `**` sem par ainda) renderizaria de forma estranha —
+                    // por isso mostramos texto puro com um cursor piscando, e só
+                    // trocamos para o Markdown formatado quando a resposta termina.
+                    <p className="whitespace-pre-wrap">
+                      {mensagem.content}
+                      <span className="animate-piscar ml-0.5 inline-block w-[2px] translate-y-[2px] bg-brand-600 align-middle" style={{ height: '1em' }} />
+                    </p>
                   ) : (
                     <Markdown texto={mensagem.content} />
                   )}

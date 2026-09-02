@@ -22,6 +22,14 @@ const MAX_TENTATIVAS = 3;
 
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8' };
 
+/**
+ * Caractere de controle (NUL) usado como separador para sinalizar um erro
+ * que ocorreu DEPOIS que o streaming já começou — quando não é mais possível
+ * trocar o status HTTP da resposta. Nunca aparece em texto gerado pelo
+ * modelo, então o cliente pode cortar o conteúdo com segurança nesse ponto.
+ */
+const MARCA_ERRO_NO_STREAM = String.fromCharCode(0);
+
 function responder(corpo: unknown, status = 200): Response {
   return new Response(JSON.stringify(corpo), { status, headers: JSON_HEADERS });
 }
@@ -102,11 +110,16 @@ export default async (req: Request): Promise<Response> => {
     parts: [{ text: msg.content }],
   }));
 
+  // A tentativa de retomada só cobre a ABERTURA do stream (a primeira chamada
+  // de rede). Uma vez que os primeiros bytes já foram enviados ao cliente, o
+  // status HTTP não pode mais mudar — por isso o corpo do `for` só troca de
+  // tentativa enquanto `streamGemini` ainda não existe.
+  let streamGemini: AsyncGenerator<{ text?: string }> | null = null;
   let ultimoErro: unknown = null;
 
   for (let tentativa = 1; tentativa <= MAX_TENTATIVAS; tentativa++) {
     try {
-      const resposta = await ai.models.generateContent({
+      streamGemini = await ai.models.generateContentStream({
         model: modeloEscolhido,
         contents: conteudo,
         config: {
@@ -114,16 +127,7 @@ export default async (req: Request): Promise<Response> => {
           temperature: 0.2,
         },
       });
-
-      const texto = resposta.text?.trim();
-      if (!texto) {
-        return responder(
-          { erro: 'O modelo retornou uma resposta vazia. Tente reformular a pergunta.' },
-          502,
-        );
-      }
-
-      return responder({ texto, modelo: modeloEscolhido });
+      break;
     } catch (erro) {
       ultimoErro = erro;
       if (!ehTransitorio(erro) || tentativa === MAX_TENTATIVAS) break;
@@ -132,15 +136,57 @@ export default async (req: Request): Promise<Response> => {
     }
   }
 
-  const detalhe = ultimoErro instanceof Error ? ultimoErro.message : String(ultimoErro);
-  const transitorio = ehTransitorio(ultimoErro);
+  if (!streamGemini) {
+    const detalhe = ultimoErro instanceof Error ? ultimoErro.message : String(ultimoErro);
+    const transitorio = ehTransitorio(ultimoErro);
 
-  return responder(
-    {
-      erro: transitorio
-        ? 'Os servidores da IA estão sobrecarregados no momento. Aguarde alguns segundos e tente novamente.'
-        : `Erro de comunicação com o Gemini: ${detalhe}`,
+    return responder(
+      {
+        erro: transitorio
+          ? 'Os servidores da IA estão sobrecarregados no momento. Aguarde alguns segundos e tente novamente.'
+          : `Erro de comunicação com o Gemini: ${detalhe}`,
+      },
+      transitorio ? 503 : 502,
+    );
+  }
+
+  const encoder = new TextEncoder();
+  let recebeuTexto = false;
+
+  const corpoResposta = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      try {
+        for await (const parte of streamGemini!) {
+          const texto = parte.text;
+          if (texto) {
+            recebeuTexto = true;
+            controller.enqueue(encoder.encode(texto));
+          }
+        }
+        if (!recebeuTexto) {
+          controller.enqueue(
+            encoder.encode(
+              `${MARCA_ERRO_NO_STREAM}O modelo retornou uma resposta vazia. Tente reformular a pergunta.`,
+            ),
+          );
+        }
+      } catch (erro) {
+        const detalhe = erro instanceof Error ? erro.message : String(erro);
+        controller.enqueue(
+          encoder.encode(`${MARCA_ERRO_NO_STREAM}Erro de comunicação com o Gemini: ${detalhe}`),
+        );
+      } finally {
+        controller.close();
+      }
     },
-    transitorio ? 503 : 502,
-  );
+  });
+
+  return new Response(corpoResposta, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'X-Modelo-Gemini': modeloEscolhido,
+      'Cache-Control': 'no-cache',
+    },
+  });
 };

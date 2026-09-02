@@ -5,7 +5,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
 } from 'lucide-react';
-import { GithubIcon, InstagramIcon, LinkedinIcon } from './SocialIcons';
+import { GithubIcon } from './SocialIcons';
 
 interface NavbarProps {
   onAbrirChat: () => void;
@@ -31,8 +31,6 @@ const REDES = [
     Icone: Newspaper,
   },
   { href: 'https://github.com/GSimas', rotulo: 'GitHub', Icone: GithubIcon },
-  { href: 'https://www.linkedin.com/in/simasgs/', rotulo: 'LinkedIn', Icone: LinkedinIcon },
-  { href: 'https://instagram.com/tudoemsimas', rotulo: 'Instagram', Icone: InstagramIcon },
 ];
 
 export default function Navbar({

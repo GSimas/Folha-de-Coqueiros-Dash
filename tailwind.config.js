@@ -42,10 +42,21 @@ export default {
           from: { transform: 'translateX(100%)' },
           to: { transform: 'translateX(0)' },
         },
+        piscar: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0' },
+        },
+        'barra-carregando': {
+          '0%': { left: '-40%' },
+          '50%': { left: '55%' },
+          '100%': { left: '110%' },
+        },
       },
       animation: {
         'fade-in': 'fade-in 0.25s ease-out',
         'slide-in': 'slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+        piscar: 'piscar 0.9s step-end infinite',
+        'barra-carregando': 'barra-carregando 1.3s cubic-bezier(0.4, 0, 0.2, 1) infinite',
       },
     },
   },

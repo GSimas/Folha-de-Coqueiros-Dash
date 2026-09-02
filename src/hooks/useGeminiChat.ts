@@ -26,6 +26,12 @@ function novoId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
+/** Caractere de controle usado pela função `/api/chat` para sinalizar um erro em pleno stream. */
+const MARCA_ERRO_NO_STREAM = String.fromCharCode(0);
+
+/** Intervalo entre "toques" da revelação, em ms — controla a velocidade da digitação. */
+const INTERVALO_REVELACAO_MS = 18;
+
 /**
  * Seleciona as notícias mais relevantes para a pergunta.
  *
@@ -150,6 +156,14 @@ export function useGeminiChat({ noticias, atores, metricas }: OpcoesChat) {
   dadosRef.current = { noticias, atores, metricas };
 
   const abortRef = useRef<AbortController | null>(null);
+  const revelacaoRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const pararRevelacao = useCallback(() => {
+    if (revelacaoRef.current !== null) {
+      clearInterval(revelacaoRef.current);
+      revelacaoRef.current = null;
+    }
+  }, []);
 
   const enviar = useCallback(
     async (pergunta: string) => {
@@ -177,8 +191,78 @@ export function useGeminiChat({ noticias, atores, metricas }: OpcoesChat) {
       setCarregando(true);
 
       abortRef.current?.abort();
+      pararRevelacao();
       const controller = new AbortController();
       abortRef.current = controller;
+
+      /**
+       * O texto chega em pedaços (streaming real do Gemini quando o runtime
+       * suporta, ou de uma vez só em ambientes que armazenam a resposta em
+       * buffer). Em ambos os casos, um relógio próprio "revela" o buffer
+       * caractere a caractere na tela — daí o efeito de máquina de escrever
+       * ser sempre visível, independente da granularidade da rede.
+       */
+      let bufferCompleto = '';
+      let posicaoRevelada = 0;
+      let streamEncerrado = false;
+      let mensagemErro: string | null = null;
+
+      const finalizarMensagem = () => {
+        pararRevelacao();
+        setCarregando(false);
+        setMensagens((atual) =>
+          atual.map((msg) =>
+            msg.id === idResposta
+              ? {
+                  ...msg,
+                  content: mensagemErro
+                    ? `Não consegui responder agora. ${mensagemErro}`
+                    : bufferCompleto,
+                  carregando: false,
+                  streaming: false,
+                  erro: Boolean(mensagemErro),
+                }
+              : msg,
+          ),
+        );
+      };
+
+      const iniciarRevelacao = () => {
+        if (revelacaoRef.current !== null) return;
+        revelacaoRef.current = setInterval(() => {
+          const restante = bufferCompleto.length - posicaoRevelada;
+
+          if (restante <= 0) {
+            if (streamEncerrado) finalizarMensagem();
+            return;
+          }
+
+          // Digitação suave enquanto os dados ainda chegam; se o stream já
+          // terminou e sobrou muito texto acumulado, acelera para não deixar
+          // o usuário esperando uma animação longa por nada.
+          const porToque = streamEncerrado
+            ? Math.max(4, Math.ceil(restante / 30))
+            : Math.max(1, Math.ceil(restante / 8));
+          posicaoRevelada = Math.min(bufferCompleto.length, posicaoRevelada + porToque);
+
+          setMensagens((atual) =>
+            atual.map((msg) =>
+              msg.id === idResposta
+                ? {
+                    ...msg,
+                    content: bufferCompleto.slice(0, posicaoRevelada),
+                    carregando: false,
+                    streaming: true,
+                  }
+                : msg,
+            ),
+          );
+
+          if (posicaoRevelada >= bufferCompleto.length && streamEncerrado) {
+            finalizarMensagem();
+          }
+        }, INTERVALO_REVELACAO_MS);
+      };
 
       try {
         const { noticias: n, atores: a, metricas: m } = dadosRef.current;
@@ -195,24 +279,46 @@ export function useGeminiChat({ noticias, atores, metricas }: OpcoesChat) {
           signal: controller.signal,
         });
 
-        const dados = (await resposta.json().catch(() => null)) as
-          | { texto?: string; erro?: string }
-          | null;
-
-        if (!resposta.ok || !dados || dados.erro) {
+        if (!resposta.ok) {
+          const dados = (await resposta.json().catch(() => null)) as { erro?: string } | null;
           throw new Error(dados?.erro ?? `Falha na resposta (HTTP ${resposta.status})`);
         }
+        if (!resposta.body) {
+          throw new Error('O servidor não retornou conteúdo.');
+        }
 
-        setMensagens((atual) =>
-          atual.map((msg) =>
-            msg.id === idResposta
-              ? { ...msg, content: dados.texto ?? '', carregando: false }
-              : msg,
-          ),
-        );
+        const leitor = resposta.body.getReader();
+        const decodificador = new TextDecoder();
+        iniciarRevelacao();
+
+        while (true) {
+          const { value, done } = await leitor.read();
+          if (done) break;
+
+          const pedaco = decodificador.decode(value, { stream: true });
+          const indiceErro = pedaco.indexOf(MARCA_ERRO_NO_STREAM);
+
+          if (indiceErro !== -1) {
+            bufferCompleto += pedaco.slice(0, indiceErro);
+            mensagemErro = pedaco.slice(indiceErro + 1) || 'Resposta interrompida.';
+            break;
+          }
+
+          bufferCompleto += pedaco;
+        }
+
+        streamEncerrado = true;
+        if (bufferCompleto.length === 0 && !mensagemErro) {
+          mensagemErro = 'O modelo retornou uma resposta vazia. Tente reformular a pergunta.';
+        }
+        // Cobre o caso em que o corpo inteiro já chegou antes do primeiro
+        // toque do relógio de revelação (comum fora de streaming real).
+        if (posicaoRevelada >= bufferCompleto.length) finalizarMensagem();
       } catch (erro) {
         if (controller.signal.aborted) return;
+        pararRevelacao();
         const detalhe = erro instanceof Error ? erro.message : 'Erro desconhecido';
+        setCarregando(false);
         setMensagens((atual) =>
           atual.map((msg) =>
             msg.id === idResposta
@@ -220,23 +326,23 @@ export function useGeminiChat({ noticias, atores, metricas }: OpcoesChat) {
                   ...msg,
                   content: `Não consegui responder agora. ${detalhe}`,
                   carregando: false,
+                  streaming: false,
                   erro: true,
                 }
               : msg,
           ),
         );
-      } finally {
-        setCarregando(false);
       }
     },
-    [carregando, mensagens, modelo],
+    [carregando, mensagens, modelo, pararRevelacao],
   );
 
   const limpar = useCallback(() => {
     abortRef.current?.abort();
+    pararRevelacao();
     setMensagens([]);
     setCarregando(false);
-  }, []);
+  }, [pararRevelacao]);
 
   return { mensagens, carregando, modelo, setModelo, enviar, limpar };
 }
