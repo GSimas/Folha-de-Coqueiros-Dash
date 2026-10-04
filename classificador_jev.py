@@ -43,6 +43,9 @@ MAX_CARACTERES_TEXTO = 7000  # estado enxuto: Jev perde precisão com contexto i
 MAX_CANDIDATOS_PALAVRAS = 20
 MAX_CANDIDATOS_ATORES = 20
 MAX_CANDIDATOS_VALOR = 12
+MAX_ATORES_NOVOS = 6
+LIMIAR_RELEVANCIA_ATOR = 0.6
+LIMIAR_CONFIANCA_TIPO = 0.5
 
 
 class ErroJev(Exception):
@@ -127,7 +130,7 @@ _MAIUSC = "A-ZÁÉÍÓÚÂÊÔÃÕÇÀ"
 # Palavra capitalizada (sem ponto, exceto abreviações comuns de endereços e títulos).
 _PALAVRA_PROPRIA = rf"(?:(?:Av|Eng|Dr|Dra|Prof|Profa|Sr|Sra|Pe|Sta|Sto|Gov|Des|Ver)\.|[{_MAIUSC}][\wÀ-ÿ'’\-]*)"
 # Só espaços na mesma linha separam as palavras de um nome; "e" não une nomes.
-_SEQUENCIA = rf"{_PALAVRA_PROPRIA}(?:[ \t]+(?:(?:de|da|do|dos|das)[ \t]+)?{_PALAVRA_PROPRIA}){{0,5}}"
+_SEQUENCIA = rf"{_PALAVRA_PROPRIA}(?:[ \t]+(?:(?:de|da|do|dos|das)[ \t]+)?{_PALAVRA_PROPRIA}){{0,8}}"
 PADRAO_NOME_PROPRIO = re.compile(_SEQUENCIA)
 PADRAO_LOCAL = re.compile(rf"\b(?:no|na|nos|nas|em|local:)[ \t]+({_SEQUENCIA})")
 
@@ -138,7 +141,12 @@ PALAVRAS_COMUNS = {
         "Ele Ela Eles Elas Também Já Mas Este Esta Esse Essa Isso Aqui Ali Quando Onde Como Porque Então Hoje Amanhã "
         "Ontem Neste Nesta Próximo Próxima Durante Após Antes Depois Além Entre Sobre Sem Até Desde Cada Todos Todas "
         "Sim Não Já Ainda Se Seu Sua Nosso Nossa Confira Veja Saiba Acesse Clique Informações Serviço Data Local "
-        "Horário Valor Entrada Inscrições Contato Telefone Site Instagram Facebook WhatsApp Domingo Segunda Terça "
+        "Horário Valor Entrada Inscrições Contato Telefone Site Instagram Facebook WhatsApp Endereço Rua Avenida "
+        "Programação Evento Atrações Agenda Fonte Crédito Créditos "
+        # Papéis que antecedem nomes ("Morador da Vila Aparecida", "Presidente Gerusa…")
+        "Morador Moradora Moradores Moradoras Presidente Prefeito Prefeita Vereador Vereadora Secretário "
+        "Secretária Diretor Diretora Coordenador Coordenadora Professor Professora Aluno Aluna Atleta "
+        "Domingo Segunda Terça "
         "Quarta Quinta Sexta Sábado Janeiro Fevereiro Março Abril Maio Junho Julho Agosto Setembro Outubro Novembro Dezembro"
     ).split()
 }
@@ -198,10 +206,15 @@ def nomes_proprios(texto: str) -> Counter:
             ):
                 palavras = palavras[1:]
                 nome = " ".join(palavras)
+            while palavras and normalizar(palavras[0]) in ("de", "da", "do", "dos", "das"):
+                palavras = palavras[1:]
+            nome = " ".join(palavras)
             if not palavras or len(nome) < 3 or all(normalizar(p) in PALAVRAS_COMUNS for p in palavras):
                 continue
             contagem[nome] += 1
-    return contagem
+    # Palavra única só vale se for sigla (UFSC) ou aparecer mais de uma vez:
+    # nomes soltos citados uma vez ("Edson", "Melissa") raramente são atores úteis.
+    return Counter({n: c for n, c in contagem.items() if " " in n or n.isupper() and len(n) >= 2 or c >= 2})
 
 
 def sem_prefixos(nomes: list[str]) -> list[str]:
@@ -225,8 +238,8 @@ def candidatos_local(texto: str, locais_conhecidos: list[str]) -> list[str]:
 def candidatos_palavras(titulo: str, texto: str, vocabulario: Counter, nomes: list[str] | None = None) -> list[str]:
     """
     Termos do vocabulário de palavras-chave do acervo que aparecem na notícia,
-    completados com nomes próprios e substantivos do título — assim notícias
-    sobre assuntos novos também têm candidatos.
+    completados com nomes próprios da notícia — assim assuntos novos também
+    têm candidatos.
     """
     titulo_norm, texto_norm = normalizar(titulo), normalizar(texto)
     pontuados = []
@@ -238,12 +251,7 @@ def candidatos_palavras(titulo: str, texto: str, vocabulario: Counter, nomes: li
         pontuados.append((no_titulo * 5 + min(ocorrencias, 5) + min(freq, 20) / 10, termo))
     pontuados.sort(reverse=True)
     termos = [t for _, t in pontuados]
-    do_titulo = [
-        p.strip(".,;:!?\"'“”()").capitalize()
-        for p in titulo.split()
-        if len(p.strip(".,;:!?\"'“”()")) >= 5 and normalizar(p.strip(".,;:!?\"'“”()")) not in PALAVRAS_COMUNS
-    ]
-    return _unicos(termos + (nomes or [])[:6] + do_titulo, MAX_CANDIDATOS_PALAVRAS)
+    return _unicos(termos + (nomes or [])[:8], MAX_CANDIDATOS_PALAVRAS)
 
 
 def vocabulario_do_acervo(noticias: list[dict]) -> Counter:
@@ -331,6 +339,13 @@ def resolver_data(expressao: str, publicacao: date) -> str | None:
                 distancia = 7
             resultado = publicacao + timedelta(days=distancia)
 
+    # Evento anunciado não acontece meses antes da publicação: um ano explícito
+    # que leva a isso é erro de digitação na matéria ("12 de maio de 2025" numa
+    # notícia de maio de 2026). Mantém dia e mês com o ano da publicação.
+    if resultado and resultado < publicacao - timedelta(days=60):
+        corrigido = _criar(publicacao.year, resultado.month, resultado.day)
+        if corrigido and corrigido >= publicacao - timedelta(days=60):
+            resultado = corrigido
     return resultado.strftime("%d/%m/%Y") if resultado else None
 
 
@@ -450,6 +465,11 @@ def montar_requisicao(noticia: dict, atores_base: list[dict], vocabulario: Count
             f"In the article in `texto`, what kind of named entity is `candidatos_atores[{i}]`?",
             TIPOS_ATOR,
         )
+        perguntas[f"ator_relevante_{i}"] = _noul(
+            f"Does `candidatos_atores[{i}]` play a role in the facts reported in `texto` (subject, participant, organizer, speaker, or the place where the facts happen)?",
+            "It takes part in or is central to the reported facts.",
+            "Only a photo credit, a byline, an address detail, a passing mention, or not a real name.",
+        )
 
     return {"state": estado, "questions": perguntas}, candidatos
 
@@ -476,17 +496,38 @@ def interpretar(noticia: dict, respostas: dict, candidatos: dict) -> dict:
     probabilidades = sorted(
         ((_prob(respostas, f"palavra_{i}"), termo) for i, termo in enumerate(candidatos["palavras"])), reverse=True
     )
-    escolhidas = [t for p, t in probabilidades if p >= LIMIAR_SIM][:5]
+    def redundante(termo: str, lista: list[str]) -> bool:
+        a = normalizar(termo)
+        return any(a in normalizar(b) or normalizar(b) in a for b in lista)
+
+    escolhidas: list[str] = []
+    for p, termo in probabilidades:
+        if p >= LIMIAR_SIM and len(escolhidas) < 5 and not redundante(termo, escolhidas):
+            escolhidas.append(termo)
     if len(escolhidas) < 3:
-        escolhidas += [t for p, t in probabilidades if t not in escolhidas and p >= 0.2][: 3 - len(escolhidas)]
+        for p, termo in probabilidades:
+            if len(escolhidas) < 3 and p >= 0.2 and not redundante(termo, escolhidas):
+                escolhidas.append(termo)
     if not escolhidas and probabilidades:  # nunca deixa a notícia sem palavra-chave
         escolhidas = [probabilidades[0][1]]
 
     atores = [{"nome": a["Nome"], "tipo": a["Tipo"], "descricao": a.get("Descricao", "")} for a in candidatos["atores_conhecidos"]]
+    # Novos atores: entidade nomeada com tipo confiável E papel nos fatos; no
+    # máximo MAX_ATORES_NOVOS por notícia, os de maior relevância.
+    aceitos = []
     for i, nome in enumerate(candidatos["atores_novos"]):
+        resposta_tipo = respostas.get(f"ator_{i}") or {}
         tipo = _escolhido(respostas, f"ator_{i}")
-        if tipo and tipo != "nao_entidade":
-            atores.append({"nome": nome, "tipo": tipo, "descricao": frase_com(texto, nome)})
+        relevancia = _prob(respostas, f"ator_relevante_{i}")
+        if (
+            tipo
+            and tipo != "nao_entidade"
+            and float(resposta_tipo.get("confidence") or 0) >= LIMIAR_CONFIANCA_TIPO
+            and relevancia >= LIMIAR_RELEVANCIA_ATOR
+        ):
+            aceitos.append((relevancia, nome, tipo))
+    for _, nome, tipo in sorted(aceitos, reverse=True)[:MAX_ATORES_NOVOS]:
+        atores.append({"nome": nome, "tipo": tipo, "descricao": frase_com(texto, nome)})
 
     e_evento = _prob(respostas, "e_evento") >= LIMIAR_SIM
     data_inicio = _escolhido(respostas, "data_inicio")

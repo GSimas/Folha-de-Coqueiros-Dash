@@ -32,16 +32,18 @@ VOCAB = Counter({"Feira": 30, "Queijos": 4, "Coqueiros": 50, "Saúde": 40, "Gast
 
 class Candidatos(unittest.TestCase):
     def test_nomes_proprios_nao_atravessam_frases_nem_juntam_com_e(self):
-        nomes = j.nomes_proprios("Falou Jorge Fernando Schneider\nNo sábado, Braço do Norte e Major Gercino.")
+        nomes = j.nomes_proprios("Falou Jorge Fernando Schneider\nNo sábado, Braço do Norte e Major Gercino. Morador da Vila Aparecida. Edson veio.")
         self.assertIn("Jorge Fernando Schneider", nomes)
         self.assertIn("Braço do Norte", nomes)
         self.assertIn("Major Gercino", nomes)
         self.assertFalse(any("\n" in n or " e " in n for n in nomes))
+        self.assertIn("Vila Aparecida", nomes)  # sem o "da" que sobra ao tirar "Morador"
+        self.assertNotIn("Edson", nomes)  # nome solto citado uma vez
 
     def test_palavras_tem_candidatos_mesmo_sem_vocabulario(self):
-        candidatos = j.candidatos_palavras("Abraço Centenário à Ponte Hercílio Luz", "Texto curto.", Counter(), ["Ponte Hercílio Luz"])
+        candidatos = j.candidatos_palavras("Abraço Centenário acontece na Ponte Hercílio Luz", "Texto.", Counter(), ["Ponte Hercílio Luz"])
         self.assertIn("Ponte Hercílio Luz", candidatos)
-        self.assertIn("Centenário", candidatos)
+        self.assertNotIn("Acontece", candidatos)  # verbos do título não viram candidatos
 
     def test_remove_prefixos_de_nomes_mais_longos(self):
         self.assertEqual(j.sem_prefixos(["Gerusa", "Gerusa Machado", "Centro de Saúde", "Centro de Saúde da Vila"]),
@@ -77,6 +79,7 @@ class Datas(unittest.TestCase):
             "hoje": "12/06/2026",
             "amanhã": "13/06/2026",
             "10 de janeiro": "10/01/2027",  # sem ano e já passado → ano seguinte
+            "13 de junho de 2025": "13/06/2026",  # ano digitado errado na matéria
         }
         for expressao, esperado in casos.items():
             self.assertEqual(j.resolver_data(expressao, self.pub), esperado, expressao)
@@ -135,6 +138,7 @@ def respostas_falsas(candidatos, **sobrescrever):
     for i, nome in enumerate(candidatos["atores_novos"]):
         tipo = {"Gerusa Machado": "Pessoa", "Associação dos Moradores de Coqueiros": "Organização"}.get(nome, "nao_entidade")
         r[f"ator_{i}"] = {"type": "choice", "choice": tipo, "confidence": 0.9}
+        r[f"ator_relevante_{i}"] = {"type": "noul", "noul": 0.9 if tipo != "nao_entidade" else 0.2}
     r.update(sobrescrever)
     return r
 
@@ -159,6 +163,20 @@ class Interpretacao(unittest.TestCase):
         self.assertEqual(nomes["Palhoça"], "Local")  # conhecido
         self.assertNotIn("Coqueiros", nomes)  # marcado como não-entidade no teste
         self.assertIn("presidente", next(a["descricao"] for a in r["atores"] if a["nome"] == "Gerusa Machado"))
+
+    def test_ator_sem_papel_nos_fatos_ou_tipo_incerto_e_descartado(self):
+        i = self.c["atores_novos"].index("Gerusa Machado")
+        sem_papel = respostas_falsas(self.c, **{f"ator_relevante_{i}": {"noul": 0.3}})
+        self.assertNotIn("Gerusa Machado", [a["nome"] for a in j.interpretar(NOTICIA, sem_papel, self.c)["atores"]])
+        incerto = respostas_falsas(self.c, **{f"ator_{i}": {"choice": "Pessoa", "confidence": 0.3}})
+        self.assertNotIn("Gerusa Machado", [a["nome"] for a in j.interpretar(NOTICIA, incerto, self.c)["atores"]])
+
+    def test_palavras_chave_sem_variantes_redundantes(self):
+        c = {**self.c, "palavras": ["Centro de Saúde", "Centro de Saúde de Coqueiros", "Saúde", "Vacina"]}
+        r = respostas_falsas(c)
+        for i in range(4):
+            r[f"palavra_{i}"] = {"noul": 0.9 - i * 0.1}
+        self.assertEqual(j.interpretar(NOTICIA, r, c)["palavras_chave"], "Centro de Saúde, Vacina")
 
     def test_evento_pago_usa_o_valor_escolhido(self):
         r = j.interpretar(NOTICIA, respostas_falsas(self.c, e_pago={"noul": 0.9}, valor={"choice": "R$ 20,00"}), self.c)
