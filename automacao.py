@@ -413,7 +413,10 @@ def pendencias(noticias: list[dict], atores: list[dict]) -> list[dict]:
     notícia mais recente já ligada a algum ator.
     """
     ids_com_atores = {int(i) for a in atores for i in a.get("Noticias", [])}
-    marco = max(ids_com_atores, default=-1)
+    # Só o histórico sem a marca define o marco: um lote cortado pelo limite
+    # não esconde as notícias que ficaram para a próxima execução.
+    marcadas = {int(n["ID"]) for n in noticias if n.get("Atores Extraídos")}
+    marco = max(ids_com_atores - marcadas, default=-1)
 
     def precisa(n: dict) -> bool:
         sem_categoria = n.get("Categorias") in (None, "", "Não categorizado")

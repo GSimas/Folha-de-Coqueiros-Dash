@@ -113,6 +113,13 @@ class Atores(unittest.TestCase):
         atores = [{"Nome": "A", "Tipo": "Pessoa", "Noticias": [2]}]
         self.assertEqual([n["ID"] for n in a.pendencias(noticias, atores)], [4, 3])
 
+    def test_lote_parcial_nao_esconde_as_restantes(self):
+        noticias = [{"ID": i, "Categorias": "Educação", "Palavras-Chaves": "a"} for i in range(1, 6)]
+        for n in noticias[3:]:
+            n["Atores Extraídos"] = True  # 4 e 5 já processadas neste lote
+        atores = [{"Nome": "A", "Tipo": "Pessoa", "Noticias": [1, 5]}]
+        self.assertEqual([n["ID"] for n in a.pendencias(noticias, atores)], [3, 2])
+
 
 class FluxoCompleto(unittest.TestCase):
     def setUp(self):
