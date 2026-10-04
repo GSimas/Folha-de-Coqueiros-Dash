@@ -70,7 +70,8 @@
             357,
             533,
             621,
-            766
+            766,
+            868
         ]
     },
     {
@@ -83,7 +84,8 @@
             129,
             190,
             629,
-            672
+            672,
+            842
         ]
     },
     {
@@ -202,7 +204,8 @@
         "Descricao": "Professora do 5º ano da Escola Praia do Riso, Coqueiros",
         "Noticias": [
             3,
-            13
+            13,
+            841
         ]
     },
     {
@@ -329,7 +332,9 @@
             763,
             775,
             777,
-            804
+            804,
+            869,
+            840
         ]
     },
     {
@@ -512,7 +517,9 @@
             482,
             581,
             616,
-            661
+            661,
+            849,
+            845
         ]
     },
     {
@@ -617,7 +624,9 @@
             218,
             219,
             231,
-            233
+            233,
+            850,
+            846
         ]
     },
     {
@@ -684,7 +693,8 @@
         "Tipo": "Pessoa",
         "Descricao": "Pessoa mencionada em notícias comunitárias de Coqueiros",
         "Noticias": [
-            118
+            118,
+            851
         ]
     },
     {
@@ -749,7 +759,15 @@
             697,
             707,
             713,
-            722
+            722,
+            874,
+            872,
+            871,
+            868,
+            856,
+            846,
+            842,
+            840
         ]
     },
     {
@@ -790,7 +808,8 @@
             388,
             397,
             682,
-            731
+            731,
+            868
         ]
     },
     {
@@ -947,7 +966,9 @@
             283,
             308,
             441,
-            581
+            581,
+            849,
+            845
         ]
     },
     {
@@ -1105,7 +1126,8 @@
             149,
             176,
             185,
-            813
+            813,
+            867
         ]
     },
     {
@@ -1331,7 +1353,17 @@
             758,
             763,
             775,
-            804
+            804,
+            874,
+            869,
+            868,
+            864,
+            854,
+            850,
+            849,
+            841,
+            840,
+            838
         ]
     },
     {
@@ -1391,7 +1423,8 @@
         "Noticias": [
             350,
             443,
-            696
+            696,
+            840
         ]
     },
     {
@@ -1492,7 +1525,8 @@
         "Descricao": "Fotógrafo colaborador da Folha de Coqueiros",
         "Noticias": [
             3,
-            13
+            13,
+            841
         ]
     },
     {
@@ -1501,7 +1535,8 @@
         "Tipo": "Pessoa",
         "Descricao": "Secretário da Pró-Coqueiros",
         "Noticias": [
-            1
+            1,
+            874
         ]
     },
     {
@@ -1590,7 +1625,10 @@
             593,
             620,
             656,
-            657
+            657,
+            852,
+            848,
+            838
         ]
     },
     {
@@ -1778,7 +1816,9 @@
             722,
             731,
             736,
-            751
+            751,
+            860,
+            856
         ]
     },
     {
@@ -1892,7 +1932,8 @@
         "Descricao": "Associação de pescadores artesanais da Praia da Saudade, Coqueiros",
         "Noticias": [
             176,
-            814
+            814,
+            871
         ]
     },
     {
@@ -1962,7 +2003,8 @@
             724,
             731,
             736,
-            808
+            808,
+            840
         ]
     },
     {
@@ -2040,7 +2082,9 @@
             763,
             771,
             780,
-            804
+            804,
+            868,
+            861
         ]
     },
     {
@@ -2142,7 +2186,9 @@
         "Noticias": [
             466,
             503,
-            726
+            726,
+            866,
+            853
         ]
     },
     {
@@ -2178,7 +2224,10 @@
             81,
             258,
             732,
-            786
+            786,
+            864,
+            854,
+            841
         ]
     },
     {
@@ -2210,7 +2259,8 @@
             145,
             230,
             414,
-            415
+            415,
+            839
         ]
     },
     {
@@ -2424,7 +2474,19 @@
             808,
             812,
             813,
-            814
+            814,
+            877,
+            871,
+            869,
+            868,
+            851,
+            849,
+            847,
+            846,
+            842,
+            841,
+            839,
+            838
         ]
     },
     {
@@ -2502,7 +2564,9 @@
             482,
             581,
             616,
-            661
+            661,
+            849,
+            845
         ]
     },
     {
@@ -2579,7 +2643,8 @@
             768,
             769,
             809,
-            811
+            811,
+            866
         ]
     },
     {
@@ -2619,7 +2684,8 @@
             701,
             709,
             745,
-            813
+            813,
+            858
         ]
     },
     {
@@ -2710,7 +2776,9 @@
             468,
             506,
             596,
-            678
+            678,
+            849,
+            845
         ]
     },
     {
@@ -2742,7 +2810,9 @@
         "Descricao": "Museu estadual de preservação da memória histórica catarinense",
         "Noticias": [
             129,
-            612
+            612,
+            849,
+            845
         ]
     },
     {
@@ -3035,7 +3105,13 @@
             803,
             806,
             810,
-            814
+            814,
+            873,
+            868,
+            866,
+            860,
+            858,
+            845
         ]
     },
     {
@@ -3060,7 +3136,8 @@
         "Tipo": "Organização",
         "Descricao": "Projeto ambiental premiado, liderado por Rodrigo Kiko Bungus, Coqueiros",
         "Noticias": [
-            109
+            109,
+            854
         ]
     },
     {
@@ -3191,7 +3268,16 @@
             752,
             755,
             763,
-            775
+            775,
+            873,
+            872,
+            871,
+            868,
+            865,
+            860,
+            856,
+            846,
+            842
         ]
     },
     {
@@ -3242,7 +3328,8 @@
             774,
             776,
             780,
-            787
+            787,
+            844
         ]
     },
     {
@@ -3308,7 +3395,8 @@
             802,
             805,
             806,
-            808
+            808,
+            850
         ]
     },
     {
@@ -3414,7 +3502,9 @@
             731,
             736,
             751,
-            811
+            811,
+            860,
+            856
         ]
     },
     {
@@ -3490,7 +3580,9 @@
             786,
             787,
             794,
-            806
+            806,
+            874,
+            867
         ]
     },
     {
@@ -3509,7 +3601,8 @@
             721,
             736,
             753,
-            813
+            813,
+            871
         ]
     },
     {
@@ -3547,7 +3640,9 @@
         "Noticias": [
             10,
             185,
-            813
+            813,
+            865,
+            842
         ]
     },
     {
@@ -3622,7 +3717,8 @@
             570,
             680,
             685,
-            814
+            814,
+            871
         ]
     },
     {
@@ -3683,7 +3779,8 @@
             16,
             104,
             127,
-            482
+            482,
+            845
         ]
     },
     {
@@ -3695,7 +3792,9 @@
             180,
             268,
             282,
-            300
+            300,
+            848,
+            838
         ]
     },
     {
@@ -3745,7 +3844,8 @@
             305,
             629,
             672,
-            775
+            775,
+            867
         ]
     },
     {
@@ -3767,7 +3867,8 @@
             15,
             26,
             82,
-            96
+            96,
+            855
         ]
     },
     {
@@ -3794,7 +3895,9 @@
             146,
             156,
             376,
-            423
+            423,
+            870,
+            859
         ]
     },
     {
@@ -3888,7 +3991,10 @@
             179,
             185,
             451,
-            814
+            814,
+            871,
+            865,
+            842
         ]
     },
     {
@@ -3939,7 +4045,8 @@
             183,
             252,
             315,
-            335
+            335,
+            853
         ]
     },
     {
@@ -3948,7 +4055,8 @@
         "Tipo": "Empresa",
         "Descricao": "Chocolateria mencionada em notícias de Coqueiros",
         "Noticias": [
-            156
+            156,
+            870
         ]
     },
     {
@@ -4247,7 +4355,11 @@
             741,
             754,
             771,
-            780
+            780,
+            876,
+            862,
+            861,
+            844
         ]
     },
     {
@@ -4265,7 +4377,8 @@
             561,
             603,
             672,
-            781
+            781,
+            870
         ]
     },
     {
@@ -4326,7 +4439,8 @@
             344,
             652,
             684,
-            704
+            704,
+            858
         ]
     },
     {
@@ -4351,7 +4465,8 @@
             561,
             603,
             632,
-            813
+            813,
+            864
         ]
     },
     {
@@ -4384,7 +4499,8 @@
         "Descricao": "Comunidade do Continente de Florianópolis",
         "Noticias": [
             481,
-            624
+            624,
+            858
         ]
     },
     {
@@ -4554,7 +4670,8 @@
             804,
             807,
             809,
-            813
+            813,
+            859
         ]
     },
     {
@@ -4567,7 +4684,8 @@
             23,
             87,
             231,
-            335
+            335,
+            874
         ]
     },
     {
@@ -4617,7 +4735,9 @@
             737,
             738,
             745,
-            766
+            766,
+            873,
+            864
         ]
     },
     {
@@ -4721,7 +4841,11 @@
             711,
             730,
             805,
-            814
+            814,
+            872,
+            871,
+            865,
+            842
         ]
     },
     {
@@ -4781,7 +4905,9 @@
             601,
             625,
             702,
-            796
+            796,
+            848,
+            838
         ]
     },
     {
@@ -4897,7 +5023,8 @@
             797,
             801,
             802,
-            813
+            813,
+            840
         ]
     },
     {
@@ -4964,7 +5091,8 @@
             589,
             594,
             595,
-            725
+            725,
+            849
         ]
     },
     {
@@ -5002,7 +5130,8 @@
             728,
             729,
             740,
-            813
+            813,
+            850
         ]
     },
     {
@@ -5165,7 +5294,8 @@
             640,
             643,
             689,
-            805
+            805,
+            871
         ]
     },
     {
@@ -5235,7 +5365,1483 @@
             747,
             755,
             780,
-            804
+            804,
+            868,
+            862,
+            847,
+            839
+        ]
+    },
+    {
+        "ID_Ator": 253,
+        "Nome": "João Olíbio da Silva",
+        "Tipo": "Pessoa",
+        "Descricao": "Faleceu nesta sexta-feira, dia 4 de novembro, aos 81 anos, o nosso querido vizinho João Olíbio da Silva, o conhecido Artista das Bananeiras.",
+        "Noticias": [
+            877
+        ]
+    },
+    {
+        "ID_Ator": 254,
+        "Nome": "Hospital Celso Ramos",
+        "Tipo": "Organização",
+        "Descricao": "Internado há uma semana no Hospital Celso Ramos, em Florianópolis, com pneumonia, Olíbio não resistiu à doença e faleceu no final da tarde de ontem.",
+        "Noticias": [
+            877
+        ]
+    },
+    {
+        "ID_Ator": 255,
+        "Nome": "Ilha de Santa Catarina",
+        "Tipo": "Local",
+        "Descricao": "Rico em detalhes e cores, eles retratam casarios, paisagens e monumentos da Ilha de Santa Catarina.",
+        "Noticias": [
+            877
+        ]
+    },
+    {
+        "ID_Ator": 256,
+        "Nome": "Policlínica da Mulher",
+        "Tipo": "Organização",
+        "Descricao": "Os pacientes que precisarem realizar as seguintes vacinas: COVID; ⁠Varicela; ⁠Tetraviral; e ⁠anti-rábica devem procurar o Espaço Imuniza, que fica na Policlínica da Mulher e da Criança, na  Rua Esteves Junior, 89 -Centro",
+        "Noticias": [
+            876,
+            844
+        ]
+    },
+    {
+        "ID_Ator": 257,
+        "Nome": "Roberto Massa",
+        "Tipo": "Pessoa",
+        "Descricao": "É o caso do aposentado Roberto Massa, de 84 anos, que diante de tanta dificuldade se obriga a andar de aplicativo toda a vez que precisa sair de casa.",
+        "Noticias": [
+            875
+        ]
+    },
+    {
+        "ID_Ator": 258,
+        "Nome": "Florianópolis",
+        "Tipo": "Local",
+        "Descricao": "Infelizmente, essa é a situação dos deficientes físicos que dependem do transporte coletivo de Florianópolis.",
+        "Noticias": [
+            875,
+            874,
+            873,
+            872,
+            870,
+            868,
+            866,
+            864,
+            860,
+            858,
+            857,
+            856,
+            849,
+            845,
+            844,
+            843,
+            841
+        ]
+    },
+    {
+        "ID_Ator": 259,
+        "Nome": "Professores do Neim",
+        "Tipo": "Organização",
+        "Descricao": "Professores do Neim (Núcleo de Educação Infantil Municipal) Dona Cota, vizinho do Parque, também participaram do movimento levando cartazes e uma carta aberta à comunidade escrita pelas crianças.",
+        "Noticias": [
+            874
+        ]
+    },
+    {
+        "ID_Ator": 260,
+        "Nome": "Paulo Horta",
+        "Tipo": "Pessoa",
+        "Descricao": "“É uma semente de vida e de esperança, e um recomeço às espécies atingidas pelo crime ambiental”, coloca a jornalista e editora do Blog, Márcia Quartiero, ao citar o professor Paulo Horta, especialista da UFSC e que fez ",
+        "Noticias": [
+            874
+        ]
+    },
+    {
+        "ID_Ator": 261,
+        "Nome": "Blog do Abraão",
+        "Tipo": "Organização",
+        "Descricao": "Promovido pelo Blog do Abraão, o ato envolveu o plantio de um pé de Guarapuvu, árvore símbolo de Florianópolis, e um exemplar de Pata de Vaca, além de uma muda de Jabuticaba.",
+        "Noticias": [
+            874,
+            868
+        ]
+    },
+    {
+        "ID_Ator": 262,
+        "Nome": "Nídia Pacheco",
+        "Tipo": "Pessoa",
+        "Descricao": "Entre elas, um exemplar de Pata de Vaca, plantado há seis anos pela professora e publicitária Nídia Pacheco.",
+        "Noticias": [
+            874
+        ]
+    },
+    {
+        "ID_Ator": 263,
+        "Nome": "Márcia Quartiero",
+        "Tipo": "Pessoa",
+        "Descricao": "“É uma semente de vida e de esperança, e um recomeço às espécies atingidas pelo crime ambiental”, coloca a jornalista e editora do Blog, Márcia Quartiero, ao citar o professor Paulo Horta, especialista da UFSC e que fez ",
+        "Noticias": [
+            874,
+            868
+        ]
+    },
+    {
+        "ID_Ator": 264,
+        "Nome": "Ana Paula",
+        "Tipo": "Pessoa",
+        "Descricao": "A professora Ana Paula disse que o espaço onde foram envenenadas as árvores era o ambiente usado pelas crianças para aula de Educação Física.",
+        "Noticias": [
+            874
+        ]
+    },
+    {
+        "ID_Ator": 265,
+        "Nome": "Associação dos Moradores de Coqueiros",
+        "Tipo": "Organização",
+        "Descricao": "À frente da organização, estão a Associação de Amigos do Parque da Luz (AAPluz), a Associação dos Moradores de Coqueiros (Pró-Coqueiros) e a Câmera Criativa.",
+        "Noticias": [
+            873,
+            872,
+            871,
+            868,
+            865,
+            861,
+            860,
+            856,
+            850,
+            842
+        ]
+    },
+    {
+        "ID_Ator": 266,
+        "Nome": "Associação de Amigos do Parque da Luz",
+        "Tipo": "Organização",
+        "Descricao": "À frente da organização, estão a Associação de Amigos do Parque da Luz (AAPluz), a Associação dos Moradores de Coqueiros (Pró-Coqueiros) e a Câmera Criativa.",
+        "Noticias": [
+            873
+        ]
+    },
+    {
+        "ID_Ator": 267,
+        "Nome": "Câmera Criativa",
+        "Tipo": "Organização",
+        "Descricao": "À frente da organização, estão a Associação de Amigos do Parque da Luz (AAPluz), a Associação dos Moradores de Coqueiros (Pró-Coqueiros) e a Câmera Criativa.",
+        "Noticias": [
+            873
+        ]
+    },
+    {
+        "ID_Ator": 268,
+        "Nome": "Sociedade Civil",
+        "Tipo": "Organização",
+        "Descricao": "Para tanto, um grupo de voluntários que reúne integrantes de quase 30 instituições da Sociedade Civil está elaborando os últimos detalhes do evento.",
+        "Noticias": [
+            873,
+            866
+        ]
+    },
+    {
+        "ID_Ator": 269,
+        "Nome": "Secretaria Municipal de Turismo",
+        "Tipo": "Organização",
+        "Descricao": "Nas fotos abaixo, encontros na sede da AAPluz e na Secretaria Municipal de Turismo para decidir a programação e demais itens do evento,",
+        "Noticias": [
+            873
+        ]
+    },
+    {
+        "ID_Ator": 270,
+        "Nome": "Estado de Santa Catarina",
+        "Tipo": "Organização",
+        "Descricao": "Sentimento que é compartilhado pelos habitantes da cidade de Florianópolis e da população do Estado de Santa Catarina”, aponta a organização.",
+        "Noticias": [
+            873
+        ]
+    },
+    {
+        "ID_Ator": 271,
+        "Nome": "Associação dos Moradores de Coqueiros Pró-Coqueiros",
+        "Tipo": "Organização",
+        "Descricao": "A Associação dos Moradores de Coqueiros Pró-Coqueiros, em cumprimento ao disposto no Parágrafo 1° do Artigo 14 do seu Estatuto, convoca a comunidade de Coqueiros para a Assembleia Geral Extraordinária, a ser realizada no",
+        "Noticias": [
+            872,
+            860,
+            856
+        ]
+    },
+    {
+        "ID_Ator": 272,
+        "Nome": "Escola Básica Municipal Almirante Carvalhal",
+        "Tipo": "Organização",
+        "Descricao": "A Associação dos Moradores de Coqueiros Pró-Coqueiros, em cumprimento ao disposto no Parágrafo 1° do Artigo 14 do seu Estatuto, convoca a comunidade de Coqueiros para a Assembleia Geral Extraordinária, a ser realizada no",
+        "Noticias": [
+            872
+        ]
+    },
+    {
+        "ID_Ator": 273,
+        "Nome": "Leonardo Contin da Costa",
+        "Tipo": "Pessoa",
+        "Descricao": "Leonardo Contin da Costa",
+        "Noticias": [
+            872,
+            856
+        ]
+    },
+    {
+        "ID_Ator": 274,
+        "Nome": "Bento Goia",
+        "Tipo": "Local",
+        "Descricao": "A Associação dos Moradores de Coqueiros Pró-Coqueiros, em cumprimento ao disposto no Parágrafo 1° do Artigo 14 do seu Estatuto, convoca a comunidade de Coqueiros para a Assembleia Geral Extraordinária, a ser realizada no",
+        "Noticias": [
+            872,
+            854
+        ]
+    },
+    {
+        "ID_Ator": 275,
+        "Nome": "Restaurante Dançante Tritão",
+        "Tipo": "Empresa",
+        "Descricao": "Depois de tantos outros prédios e monumentos históricos como a Casa Rosa e o Trapiche da Praia da Saudade, chegou a vez do famoso Restaurante Dançante Tritão.",
+        "Noticias": [
+            871
+        ]
+    },
+    {
+        "ID_Ator": 276,
+        "Nome": "César Ávila",
+        "Tipo": "Pessoa",
+        "Descricao": "em outubro de 2023, o empresário César Ávila, então com 89 anos, contou um pouco da história do Tritão.",
+        "Noticias": [
+            871
+        ]
+    },
+    {
+        "ID_Ator": 277,
+        "Nome": "Coral Construtora",
+        "Tipo": "Empresa",
+        "Descricao": "Para tanto, a Pró-Coqueiros enviou um ofício à Coral Construtora solicitando a permanência das “figueiras centenárias”.",
+        "Noticias": [
+            871
+        ]
+    },
+    {
+        "ID_Ator": 278,
+        "Nome": "Associação Pró-Coqueiros",
+        "Tipo": "Organização",
+        "Descricao": "“A Ocupação Cultural Tritão nasceu em 2024 após a comunidade realizar uma “procissão luminosa” para cobrar iluminação e segurança para a área”, coloca o presidente da Associação Pró-Coqueiros, Leonardo Contin.",
+        "Noticias": [
+            871,
+            865,
+            842
+        ]
+    },
+    {
+        "ID_Ator": 279,
+        "Nome": "Paulo Gil",
+        "Tipo": "Pessoa",
+        "Descricao": "César Ávila, junto com o sócio e ex-proprietário da empresa Pedrita, o saudoso Paulo Gil, fundou o Tritão em 27 de maio de 1971.",
+        "Noticias": [
+            871
+        ]
+    },
+    {
+        "ID_Ator": 280,
+        "Nome": "Rui Ramos Soares",
+        "Tipo": "Pessoa",
+        "Descricao": "O prédio foi erguido no terreno alugado do engenheiro Rui Ramos Soares, pai do aposentado e morador da Praia da Saudade, José Rui.",
+        "Noticias": [
+            871
+        ]
+    },
+    {
+        "ID_Ator": 281,
+        "Nome": "Delícias Portuguesas",
+        "Tipo": "Empresa",
+        "Descricao": "Já a Delícias Portuguesas levará ao público uma seleção de vinhos portugueses, sul-americanos e de outros países, reforçando a proposta de valorizar sabores autênticos e rótulos com história.",
+        "Noticias": [
+            870
+        ]
+    },
+    {
+        "ID_Ator": 282,
+        "Nome": "Boca da Serra",
+        "Tipo": "Empresa",
+        "Descricao": "Entre os convidados, a Boca da Serra, de Águas Mornas, apresentará queijos que expressam o terroir da Microrregião de Tabuleiro, como o Floripano, de sabor adocicado e notas de amêndoas, o Maciambu, inspirado em queijos ",
+        "Noticias": [
+            870
+        ]
+    },
+    {
+        "ID_Ator": 283,
+        "Nome": "Banca Pacheco",
+        "Tipo": "Empresa",
+        "Descricao": "A Banca Pacheco, uma das bancas mais tradicionais de Florianópolis e reconhecida pela curadoria de produtos artesanais e frescos, apresentará uma seleção especial de doces, geleias e tábuas de frios, além da degustação d",
+        "Noticias": [
+            870
+        ]
+    },
+    {
+        "ID_Ator": 284,
+        "Nome": "Petrolândia",
+        "Tipo": "Local",
+        "Descricao": "A feira de degustação e comercialização de produtos artesanais vai reunir dez expositores de oito cidades catarinenses, Florianópolis, Águas Mornas, Chapecó, Palhoça, Petrolândia, Garopaba, Braço do Norte e Major Gercino",
+        "Noticias": [
+            870
+        ]
+    },
+    {
+        "ID_Ator": 285,
+        "Nome": "Major Gercino",
+        "Tipo": "Local",
+        "Descricao": "A feira de degustação e comercialização de produtos artesanais vai reunir dez expositores de oito cidades catarinenses, Florianópolis, Águas Mornas, Chapecó, Palhoça, Petrolândia, Garopaba, Braço do Norte e Major Gercino",
+        "Noticias": [
+            870
+        ]
+    },
+    {
+        "ID_Ator": 286,
+        "Nome": "Águas Mornas",
+        "Tipo": "Local",
+        "Descricao": "A feira de degustação e comercialização de produtos artesanais vai reunir dez expositores de oito cidades catarinenses, Florianópolis, Águas Mornas, Chapecó, Palhoça, Petrolândia, Garopaba, Braço do Norte e Major Gercino",
+        "Noticias": [
+            870
+        ]
+    },
+    {
+        "ID_Ator": 287,
+        "Nome": "João Felipe",
+        "Tipo": "Pessoa",
+        "Descricao": "Junto estavam o menino João Felipe com uma gravata cheio de estilo ao lado da mãe Tainara.",
+        "Noticias": [
+            869
+        ]
+    },
+    {
+        "ID_Ator": 288,
+        "Nome": "Estádio de Nova Jersey",
+        "Tipo": "Local",
+        "Descricao": "Durante a partida que aconteceu no Estádio de Nova Jersey, Estados Unidos, a esperança dos brasileiros em chegar ao hexacampeonato.",
+        "Noticias": [
+            869
+        ]
+    },
+    {
+        "ID_Ator": 289,
+        "Nome": "Bar do Ori",
+        "Tipo": "Empresa",
+        "Descricao": "A exemplo de outros espaços públicos da cidade, o Bar do Ori, um dos botecos mais democráticos de Floripa, ficou lotado neste sábado, dia 13 de junho, Dia de Santo Antônio e da estreia do Jogo da Seleção do Brasil.",
+        "Noticias": [
+            869
+        ]
+    },
+    {
+        "ID_Ator": 290,
+        "Nome": "Estados Unidos",
+        "Tipo": "Local",
+        "Descricao": "Durante a partida que aconteceu no Estádio de Nova Jersey, Estados Unidos, a esperança dos brasileiros em chegar ao hexacampeonato.",
+        "Noticias": [
+            869
+        ]
+    },
+    {
+        "ID_Ator": 291,
+        "Nome": "João Meireles",
+        "Tipo": "Local",
+        "Descricao": "Com telões espalhados pelos três ambientes – dois junto ao bar tradicional da Rua João Meireles e outro na calçada em frente – os torcedores acabaram saindo frustrados com o resultado: deu empate entre Brasil e Marrocos.",
+        "Noticias": [
+            869
+        ]
+    },
+    {
+        "ID_Ator": 292,
+        "Nome": "Maria Gorete",
+        "Tipo": "Pessoa",
+        "Descricao": "“Um cadeirante ou uma pessoa obesa não tem condições de utilizar o banheiro de tão reduzido que é o local”, aponta Maria Gorete, coordenadora do Conselho Local de Saúde, que reclama também da dificuldade de conseguir con",
+        "Noticias": [
+            868
+        ]
+    },
+    {
+        "ID_Ator": 293,
+        "Nome": "Gerusa Machado",
+        "Tipo": "Pessoa",
+        "Descricao": "O projeto do novo Centro de Saúde da comunidade já está em processo de licitação, segundo informou a secretária executiva do Conselho Municipal de Saúde, Gerusa Machado.",
+        "Noticias": [
+            868
+        ]
+    },
+    {
+        "ID_Ator": 294,
+        "Nome": "Centro de Saúde da Vila Aparecida",
+        "Tipo": "Organização",
+        "Descricao": "Do contrário, se o Centro de Saúde da Vila Aparecida ficar mais um ou dois anos no mesmo espaço, o atendimento vai colapsar também nos centros de saúde de Coqueiros e do Abraão”, declara a jornalista Cleuse Soares, vice-",
+        "Noticias": [
+            868
+        ]
+    },
+    {
+        "ID_Ator": 295,
+        "Nome": "Lidia Marques",
+        "Tipo": "Pessoa",
+        "Descricao": "A mesma denúncia foi relatada por mais duas usuárias: Lidia Marques, conselheira, e Daniela, mãe de oito filhos.",
+        "Noticias": [
+            868
+        ]
+    },
+    {
+        "ID_Ator": 296,
+        "Nome": "Ester Azevedo",
+        "Tipo": "Pessoa",
+        "Descricao": "De acordo com a coordenadora do Centro de Saúde, Ester Azevedo, a falta de profissionais na sexta-feira se dá por causa de visitas domiciliares.",
+        "Noticias": [
+            868
+        ]
+    },
+    {
+        "ID_Ator": 297,
+        "Nome": "Conselho Municipal de Saúde",
+        "Tipo": "Organização",
+        "Descricao": "O projeto do novo Centro de Saúde da comunidade já está em processo de licitação, segundo informou a secretária executiva do Conselho Municipal de Saúde, Gerusa Machado.",
+        "Noticias": [
+            868
+        ]
+    },
+    {
+        "ID_Ator": 298,
+        "Nome": "Rita Paulino",
+        "Tipo": "Pessoa",
+        "Descricao": "Professora Rita Paulino (quarta à esquerda), jurada da UFSC, e Petra Mafalda que venceu na categoria Fotojornalismo.",
+        "Noticias": [
+            867,
+            841
+        ]
+    },
+    {
+        "ID_Ator": 299,
+        "Nome": "Renato Campos Carvalho",
+        "Tipo": "Pessoa",
+        "Descricao": "presidente do Conselho Deliberativo do Sebrae/SC, Renato Campos Carvalho",
+        "Noticias": [
+            867
+        ]
+    },
+    {
+        "ID_Ator": 300,
+        "Nome": "Conselho Deliberativo do Sebrae",
+        "Tipo": "Organização",
+        "Descricao": "presidente do Conselho Deliberativo do Sebrae/SC, Renato Campos Carvalho",
+        "Noticias": [
+            867
+        ]
+    },
+    {
+        "ID_Ator": 301,
+        "Nome": "Lúcia Helena Vieira",
+        "Tipo": "Pessoa",
+        "Descricao": "Ao seu lado, as juradas Lúcia Helena Vieira, presidente da Associação Catarinense de Imprensa (ACI) e Melina Cauduro, coordenadora de Conteúdo da Associação Catarinense de Emissoras de Rádio e Televisão (Acaert).",
+        "Noticias": [
+            867
+        ]
+    },
+    {
+        "ID_Ator": 302,
+        "Nome": "Associação Catarinense de Imprensa",
+        "Tipo": "Organização",
+        "Descricao": "Ao seu lado, as juradas Lúcia Helena Vieira, presidente da Associação Catarinense de Imprensa (ACI) e Melina Cauduro, coordenadora de Conteúdo da Associação Catarinense de Emissoras de Rádio e Televisão (Acaert).",
+        "Noticias": [
+            867
+        ]
+    },
+    {
+        "ID_Ator": 303,
+        "Nome": "Melina Cauduro",
+        "Tipo": "Pessoa",
+        "Descricao": "Ao seu lado, as juradas Lúcia Helena Vieira, presidente da Associação Catarinense de Imprensa (ACI) e Melina Cauduro, coordenadora de Conteúdo da Associação Catarinense de Emissoras de Rádio e Televisão (Acaert).",
+        "Noticias": [
+            867
+        ]
+    },
+    {
+        "ID_Ator": 304,
+        "Nome": "Secretaria Municipal de Saúde",
+        "Tipo": "Organização",
+        "Descricao": "As ações são promovidas pela Prefeitura, por meio da Secretaria Municipal de Saúde e da Secretaria Executiva de Operações de Mobilidade, em parceria com a Rede Vida no Trânsito e instituições das áreas de segurança, mobi",
+        "Noticias": [
+            866,
+            861
+        ]
+    },
+    {
+        "ID_Ator": 305,
+        "Nome": "Secretaria Executiva de Operações de Mobilidade",
+        "Tipo": "Organização",
+        "Descricao": "As ações são promovidas pela Prefeitura, por meio da Secretaria Municipal de Saúde e da Secretaria Executiva de Operações de Mobilidade, em parceria com a Rede Vida no Trânsito e instituições das áreas de segurança, mobi",
+        "Noticias": [
+            866
+        ]
+    },
+    {
+        "ID_Ator": 306,
+        "Nome": "Rede Vida",
+        "Tipo": "Organização",
+        "Descricao": "As ações são promovidas pela Prefeitura, por meio da Secretaria Municipal de Saúde e da Secretaria Executiva de Operações de Mobilidade, em parceria com a Rede Vida no Trânsito e instituições das áreas de segurança, mobi",
+        "Noticias": [
+            866
+        ]
+    },
+    {
+        "ID_Ator": 307,
+        "Nome": "Almir Gentil",
+        "Tipo": "Pessoa",
+        "Descricao": "Para o secretário municipal de Saúde, Almir Gentil, a mudança de comportamento passa pela compreensão de que o trânsito é um espaço compartilhado e de que as escolhas individuais podem impactar diretamente a vida de outr",
+        "Noticias": [
+            866
+        ]
+    },
+    {
+        "ID_Ator": 308,
+        "Nome": "Moacir da Silva",
+        "Tipo": "Pessoa",
+        "Descricao": "A infraestrutura é fundamental, mas a educação para o uso desses espaços também faz parte desse processo”, afirma Moacir da Silva.",
+        "Noticias": [
+            866
+        ]
+    },
+    {
+        "ID_Ator": 309,
+        "Nome": "Operações de Mobilidade",
+        "Tipo": "Organização",
+        "Descricao": "As ações são promovidas pela Prefeitura, por meio da Secretaria Municipal de Saúde e da Secretaria Executiva de Operações de Mobilidade, em parceria com a Rede Vida no Trânsito e instituições das áreas de segurança, mobi",
+        "Noticias": [
+            866
+        ]
+    },
+    {
+        "ID_Ator": 310,
+        "Nome": "Drag Urbana",
+        "Tipo": "Pessoa",
+        "Descricao": "ainda com a presença da Drag Urbana, trazendo a arte drag para o encontro e reforçando a importância da diversidade, da liberdade artística e da ocupação democrática dos espaços culturais.",
+        "Noticias": [
+            865
+        ]
+    },
+    {
+        "ID_Ator": 311,
+        "Nome": "Carol Parucci",
+        "Tipo": "Pessoa",
+        "Descricao": "Cada edição amplia a possibilidade de encontro entre artistas, moradores e diferentes manifestações culturais, fortalecendo a ocupação desse espaço público de forma viva, democrática e afetiva, coloca a organizadora do e",
+        "Noticias": [
+            865,
+            861
+        ]
+    },
+    {
+        "ID_Ator": 312,
+        "Nome": "Arena Cultural Tritão",
+        "Tipo": "Local",
+        "Descricao": "Ocupação Cultural – 6ª Edição | Arena Cultural Tritão",
+        "Noticias": [
+            865
+        ]
+    },
+    {
+        "ID_Ator": 313,
+        "Nome": "Max de Souza",
+        "Tipo": "Pessoa",
+        "Descricao": "Max de Souza com a Des.",
+        "Noticias": [
+            865,
+            859,
+            846
+        ]
+    },
+    {
+        "ID_Ator": 314,
+        "Nome": "Casa Rosa",
+        "Tipo": "Local",
+        "Descricao": "Construída no início do século XX, a conhecida Casa Rosa já se tornou a Majestade da Escola Praia do Riso, em Coqueiros.",
+        "Noticias": [
+            864
+        ]
+    },
+    {
+        "ID_Ator": 315,
+        "Nome": "Silvia Lenzi",
+        "Tipo": "Pessoa",
+        "Descricao": "“Um exemplo de reconhecimento e de respeito da comunidade escolar pelo seu valor histórico”, define a arquiteta Silvia Lenzi.",
+        "Noticias": [
+            864
+        ]
+    },
+    {
+        "ID_Ator": 316,
+        "Nome": "Poder Público",
+        "Tipo": "Organização",
+        "Descricao": "Agora só falta o reconhecimento pelo Poder Público”, coloca a arquiteta, que também mora no bairro.",
+        "Noticias": [
+            864,
+            854
+        ]
+    },
+    {
+        "ID_Ator": 317,
+        "Nome": "Zelita Chamone",
+        "Tipo": "Pessoa",
+        "Descricao": "A pedagoga Zelita Chamone, pós-graduada em psicopedagogia/educação especial com especialização em terapia da fala, afirma que quanto mais cedo os problemas de aprendizagem forem solucionados, maiores são as chances de su",
+        "Noticias": [
+            863
+        ]
+    },
+    {
+        "ID_Ator": 318,
+        "Nome": "Equipes de Saúde da Família",
+        "Tipo": "Organização",
+        "Descricao": "A equipe Multiprofissional (eMulti) da Atenção Primária à Saúde (APS), em parceria com as Equipes de Saúde da Família (ESF) e os residentes dos Centros de Saúde de Coqueiros, Abraão e Vila Aparecida, promoverá uma série ",
+        "Noticias": [
+            862,
+            844
+        ]
+    },
+    {
+        "ID_Ator": 319,
+        "Nome": "ESF",
+        "Tipo": "Organização",
+        "Descricao": "A equipe Multiprofissional (eMulti) da Atenção Primária à Saúde (APS), em parceria com as Equipes de Saúde da Família (ESF) e os residentes dos Centros de Saúde de Coqueiros, Abraão e Vila Aparecida, promoverá uma série ",
+        "Noticias": [
+            862
+        ]
+    },
+    {
+        "ID_Ator": 320,
+        "Nome": "Centros de Saúde de Coqueiros",
+        "Tipo": "Organização",
+        "Descricao": "A equipe Multiprofissional (eMulti) da Atenção Primária à Saúde (APS), em parceria com as Equipes de Saúde da Família (ESF) e os residentes dos Centros de Saúde de Coqueiros, Abraão e Vila Aparecida, promoverá uma série ",
+        "Noticias": [
+            862
+        ]
+    },
+    {
+        "ID_Ator": 321,
+        "Nome": "Abraão",
+        "Tipo": "Local",
+        "Descricao": "A equipe Multiprofissional (eMulti) da Atenção Primária à Saúde (APS), em parceria com as Equipes de Saúde da Família (ESF) e os residentes dos Centros de Saúde de Coqueiros, Abraão e Vila Aparecida, promoverá uma série ",
+        "Noticias": [
+            862,
+            858,
+            839
+        ]
+    },
+    {
+        "ID_Ator": 322,
+        "Nome": "APS",
+        "Tipo": "Organização",
+        "Descricao": "A equipe Multiprofissional (eMulti) da Atenção Primária à Saúde (APS), em parceria com as Equipes de Saúde da Família (ESF) e os residentes dos Centros de Saúde de Coqueiros, Abraão e Vila Aparecida, promoverá uma série ",
+        "Noticias": [
+            862
+        ]
+    },
+    {
+        "ID_Ator": 323,
+        "Nome": "Atenção Primária",
+        "Tipo": "Organização",
+        "Descricao": "A equipe Multiprofissional (eMulti) da Atenção Primária à Saúde (APS), em parceria com as Equipes de Saúde da Família (ESF) e os residentes dos Centros de Saúde de Coqueiros, Abraão e Vila Aparecida, promoverá uma série ",
+        "Noticias": [
+            862
+        ]
+    },
+    {
+        "ID_Ator": 324,
+        "Nome": "Mariza Pecoits",
+        "Tipo": "Pessoa",
+        "Descricao": "Conselheira Mariza Pecoits destacou a redução de participantes no Grupo por conta da ausência da educadora que, por mais de 10 anos, conduziu o Grupo nas terças-feiras e quintas-feiras.",
+        "Noticias": [
+            861
+        ]
+    },
+    {
+        "ID_Ator": 325,
+        "Nome": "Conselho Local",
+        "Tipo": "Organização",
+        "Descricao": "A informação foi passada na reunião do Conselho Local de Saúde, nesta quinta-feira, dia 27, na tentativa de evitar filas antes das 7h, horário de abertura do Centro de Saúde.",
+        "Noticias": [
+            861
+        ]
+    },
+    {
+        "ID_Ator": 326,
+        "Nome": "Centro de Saúde Coqueiros",
+        "Tipo": "Organização",
+        "Descricao": "Acesso a consultas medicas no Centro de Saúde Coqueiros:",
+        "Noticias": [
+            861,
+            844
+        ]
+    },
+    {
+        "ID_Ator": 327,
+        "Nome": "Alô Saúde Floripa",
+        "Tipo": "Organização",
+        "Descricao": "Alô Saúde Floripa é indicado como canal de atendimento e grupos especiais têm agendamento prioritário",
+        "Noticias": [
+            861
+        ]
+    },
+    {
+        "ID_Ator": 328,
+        "Nome": "Sibele Holsbach Costa",
+        "Tipo": "Pessoa",
+        "Descricao": "A falta de um educador físico também foi, novamente, discutido, principalmente a transferência da profissional Sibele Holsbach Costa para outro projeto.",
+        "Noticias": [
+            861
+        ]
+    },
+    {
+        "ID_Ator": 329,
+        "Nome": "Secretaria da Saúde",
+        "Tipo": "Organização",
+        "Descricao": "Ficou acertado também de o Conselho pedir apoio à Associação dos Moradores de Coqueiros encaminhar ofício à Secretaria da Saúde solicitando a contratação dos profissionais.",
+        "Noticias": [
+            861
+        ]
+    },
+    {
+        "ID_Ator": 330,
+        "Nome": "Auditório do Cefid",
+        "Tipo": "Local",
+        "Descricao": "A Associação dos Moradores de Coqueiros – Pró-Coqueiros, está convidando a comunidade para participar de reunião nesta quinta-feira, dia 20, no Auditório do Cefid/Udesc.",
+        "Noticias": [
+            860,
+            856
+        ]
+    },
+    {
+        "ID_Ator": 331,
+        "Nome": "Auditório Cefid",
+        "Tipo": "Local",
+        "Descricao": "Auditório Cefid/Udesc",
+        "Noticias": [
+            860
+        ]
+    },
+    {
+        "ID_Ator": 332,
+        "Nome": "Coronel Ivan Dentice Linhares",
+        "Tipo": "Local",
+        "Descricao": "Trata-se de o prolongamento da Rua Coronel Ivan Dentice Linhares.",
+        "Noticias": [
+            860,
+            856
+        ]
+    },
+    {
+        "ID_Ator": 333,
+        "Nome": "Victoria Beatriz",
+        "Tipo": "Pessoa",
+        "Descricao": "A partir das 10h30 do sábado, dia 22, o mezanino do Mercadão de Coqueiros recebe a oficina “Modelagem em Argila: Criando Seres Místicos”, ministrada pela arte-educadora e artista visual Victoria Beatriz.",
+        "Noticias": [
+            859
+        ]
+    },
+    {
+        "ID_Ator": 334,
+        "Nome": "Engenheiro Max de Souza",
+        "Tipo": "Local",
+        "Descricao": "Engenheiro Max de Souza, 843, ao lado do Parque de Coqueiros.",
+        "Noticias": [
+            859
+        ]
+    },
+    {
+        "ID_Ator": 335,
+        "Nome": "Continente",
+        "Tipo": "Local",
+        "Descricao": "No Continente, evento acontece no IFSC, em Coqueiros",
+        "Noticias": [
+            858,
+            850,
+            846
+        ]
+    },
+    {
+        "ID_Ator": 336,
+        "Nome": "Norte da Ilha",
+        "Tipo": "Local",
+        "Descricao": "O primeiro aconteceu na EBM Virgílio dos Reis Várzea, em Canasvieiras, e reuniu os bairros do Norte da Ilha.",
+        "Noticias": [
+            858
+        ]
+    },
+    {
+        "ID_Ator": 337,
+        "Nome": "EBM Virgílio dos Reis Várzea",
+        "Tipo": "Organização",
+        "Descricao": "O primeiro aconteceu na EBM Virgílio dos Reis Várzea, em Canasvieiras, e reuniu os bairros do Norte da Ilha.",
+        "Noticias": [
+            858
+        ]
+    },
+    {
+        "ID_Ator": 338,
+        "Nome": "Barra da Lagoa",
+        "Tipo": "Local",
+        "Descricao": "Será no Centro de Eventos do IFSC – Rua Quatorze de Julho, 150 – Coqueiros, e vai reunir os seguintes bairros: Balneário, Canto, Capoeiras, Coloninha, Estreito, Jardim Atlântico, Monte Cristo, Abraão, Bom Abrigo, Coqueir",
+        "Noticias": [
+            858
+        ]
+    },
+    {
+        "ID_Ator": 339,
+        "Nome": "Capoeiras",
+        "Tipo": "Local",
+        "Descricao": "Será no Centro de Eventos do IFSC – Rua Quatorze de Julho, 150 – Coqueiros, e vai reunir os seguintes bairros: Balneário, Canto, Capoeiras, Coloninha, Estreito, Jardim Atlântico, Monte Cristo, Abraão, Bom Abrigo, Coqueir",
+        "Noticias": [
+            858
+        ]
+    },
+    {
+        "ID_Ator": 340,
+        "Nome": "Canasvieiras",
+        "Tipo": "Local",
+        "Descricao": "O primeiro aconteceu na EBM Virgílio dos Reis Várzea, em Canasvieiras, e reuniu os bairros do Norte da Ilha.",
+        "Noticias": [
+            858
+        ]
+    },
+    {
+        "ID_Ator": 341,
+        "Nome": "Luciano Batista",
+        "Tipo": "Pessoa",
+        "Descricao": "Luciano Batista, que morava num terreno baldio em Coqueiros, faleceu em consequência de queimaduras em 80% do corpo.",
+        "Noticias": [
+            857
+        ]
+    },
+    {
+        "ID_Ator": 342,
+        "Nome": "Hospital Governador Celso Ramos",
+        "Tipo": "Organização",
+        "Descricao": "Luciano foi levado ao Hospital Governador Celso Ramos.",
+        "Noticias": [
+            857
+        ]
+    },
+    {
+        "ID_Ator": 343,
+        "Nome": "SAMU",
+        "Tipo": "Organização",
+        "Descricao": "Na madrugada de terça-feira, dia 11 de agosto, por volta das 2h30, recebi a notícia de que o SAMU estava socorrendo Luciano.",
+        "Noticias": [
+            857
+        ]
+    },
+    {
+        "ID_Ator": 344,
+        "Nome": "Instituto Médico Legal",
+        "Tipo": "Organização",
+        "Descricao": "Após seu falecimento, Luciano foi encaminhado ao Instituto Médico Legal (IML), para os procedimentos necessários.",
+        "Noticias": [
+            857
+        ]
+    },
+    {
+        "ID_Ator": 345,
+        "Nome": "IML",
+        "Tipo": "Organização",
+        "Descricao": "Após seu falecimento, Luciano foi encaminhado ao Instituto Médico Legal (IML), para os procedimentos necessários.",
+        "Noticias": [
+            857
+        ]
+    },
+    {
+        "ID_Ator": 346,
+        "Nome": "Pascoal Simone",
+        "Tipo": "Local",
+        "Descricao": "A Associação dos Moradores de Coqueiros – Pró-Coqueiros, convoca a comunidade de Coqueiros para a Assembleia Geral Extraordinária, a ser realizada no dia 20 de agosto de 2026, no Auditório do CEFID/UDESC, localizado na R",
+        "Noticias": [
+            856
+        ]
+    },
+    {
+        "ID_Ator": 347,
+        "Nome": "Rodrigo Pelágio Alves Ferreira",
+        "Tipo": "Pessoa",
+        "Descricao": "Para conhecer um pouco mais da vegetação espalhada no terreno que abriga a instituição, entrevistamos o biólogo Rodrigo Pelágio Alves Ferreira, o conhecido Kiko, 58 anos, responsável pelo Projeto Frutificar, programa que",
+        "Noticias": [
+            854
+        ]
+    },
+    {
+        "ID_Ator": 348,
+        "Nome": "Luciana De Franceschi",
+        "Tipo": "Pessoa",
+        "Descricao": "“Temos visto o interesse cada vez maior das famílias em explorar o Canadá, buscando uma educação de excelência, seja para um programa de férias – verão ou inverno – ou para estudos mais robustos, como o de High School”, ",
+        "Noticias": [
+            853
+        ]
+    },
+    {
+        "ID_Ator": 349,
+        "Nome": "Escola de Inglês Teddy Bear",
+        "Tipo": "Organização",
+        "Descricao": "A Escola de Inglês Teddy Bear está completando 36 anos e está com matrículas abertas para o segundo semestre de 2026 .",
+        "Noticias": [
+            853
+        ]
+    },
+    {
+        "ID_Ator": 350,
+        "Nome": "Canada Intercambio Santa Catarina",
+        "Tipo": "Empresa",
+        "Descricao": "Trata-se da ampliação dos programas de intercâmbio no Canadá, em parceria com a Canada Intercambio Santa Catarina, uma das empresas do Grupo Educacional Teddy Bear",
+        "Noticias": [
+            853
+        ]
+    },
+    {
+        "ID_Ator": 351,
+        "Nome": "Priscilla Malkiewiez",
+        "Tipo": "Pessoa",
+        "Descricao": "Ao lado de Priscilla Malkiewiez (foto), embaixadora da Canada Intercambio Santa Catarina, responsável pela divulgação dos programas internacionais e pelo atendimento às famílias, Luciana destaca a importância de ampliar ",
+        "Noticias": [
+            853
+        ]
+    },
+    {
+        "ID_Ator": 352,
+        "Nome": "Tony De Franceschi",
+        "Tipo": "Pessoa",
+        "Descricao": "“Temos visto o interesse cada vez maior das famílias em explorar o Canadá, buscando uma educação de excelência, seja para um programa de férias – verão ou inverno – ou para estudos mais robustos, como o de High School”, ",
+        "Noticias": [
+            853
+        ]
+    },
+    {
+        "ID_Ator": 353,
+        "Nome": "Grupo Educacional Teddy Bear",
+        "Tipo": "Empresa",
+        "Descricao": "Trata-se da ampliação dos programas de intercâmbio no Canadá, em parceria com a Canada Intercambio Santa Catarina, uma das empresas do Grupo Educacional Teddy Bear",
+        "Noticias": [
+            853
+        ]
+    },
+    {
+        "ID_Ator": 354,
+        "Nome": "Aconchego Creche",
+        "Tipo": "Empresa",
+        "Descricao": "Inaugurado em junho do ano passado, o Aconchego Creche e Hotel nasceu, como o próprio nome define, para acolher os pets enquanto os tutores cumprem as suas tarefas diárias ou atividades de lazer.",
+        "Noticias": [
+            851
+        ]
+    },
+    {
+        "ID_Ator": 355,
+        "Nome": "Bruno Becker",
+        "Tipo": "Pessoa",
+        "Descricao": "da Secretaria do Continente, Bruno Becker, os moradores solicitaram a intervenção do órgão municipal para urbanizar o local para evitar invasões e promover, com equipamentos, o lazer da comunidade.",
+        "Noticias": [
+            850
+        ]
+    },
+    {
+        "ID_Ator": 356,
+        "Nome": "Airton Farias",
+        "Tipo": "Pessoa",
+        "Descricao": ", que aconteceu na praça da Abel Capela, além de Bruno Becker, os aposentados Airton Farias e Paulo Czizeweski; o especialista em segurança Moretzsohn; o policial Valdison Lima; e a jornalista Sibyla Loureiro.",
+        "Noticias": [
+            850,
+            840
+        ]
+    },
+    {
+        "ID_Ator": 357,
+        "Nome": "Paulo Czizeweski",
+        "Tipo": "Pessoa",
+        "Descricao": ", que aconteceu na praça da Abel Capela, além de Bruno Becker, os aposentados Airton Farias e Paulo Czizeweski; o especialista em segurança Moretzsohn; o policial Valdison Lima; e a jornalista Sibyla Loureiro.",
+        "Noticias": [
+            850
+        ]
+    },
+    {
+        "ID_Ator": 358,
+        "Nome": "Valdison Lima",
+        "Tipo": "Pessoa",
+        "Descricao": ", que aconteceu na praça da Abel Capela, além de Bruno Becker, os aposentados Airton Farias e Paulo Czizeweski; o especialista em segurança Moretzsohn; o policial Valdison Lima; e a jornalista Sibyla Loureiro.",
+        "Noticias": [
+            850
+        ]
+    },
+    {
+        "ID_Ator": 359,
+        "Nome": "Departamento Nacional de Infraestrutura de Transportes",
+        "Tipo": "Organização",
+        "Descricao": "Em primeiro lugar, segundo Bruno, será feito um pedido de permissão ao Denit (Departamento Nacional de Infraestrutura de Transportes), já que área é de domínio federal.",
+        "Noticias": [
+            850,
+            846
+        ]
+    },
+    {
+        "ID_Ator": 360,
+        "Nome": "Via Expressa",
+        "Tipo": "Local",
+        "Descricao": ", que poderá ser uma cessão de uso à Associação dos Moradores de Coqueiros, o grupo também pediu o fechamento do barranco que dá acesso à Via Expressa uma vez que, por conta de furtos recorrentes, ele serve como rota de ",
+        "Noticias": [
+            850,
+            846
+        ]
+    },
+    {
+        "ID_Ator": 361,
+        "Nome": "Luciana Paulo Corrêa",
+        "Tipo": "Pessoa",
+        "Descricao": "Com curadoria de Luciana Paulo Corrêa e Monique Fonseca, “Entre o Instante e a Eternidade” vai reunir algumas obras do artista que nunca foram expostas ao público.",
+        "Noticias": [
+            849,
+            845
+        ]
+    },
+    {
+        "ID_Ator": 362,
+        "Nome": "Museu de SC",
+        "Tipo": "Organização",
+        "Descricao": "",
+        "Noticias": [
+            849
+        ]
+    },
+    {
+        "ID_Ator": 363,
+        "Nome": "Palácio Cruz",
+        "Tipo": "Local",
+        "Descricao": "A segunda exposição que integra o projeto Hassis 100 Anos será aberta no sábado, dia 25 de julho, no Museu Histórico de Santa Catarina, no Palácio Cruz e Sousa, em Florianópolis.",
+        "Noticias": [
+            849,
+            845
+        ]
+    },
+    {
+        "ID_Ator": 364,
+        "Nome": "Sousa",
+        "Tipo": "Local",
+        "Descricao": "A segunda exposição que integra o projeto Hassis 100 Anos será aberta no sábado, dia 25 de julho, no Museu Histórico de Santa Catarina, no Palácio Cruz e Sousa, em Florianópolis.",
+        "Noticias": [
+            849,
+            845
+        ]
+    },
+    {
+        "ID_Ator": 365,
+        "Nome": "Centro de Arte",
+        "Tipo": "Organização",
+        "Descricao": "No dia 29, o Instituto Collaço Paulo – Centro de Arte e Educação abre a exposição “Diários Afetivos”, com curadoria de Alice Viana Bononi e no dia 30, a Fundação Hassis, fará a abertura da mostra interativa “Hassis Brinc",
+        "Noticias": [
+            849,
+            845
+        ]
+    },
+    {
+        "ID_Ator": 366,
+        "Nome": "Espaço Gastronômica Cascaes",
+        "Tipo": "Empresa",
+        "Descricao": "Pra iniciar a semana, o Espaço Gastronômica Cascaes aposta numa alimentação mais light.",
+        "Noticias": [
+            848
+        ]
+    },
+    {
+        "ID_Ator": 367,
+        "Nome": "Espaço Kids",
+        "Tipo": "Local",
+        "Descricao": "Espaço Kids",
+        "Noticias": [
+            848,
+            838
+        ]
+    },
+    {
+        "ID_Ator": 368,
+        "Nome": "Eweton Silva",
+        "Tipo": "Pessoa",
+        "Descricao": "É com muita tristeza que comunicamos, após 10 dias desaparecido, o falecimento do comerciante Eweton Silva.",
+        "Noticias": [
+            847
+        ]
+    },
+    {
+        "ID_Ator": 369,
+        "Nome": "Secretaria Municipal do Continente",
+        "Tipo": "Organização",
+        "Descricao": "Há seis anos os moradores da Rua Professor Bayer Filho, em Coqueiros, estão reivindicando o calçamento da via e, para tanto, já promoveram abaixo-assinado, além de ofícios e outros documentos protocolados junto à Secreta",
+        "Noticias": [
+            846
+        ]
+    },
+    {
+        "ID_Ator": 370,
+        "Nome": "Rua Bayer Filho",
+        "Tipo": "Local",
+        "Descricao": "Divulgação/Moradores da Rua Bayer Filho",
+        "Noticias": [
+            846
+        ]
+    },
+    {
+        "ID_Ator": 371,
+        "Nome": "Mário Monteiro",
+        "Tipo": "Pessoa",
+        "Descricao": "“Aqui circulam diversos caminhões, muitas vezes lotados com três caçambas, o que provoca estragos na via como buracos, canos de água rebentados, por exemplo”, aponta o morador Mário Monteiro.",
+        "Noticias": [
+            846
+        ]
+    },
+    {
+        "ID_Ator": 372,
+        "Nome": "Luiz Otávio Costa",
+        "Tipo": "Pessoa",
+        "Descricao": "“O trânsito aumentou na via desde que motoristas – para fugir do engarrafamento da Via Expressa – resolveram transitar por aqui”, lamenta o casal Lydia e Luiz Otávio Costa.",
+        "Noticias": [
+            846
+        ]
+    },
+    {
+        "ID_Ator": 373,
+        "Nome": "Paróquia Nossa Senhora do Carmo",
+        "Tipo": "Organização",
+        "Descricao": "Solicitação feita pela Paróquia Nossa Senhora do Carmo por causa do movimento de carros em dias de missa.",
+        "Noticias": [
+            846
+        ]
+    },
+    {
+        "ID_Ator": 374,
+        "Nome": "Travessa Argentino Marcelino Vieira",
+        "Tipo": "Local",
+        "Descricao": "Para os moradores, a única solução é a pavimentação asfáltica – pelo menos – no trecho entre a Rua Santos Lostada e a Travessa Argentino Marcelino Vieira (próximo à Via Expressa), que tem mão dupla, ao contrário do trech",
+        "Noticias": [
+            846
+        ]
+    },
+    {
+        "ID_Ator": 375,
+        "Nome": "Itaguaçu",
+        "Tipo": "Local",
+        "Descricao": "“Hassis Brincante”, exposição que integra o projeto Hassis 100 Anos e celebra o centenário do artista, abre para visitação na quinta-feira, 30 de julho, a partir das 18h30, na Fundação Hassis, localizada no bairro Itagua",
+        "Noticias": [
+            845,
+            838
+        ]
+    },
+    {
+        "ID_Ator": 376,
+        "Nome": "Luiz da Costa Freysleben",
+        "Tipo": "Local",
+        "Descricao": "A Fundação Hassis fica na Rua Luiz da Costa Freysleben, 87, bairro Itaguaçu, em Florianópolis, e o horário de visitação é de segunda a sexta das 13h30 às 17h30 e aos sábados das 10h às 15h.",
+        "Noticias": [
+            845
+        ]
+    },
+    {
+        "ID_Ator": 377,
+        "Nome": "Lei Municipal de Incentivo",
+        "Tipo": "Organização",
+        "Descricao": "A mostra, que é a terceira exposição do projeto 3XHassis – projeto aprovado pela Lei Municipal de Incentivo à Cultura da Fundação Cultural de Florianópolis Franklin Cascaes- Prefeitura de Florianópolis, poderá ser visita",
+        "Noticias": [
+            845
+        ]
+    },
+    {
+        "ID_Ator": 378,
+        "Nome": "Alínea Urbanismo",
+        "Tipo": "Empresa",
+        "Descricao": "O projeto Hassis 100 Anos conta com o apoio de Orsitec – Assessoria Contábil e Empresarial, Alínea Urbanismo, dot Digital Group, Proarte Unicred e Placon Empreendimentos Imobiliários.–",
+        "Noticias": [
+            845
+        ]
+    },
+    {
+        "ID_Ator": 379,
+        "Nome": "Digital Group",
+        "Tipo": "Empresa",
+        "Descricao": "O projeto Hassis 100 Anos conta com o apoio de Orsitec – Assessoria Contábil e Empresarial, Alínea Urbanismo, dot Digital Group, Proarte Unicred e Placon Empreendimentos Imobiliários.–",
+        "Noticias": [
+            845
+        ]
+    },
+    {
+        "ID_Ator": 380,
+        "Nome": "Cultura da Fundação Cultural de Florianópolis Franklin Cascaes",
+        "Tipo": "Organização",
+        "Descricao": "A mostra, que é a terceira exposição do projeto 3XHassis – projeto aprovado pela Lei Municipal de Incentivo à Cultura da Fundação Cultural de Florianópolis Franklin Cascaes- Prefeitura de Florianópolis, poderá ser visita",
+        "Noticias": [
+            845
+        ]
+    },
+    {
+        "ID_Ator": 381,
+        "Nome": "Raquel Siqueira",
+        "Tipo": "Pessoa",
+        "Descricao": "Informação foi dada pela coordenadora da unidade, Raquel Siqueira, em reunião do Conselho de Saúde Local.",
+        "Noticias": [
+            844
+        ]
+    },
+    {
+        "ID_Ator": 382,
+        "Nome": "Conselho de Saúde de Coqueiros",
+        "Tipo": "Organização",
+        "Descricao": "",
+        "Noticias": [
+            844
+        ]
+    },
+    {
+        "ID_Ator": 383,
+        "Nome": "Sala de Vacinas",
+        "Tipo": "Local",
+        "Descricao": "Entre os assuntos discutidos, estão o acesso ao prédio do Centro de Saúde de Coqueiros antes das 7h para abrigar os usuários e a ampliação do horário da Sala de Vacinas.",
+        "Noticias": [
+            844
+        ]
+    },
+    {
+        "ID_Ator": 384,
+        "Nome": "Centro de Saúde",
+        "Tipo": "Local",
+        "Descricao": "Entre os assuntos discutidos, estão o acesso ao prédio do Centro de Saúde de Coqueiros antes das 7h para abrigar os usuários e a ampliação do horário da Sala de Vacinas.",
+        "Noticias": [
+            844
+        ]
+    },
+    {
+        "ID_Ator": 385,
+        "Nome": "Conselho de Saúde Local",
+        "Tipo": "Organização",
+        "Descricao": "Informação foi dada pela coordenadora da unidade, Raquel Siqueira, em reunião do Conselho de Saúde Local.",
+        "Noticias": [
+            844
+        ]
+    },
+    {
+        "ID_Ator": 386,
+        "Nome": "Associação dos Moradores",
+        "Tipo": "Organização",
+        "Descricao": "De acordo com Raquel Siqueira, o pedido deve ser feito pela Associação dos Moradores à Secretaria de Saúde do Município.",
+        "Noticias": [
+            844,
+            842
+        ]
+    },
+    {
+        "ID_Ator": 387,
+        "Nome": "Dibea de Florianópolis",
+        "Tipo": "Organização",
+        "Descricao": "Dibea de Florianópolis promove Arraiá da Adoção no dia 4 de julho",
+        "Noticias": [
+            843
+        ]
+    },
+    {
+        "ID_Ator": 388,
+        "Nome": "Itacorubi",
+        "Tipo": "Local",
+        "Descricao": "O evento ocorre das 13h às 17h, na sede do órgão, localizada na SC-401, nº 114, no bairro Itacorubi.",
+        "Noticias": [
+            843
+        ]
+    },
+    {
+        "ID_Ator": 389,
+        "Nome": "Diretoria de Bem-Estar Animal",
+        "Tipo": "Organização",
+        "Descricao": "A Diretoria de Bem-Estar Animal (Dibea) de Florianópolis realiza no sábado, 4 de julho, o Arraiá da Adoção.",
+        "Noticias": [
+            843
+        ]
+    },
+    {
+        "ID_Ator": 390,
+        "Nome": "SC-401",
+        "Tipo": "Local",
+        "Descricao": "O evento ocorre das 13h às 17h, na sede do órgão, localizada na SC-401, nº 114, no bairro Itacorubi.",
+        "Noticias": [
+            843
+        ]
+    },
+    {
+        "ID_Ator": 391,
+        "Nome": "Associação de Moradores de Coqueiros",
+        "Tipo": "Organização",
+        "Descricao": "“Trata-se de um espaço público que, ao lado da beleza natural, pode acolher manifestações voltadas à arte, à cultura e ao esporte”, destaca o presidente da Associação de Moradores de Coqueiros, Leonardo Contin.",
+        "Noticias": [
+            842
+        ]
+    },
+    {
+        "ID_Ator": 392,
+        "Nome": "Projeto Patas de Ouro",
+        "Tipo": "Organização",
+        "Descricao": "Gold, do Projeto Patas de Ouro;",
+        "Noticias": [
+            842
+        ]
+    },
+    {
+        "ID_Ator": 393,
+        "Nome": "Grupo de Alunos do Boi de Mamão",
+        "Tipo": "Organização",
+        "Descricao": "“Já participei de muitas festas promovidas pela escola, mas nunca presenciei tantas pessoas”, elogia a professora Rita Paulino que foi ao evento para prestigiar a neta Larinha que se apresentou no Grupo de Alunos do Boi ",
+        "Noticias": [
+            841
+        ]
+    },
+    {
+        "ID_Ator": 394,
+        "Nome": "Praia do Riso",
+        "Tipo": "Organização",
+        "Descricao": "A Festa Junina da Escola Praia do Riso foi um sucesso.",
+        "Noticias": [
+            841
+        ]
+    },
+    {
+        "ID_Ator": 395,
+        "Nome": "Luiz Frantz",
+        "Tipo": "Pessoa",
+        "Descricao": "É com muita tristeza que recebemos na manhã desta sexta-feira, dia 3 de julho, a notícia do falecimento do aposentado Luiz Frantz, aos 80 anos.",
+        "Noticias": [
+            840
+        ]
+    },
+    {
+        "ID_Ator": 396,
+        "Nome": "Conselho de Segurança de Coqueiros",
+        "Tipo": "Organização",
+        "Descricao": "Tanto é que chegou a disponibilizar, por quase duas décadas, o salão de festas do seu Condomínio para as reuniões mensais do Conselho de Segurança de Coqueiros (Conseg 31).",
+        "Noticias": [
+            840
+        ]
+    },
+    {
+        "ID_Ator": 397,
+        "Nome": "José Vitor da Silva Filho",
+        "Tipo": "Pessoa",
+        "Descricao": "Como presidente a socióloga Elaine Otto, como vice-presidente o jornalista e advogado Leonardo Contin e como secretários o aposentado José Vitor da Silva Filho e a jornalista Sibyla Loureiro.",
+        "Noticias": [
+            840
+        ]
+    },
+    {
+        "ID_Ator": 398,
+        "Nome": "Patrick dos Santos",
+        "Tipo": "Pessoa",
+        "Descricao": "E o responsável pela melhora na disciplina e socialização do aluno é o professor Patrick dos Santos.",
+        "Noticias": [
+            839
+        ]
+    },
+    {
+        "ID_Ator": 399,
+        "Nome": "Escola Estadual Rosinha Campos",
+        "Tipo": "Organização",
+        "Descricao": "A Escola Estadual Rosinha Campos, do bairro Abraão, está comemorando a vitória de um aluno que acaba de se destacar no esporte.",
+        "Noticias": [
+            839
+        ]
+    },
+    {
+        "ID_Ator": 400,
+        "Nome": "Luiz Renan da Silva",
+        "Tipo": "Pessoa",
+        "Descricao": "É o atleta de Judô Luiz Renan da Silva, de 13 anos, que conquistou duas medalhas nos últimos meses.",
+        "Noticias": [
+            839
+        ]
+    },
+    {
+        "ID_Ator": 401,
+        "Nome": "Casa da Comunidade",
+        "Tipo": "Organização",
+        "Descricao": "Responsável por um projeto social na Casa da Comunidade, na Vila Aparecida, Patrick treina o adolescente desde os 6 anos de idade.",
+        "Noticias": [
+            839
+        ]
+    },
+    {
+        "ID_Ator": 402,
+        "Nome": "Santo Amaro da Imperatriz",
+        "Tipo": "Local",
+        "Descricao": "Uma na seletiva regional, na categoria +64, em Santo Amaro da Imperatriz, onde foi campeão e trouxe o ouro pra casa.",
+        "Noticias": [
+            839
+        ]
+    },
+    {
+        "ID_Ator": 403,
+        "Nome": "São Miguel do Oeste",
+        "Tipo": "Local",
+        "Descricao": "E outra em São Miguel do Oeste, onde ganhou medalha de bronze por alcançar o terceiro lugar nos Jogos Escolares de Santa Catarina (JESC).",
+        "Noticias": [
+            839
+        ]
+    },
+    {
+        "ID_Ator": 404,
+        "Nome": "Fabiano Ceretta",
+        "Tipo": "Pessoa",
+        "Descricao": "Um ambiente acolhedor, ideal para reunir a família, amigos ou para aquele momento especial de final de semana”, destaca o empresário e sócio do empreendimento, Fabiano Ceretta.",
+        "Noticias": [
+            838
+        ]
+    },
+    {
+        "ID_Ator": 405,
+        "Nome": "AABB de Coqueiros",
+        "Tipo": "Organização",
+        "Descricao": "Aberto ao público, o Espaço Gastronômico Cascaes, que fica na sede da  AABB de Coqueiros, oferece estacionamento liberado por duas horas para o almoço.",
+        "Noticias": [
+            838
+        ]
+    },
+    {
+        "ID_Ator": 406,
+        "Nome": "Terraço Lounge Bar",
+        "Tipo": "Local",
+        "Descricao": "Terraço Lounge Bar",
+        "Noticias": [
+            838
+        ]
+    },
+    {
+        "ID_Ator": 407,
+        "Nome": "Franklin Cascaes",
+        "Tipo": "Pessoa",
+        "Descricao": "“Um verdadeiro evento temático focado em iguarias regionais”, aponta Fabiano Ceretta, ao destacar que o próprio espaço presta uma homenagem ao pesquisador, antropólogo e folclorista, Franklin Cascaes, que morou em Itagua",
+        "Noticias": [
+            838
+        ]
+    },
+    {
+        "ID_Ator": 408,
+        "Nome": "Espaço Pet",
+        "Tipo": "Local",
+        "Descricao": "Espaço Pet e Kids:",
+        "Noticias": [
+            838
+        ]
+    },
+    {
+        "ID_Ator": 409,
+        "Nome": "Horários Café Colonial",
+        "Tipo": "Local",
+        "Descricao": "Horários Café Colonial",
+        "Noticias": [
+            838
         ]
     }
 ]
