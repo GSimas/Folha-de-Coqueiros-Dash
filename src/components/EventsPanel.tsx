@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import {
   Bar,
   BarChart,
@@ -14,11 +14,13 @@ import {
 import { ArrowUpRight } from 'lucide-react';
 import { createColumnHelper } from '@tanstack/react-table';
 import type { Noticia } from '@/types';
-import { COR_REDUCAO, COR_REFORCO, PALETA_GRAFICOS } from '@/lib/constantes';
+import { COR_REDUCAO, COR_REFORCO, corDoTipoEvento } from '@/lib/constantes';
 import { eixoGrafico, tooltipGrafico, useCoresGrafico } from '@/lib/preferencias';
 import { Revelar } from '@/lib/motion';
 import { paraData } from '@/lib/data';
+import { LinkAtor, LinkTipoEvento, usePerfis } from '@/lib/perfis';
 import TabelaDados from './TabelaDados';
+import { BaixarGrafico } from './MenuBaixar';
 
 interface EventsPanelProps {
   noticias: Noticia[];
@@ -67,13 +69,29 @@ const COLUNAS_AGENDA = [
     id: 'tipo',
     header: 'Tipo',
     meta: { tipo: 'categoria' },
-    cell: (info) => <span className="text-xs text-muted">{info.getValue()}</span>,
+    cell: (info) =>
+      info.row.original.tipoEvento ? (
+        <LinkTipoEvento
+          nome={info.row.original.tipoEvento}
+          className="text-left text-xs text-muted transition hover:text-signal"
+        />
+      ) : (
+        <span className="text-xs text-faint">Não classificado</span>
+      ),
   }),
   coluna.accessor((e) => e.localEvento ?? 'Não informado', {
     id: 'local',
     header: 'Local',
     meta: { tipo: 'categoria', classe: 'max-w-[200px]' },
-    cell: (info) => <span className="line-clamp-2 text-xs text-muted">{info.row.original.localEvento ?? '—'}</span>,
+    cell: (info) => {
+      const local = info.row.original.localEvento;
+      // Local que também é ator do banco abre o perfil.
+      return local ? (
+        <LinkAtor nome={local} className="line-clamp-2 text-xs text-muted" />
+      ) : (
+        <span className="text-xs text-faint">—</span>
+      );
+    },
   }),
   coluna.accessor((e) => e.horarioEvento ?? '', {
     id: 'horario',
@@ -99,6 +117,9 @@ const COLUNAS_AGENDA = [
 
 export default function EventsPanel({ noticias }: EventsPanelProps) {
   const cores = useCoresGrafico();
+  const { abrirTipoEvento } = usePerfis();
+  const tiposRef = useRef<HTMLDivElement>(null);
+  const custoRef = useRef<HTMLDivElement>(null);
   const eventos = useMemo(() => noticias.filter((n) => n.ehEvento), [noticias]);
 
   const porTipo = useMemo(() => {
@@ -107,9 +128,7 @@ export default function EventsPanel({ noticias }: EventsPanelProps) {
       const tipo = evento.tipoEvento ?? 'Não classificado';
       contagem.set(tipo, (contagem.get(tipo) ?? 0) + 1);
     }
-    return [...contagem.entries()]
-      .map(([nome, total]) => ({ nome, total }))
-      .sort((a, b) => b.total - a.total);
+    return [...contagem.entries()].map(([nome, total]) => ({ nome, total })).sort((a, b) => b.total - a.total);
   }, [eventos]);
 
   const custoPorTipo = useMemo(() => {
@@ -157,11 +176,19 @@ export default function EventsPanel({ noticias }: EventsPanelProps) {
       {/* --- 2. Tipos e gratuidade --- */}
       <div className="grid gap-6 lg:grid-cols-2">
         <Revelar className="card">
-          <h3 className="card-titulo">
-            <span className="text-signal">A</span> · Tipos de evento
-          </h3>
+          <h2 className="card-titulo">
+            <span className="text-signal">B</span> · Tipos de evento
+            <span className="-my-2 ml-auto">
+              <BaixarGrafico
+                alvo={tiposRef}
+                nome="tipos-de-evento"
+                titulo="Tipos de evento"
+                legenda={porTipo.map((t, i) => ({ nome: t.nome, cor: corDoTipoEvento(t.nome, i), valor: t.total }))}
+              />
+            </span>
+          </h2>
           <div className="grid items-center gap-4 p-5 sm:grid-cols-2">
-            <div className="h-[240px]">
+            <div ref={tiposRef} className="h-[240px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -174,18 +201,14 @@ export default function EventsPanel({ noticias }: EventsPanelProps) {
                     paddingAngle={1.5}
                     stroke={cores.surface}
                     strokeWidth={2}
+                    className="cursor-pointer"
+                    onClick={(_, i) => abrirTipoEvento(porTipo[i].nome)}
                   >
                     {porTipo.map((entrada, indice) => (
-                      <Cell
-                        key={entrada.nome}
-                        fill={PALETA_GRAFICOS[indice % PALETA_GRAFICOS.length]}
-                      />
+                      <Cell key={entrada.nome} fill={corDoTipoEvento(entrada.nome, indice)} />
                     ))}
                   </Pie>
-                  <Tooltip
-                    {...tooltip}
-                    formatter={(valor, nome) => [`${valor} eventos`, String(nome)]}
-                  />
+                  <Tooltip {...tooltip} formatter={(valor, nome) => [`${valor} eventos`, String(nome)]} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -195,11 +218,12 @@ export default function EventsPanel({ noticias }: EventsPanelProps) {
                 <li key={entrada.nome} className="flex items-center gap-2 text-[0.8125rem]">
                   <span
                     className="h-2 w-2 shrink-0 rounded-full"
-                    style={{ backgroundColor: PALETA_GRAFICOS[indice % PALETA_GRAFICOS.length] }}
+                    style={{ backgroundColor: corDoTipoEvento(entrada.nome, indice) }}
                   />
-                  <span className="flex-1 truncate text-muted" title={entrada.nome}>
-                    {entrada.nome}
-                  </span>
+                  <LinkTipoEvento
+                    nome={entrada.nome}
+                    className="flex-1 truncate text-left text-muted transition hover:text-signal"
+                  />
                   <span className="font-mono text-xs tabular-nums text-ink">{entrada.total}</span>
                 </li>
               ))}
@@ -209,37 +233,40 @@ export default function EventsPanel({ noticias }: EventsPanelProps) {
 
         <Revelar className="card" atraso={100}>
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-5 py-3.5">
-            <h3 className="rotulo">
-              <span className="text-signal">B</span> · Pagos vs. gratuitos
-            </h3>
+            <h2 className="rotulo">
+              <span className="text-signal">C</span> · Pagos vs. gratuitos
+            </h2>
             <div className="flex items-center gap-3 text-xs text-muted">
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full" style={{ background: COR_GRATUITO }} />{' '}
-                Gratuito
+                <span className="h-2 w-2 rounded-full" style={{ background: COR_GRATUITO }} /> Gratuito
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full" style={{ background: COR_PAGO }} /> Pago
               </span>
+              <BaixarGrafico
+                alvo={custoRef}
+                nome="eventos-pagos-vs-gratuitos"
+                titulo="Eventos pagos vs. gratuitos por tipo"
+                legenda={[
+                  { nome: 'Gratuito', cor: COR_GRATUITO },
+                  { nome: 'Pago', cor: COR_PAGO },
+                ]}
+              />
             </div>
           </div>
           <div className="p-5">
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={custoPorTipo} margin={{ top: 8, right: 8, left: -18, bottom: 60 }}>
-                <CartesianGrid stroke={cores.line} strokeDasharray="2 4" vertical={false} />
-                <XAxis
-                  dataKey="nome"
-                  {...eixo}
-                  angle={-35}
-                  textAnchor="end"
-                  interval={0}
-                  height={70}
-                />
-                <YAxis {...eixo} axisLine={false} allowDecimals={false} />
-                <Tooltip {...tooltip} />
-                <Bar isAnimationActive={false} dataKey="Gratuito" fill={COR_GRATUITO} radius={[2, 2, 0, 0]} />
-                <Bar isAnimationActive={false} dataKey="Pago" fill={COR_PAGO} radius={[2, 2, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <div ref={custoRef}>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={custoPorTipo} margin={{ top: 8, right: 8, left: -18, bottom: 60 }}>
+                  <CartesianGrid stroke={cores.line} strokeDasharray="2 4" vertical={false} />
+                  <XAxis dataKey="nome" {...eixo} angle={-35} textAnchor="end" interval={0} height={70} />
+                  <YAxis {...eixo} axisLine={false} allowDecimals={false} />
+                  <Tooltip {...tooltip} />
+                  <Bar isAnimationActive={false} dataKey="Gratuito" fill={COR_GRATUITO} radius={[2, 2, 0, 0]} />
+                  <Bar isAnimationActive={false} dataKey="Pago" fill={COR_PAGO} radius={[2, 2, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </Revelar>
       </div>
@@ -250,14 +277,15 @@ export default function EventsPanel({ noticias }: EventsPanelProps) {
           dados={eventos}
           colunas={COLUNAS_AGENDA}
           rotuloItens="eventos"
+          nomeArquivo="agenda-de-eventos"
           ordenacaoInicial={[{ id: 'data', desc: true }]}
           porPagina={null}
           larguraMinima="min-w-[860px]"
           alturaMaxima="max-h-[28rem]"
           titulo={
-            <h3 className="rotulo">
-              <span className="text-signal">C</span> · Agenda
-            </h3>
+            <h2 className="rotulo">
+              <span className="text-signal">D</span> · Agenda
+            </h2>
           }
         />
       </Revelar>

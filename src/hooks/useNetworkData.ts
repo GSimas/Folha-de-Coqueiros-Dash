@@ -7,7 +7,7 @@
  *  - O GRAFO exibido usa métricas do SUBGRAFO (top N), refletindo a topologia
  *    daquele recorte específico.
  */
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type {
   Ator,
   AtorComSNA,
@@ -18,44 +18,38 @@ import type {
 } from '@/types';
 import {
   arestasPorCoocorrencia,
+  arredondar,
+  calcularAtoresComSNA,
   calcularMetricasSNA,
   criarGrafo,
 } from '@/lib/sna';
 
-const ARREDONDAMENTO = 4;
+export { calcularAtoresComSNA };
 
-function arredondar(valor: number): number {
-  return Number(valor.toFixed(ARREDONDAMENTO));
-}
+const SEM_ATORES: AtorComSNA[] = [];
 
 /**
- * Métricas SNA de TODOS os atores, calculadas sobre o grafo global de
- * coocorrência (dois atores se conectam quando citados na mesma notícia).
+ * Métricas SNA globais calculadas num Web Worker, fora da thread principal.
+ * Devolve `null` enquanto calcula. Sem suporte a Worker (ou se ele falhar),
+ * calcula aqui mesmo — mais lento, mas sem perder a funcionalidade.
  */
-export function calcularAtoresComSNA(atores: Ator[]): AtorComSNA[] {
-  if (atores.length === 0) return [];
+export function useAtoresComSNA(atores: Ator[]): AtorComSNA[] | null {
+  const [resultado, setResultado] = useState<{ base: Ator[]; atores: AtorComSNA[] } | null>(null);
 
-  const nos = atores.map((a) => a.nome);
-  const arestas = arestasPorCoocorrencia(
-    atores.map((a) => ({ nome: a.nome, documentos: a.noticias })),
-    1,
-  );
+  useEffect(() => {
+    if (atores.length === 0) return;
+    const calcularAqui = () => setResultado({ base: atores, atores: calcularAtoresComSNA(atores) });
+    if (typeof Worker === 'undefined') return calcularAqui();
+    const worker = new Worker(new URL('../workers/sna.worker.ts', import.meta.url), { type: 'module' });
+    worker.onmessage = (evento: MessageEvent<AtorComSNA[]>) => setResultado({ base: atores, atores: evento.data });
+    worker.onerror = calcularAqui;
+    worker.postMessage(atores);
+    return () => worker.terminate(); // troca de dados ou desmontagem: sem worker órfão
+  }, [atores]);
 
-  const grafo = criarGrafo(nos, arestas);
-  const metricas = calcularMetricasSNA(grafo);
-
-  return atores.map((ator) => ({
-    ...ator,
-    citacoes: ator.noticias.length,
-    grauAbsoluto: metricas.grau[ator.nome] ?? 0,
-    centralidadeGrau: arredondar(metricas.centralidadeGrau[ator.nome] ?? 0),
-    betweenness: arredondar(metricas.betweenness[ator.nome] ?? 0),
-    closeness: arredondar(metricas.closeness[ator.nome] ?? 0),
-  }));
+  if (atores.length === 0) return SEM_ATORES;
+  return resultado?.base === atores ? resultado.atores : null;
 }
-
-export const useAtoresComSNA = (atores: Ator[]): AtorComSNA[] =>
-  useMemo(() => calcularAtoresComSNA(atores), [atores]);
 
 interface OpcoesGrafo {
   atores: Ator[];

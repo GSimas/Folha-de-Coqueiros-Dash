@@ -58,6 +58,12 @@ export const TIPOS_EVENTO_VALIDOS = [
 ];
 
 /** Devolve uma cor estável para uma categoria arbitrária. */
+/** Cor estável por tipo de evento (a mesma no painel e no perfil). */
+export function corDoTipoEvento(tipo: string, indice = 0): string {
+  const posicao = TIPOS_EVENTO_VALIDOS.indexOf(tipo);
+  return PALETA_GRAFICOS[(posicao >= 0 ? posicao : indice) % PALETA_GRAFICOS.length];
+}
+
 export function corDaCategoria(categoria: string, indice: number): string {
   const posicao = CATEGORIAS_VALIDAS.indexOf(categoria);
   return PALETA_GRAFICOS[(posicao >= 0 ? posicao : indice) % PALETA_GRAFICOS.length];

@@ -9,6 +9,10 @@
       name="description"
       content="Inteligência de dados territoriais do bairro de Coqueiros: rede de atores (SNA), diagramas de enlace causal e assistente editorial com IA."
     />
+    <!-- O acervo começa a baixar junto com o JS, e não só depois que ele executa
+         (é o que segura o LCP). Mesma URL e modo do fetch em src/lib/data.ts. -->
+    <link rel="preload" href="/data/noticias.json" as="fetch" crossorigin="anonymous" />
+    <link rel="preload" href="/data/atores.json" as="fetch" crossorigin="anonymous" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

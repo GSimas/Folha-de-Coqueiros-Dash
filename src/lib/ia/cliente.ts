@@ -55,11 +55,16 @@ export class ErroIA extends Error {
 const espera = (ms: number, signal?: AbortSignal) =>
   new Promise<void>((resolve, reject) => {
     if (signal?.aborted) return reject(new DOMException('Abortado', 'AbortError'));
-    const timer = setTimeout(resolve, ms);
-    signal?.addEventListener('abort', () => {
+    const aoAbortar = () => {
       clearTimeout(timer);
       reject(new DOMException('Abortado', 'AbortError'));
-    });
+    };
+    // Remove o ouvinte ao terminar a espera: o sinal vive a requisição inteira.
+    const timer = setTimeout(() => {
+      signal?.removeEventListener('abort', aoAbortar);
+      resolve();
+    }, ms);
+    signal?.addEventListener('abort', aoAbortar, { once: true });
   });
 
 /** Remove a chave de qualquer texto vindo do provedor e limita o tamanho. */

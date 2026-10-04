@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { RotateCcw, X } from 'lucide-react';
 import type { Filtros } from '@/types';
 import { corDaCategoria } from '@/lib/constantes';
-import { usePresenca } from '@/lib/motion';
+import { useFocoPreso, usePresenca } from '@/lib/motion';
 
 interface FiltersDrawerProps {
   filtros: Filtros;
@@ -29,6 +29,8 @@ export default function FiltersDrawer({
 }: FiltersDrawerProps) {
   const fundo = usePresenca(aberto, 300);
   const fecharRef = useRef<HTMLButtonElement>(null);
+  const dialogoRef = useRef<HTMLDivElement>(null);
+  useFocoPreso(dialogoRef, aberto);
 
   useEffect(() => {
     if (!aberto) return;
@@ -68,7 +70,8 @@ export default function FiltersDrawer({
         />
       )}
 
-      <aside
+      <div
+        ref={dialogoRef}
         role="dialog"
         aria-modal="true"
         aria-label="Filtros do recorte"
@@ -77,7 +80,7 @@ export default function FiltersDrawer({
                     shadow-[24px_0_60px_-24px_rgb(0_0_0/0.5)] transition-transform duration-500 ease-suave
                     ${aberto ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        <header className="flex items-center justify-between border-b border-line px-5 py-4">
+        <div className="flex items-center justify-between border-b border-line px-5 py-4">
           <div>
             <p className="rotulo">Recorte</p>
             <h2 className="text-lg font-semibold text-ink">
@@ -93,7 +96,7 @@ export default function FiltersDrawer({
           >
             <X size={18} />
           </button>
-        </header>
+        </div>
 
         <div className="flex-1 space-y-7 overflow-y-auto p-5">
           {/* Resumo do recorte ativo */}
@@ -213,7 +216,7 @@ export default function FiltersDrawer({
           </div>
         </div>
 
-        <footer className="flex gap-2 border-t border-line p-4">
+        <div className="flex gap-2 border-t border-line p-4">
           <button type="button" onClick={onLimpar} className="botao-secundario flex-1">
             <RotateCcw size={14} />
             Limpar
@@ -221,8 +224,8 @@ export default function FiltersDrawer({
           <button type="button" onClick={onFechar} className="botao-primario flex-1">
             Ver {totalFiltrado.toLocaleString('pt-BR')} notícias
           </button>
-        </footer>
-      </aside>
+        </div>
+      </div>
     </>
   );
 }

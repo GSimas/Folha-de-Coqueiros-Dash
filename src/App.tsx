@@ -1,15 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import FiltersDrawer from '@/components/FiltersDrawer';
-import MetricsOverview from '@/components/MetricsOverview';
-import WordCloud from '@/components/WordCloud';
-import EventsPanel from '@/components/EventsPanel';
-import NetworkGraph from '@/components/NetworkGraph';
-import CausalDiagram from '@/components/CausalDiagram';
-import ActorsTable from '@/components/ActorsTable';
-import NewsTable from '@/components/NewsTable';
-import ChatbotDrawer from '@/components/ChatbotDrawer';
+import LimiteErro from '@/components/LimiteErro';
+import { carregarChat, carregarPerfil } from '@/lib/precarregar';
+import { ProvedorPerfis, type ContextoPerfis, type Perfil } from '@/lib/perfis';
 import { GithubIcon } from '@/components/SocialIcons';
 import FundoAnimado from '@/components/FundoAnimado';
 import Inicio from '@/pages/Inicio';
@@ -17,8 +12,35 @@ import PaginaModulo from '@/pages/PaginaModulo';
 import { useAtoresComSNA, useGrafoRede } from '@/hooks/useNetworkData';
 import { carregarAcervo, paraISO, type Acervo } from '@/lib/data';
 import { MODULOS, useRota } from '@/lib/rotas';
+import { casaComBusca, palavrasDaConsulta, semAcento } from '@/lib/busca';
 import { useIA } from '@/lib/ia/conexao';
-import type { Filtros, MetricasGerais, TipoRede } from '@/types';
+import type { AtorComSNA, Filtros, MetricasGerais, TipoRede } from '@/types';
+
+// Cada módulo, o perfil e o assistente viram chunks próprios: a página inicial
+// não baixa nem executa vis-network, Recharts, React Flow, TanStack Table nem Markdown.
+const MetricsOverview = lazy(() => import('@/components/MetricsOverview'));
+const WordCloud = lazy(() => import('@/components/WordCloud'));
+const EventsPanel = lazy(() => import('@/components/EventsPanel'));
+const NetworkGraph = lazy(() => import('@/components/NetworkGraph'));
+const CausalDiagram = lazy(() => import('@/components/CausalDiagram'));
+const ActorsTable = lazy(() => import('@/components/ActorsTable'));
+const NewsTable = lazy(() => import('@/components/NewsTable'));
+const ChatbotDrawer = lazy(carregarChat);
+const PerfilModal = lazy(carregarPerfil);
+
+/** Enquanto o chunk do módulo chega: reserva altura para não empurrar o rodapé. */
+function CarregandoModulo() {
+  return (
+    <div className="card flex min-h-[60vh] flex-col items-center justify-center gap-4" role="status">
+      <div className="relative h-px w-48 overflow-hidden bg-line">
+        <div className="absolute inset-y-0 w-1/3 animate-barra-carregando bg-signal" />
+      </div>
+      <p className="text-sm text-muted">Carregando o módulo…</p>
+    </div>
+  );
+}
+
+const SEM_METRICAS: AtorComSNA[] = [];
 
 const FILTROS_INICIAIS: Filtros = {
   dataInicio: '',
@@ -32,7 +54,7 @@ export default function App() {
   const [acervo, setAcervo] = useState<Acervo | null>(null);
   const [erroCarregamento, setErroCarregamento] = useState<string | null>(null);
 
-  const [rota] = useRota();
+  const [rota, navegar] = useRota();
   const [filtros, setFiltros] = useState<Filtros>(FILTROS_INICIAIS);
   const [periodoCompleto, setPeriodoCompleto] = useState({ inicio: '', fim: '' });
   const [tipoRede, setTipoRede] = useState<TipoRede>('atores');
@@ -41,14 +63,35 @@ export default function App() {
   const [filtrosAbertos, setFiltrosAbertos] = useState(false);
 
   const [focarConexao, setFocarConexao] = useState(false);
+  // Perfis abertos em sequência (ator → tema → ator…), para o botão Voltar.
+  const [pilhaPerfis, setPilhaPerfis] = useState<Perfil[]>([]);
+  // Baixado na primeira abertura; depois fica montado para animar a saída.
+  const [perfilMontado, setPerfilMontado] = useState(false);
+  if (pilhaPerfis.length > 0 && !perfilMontado) setPerfilMontado(true);
+  const fecharPerfil = useCallback(() => setPilhaPerfis([]), []);
+  const voltarPerfil = useCallback(() => setPilhaPerfis((pilha) => pilha.slice(0, -1)), []);
+  const abrirPerfil = useCallback(
+    (perfil: Perfil) =>
+      setPilhaPerfis((pilha) => {
+        const topo = pilha[pilha.length - 1];
+        const igual = topo && JSON.stringify(topo) === JSON.stringify(perfil);
+        return igual ? pilha : [...pilha, perfil].slice(-20);
+      }),
+    [],
+  );
   const { acabouDeEntrar, consumirEntrada } = useIA();
 
+  // O assistente só é baixado na primeira abertura e depois fica montado
+  // (a conversa sobrevive ao fechar e reabrir).
+  const [chatMontado, setChatMontado] = useState(false);
   const abrirChat = useCallback(() => {
     setFocarConexao(false);
+    setChatMontado(true);
     setChatAberto(true);
   }, []);
   const abrirConexaoIA = useCallback(() => {
     setFocarConexao(true);
+    setChatMontado(true);
     setChatAberto(true);
   }, []);
   const fecharChat = useCallback(() => setChatAberto(false), []);
@@ -60,6 +103,29 @@ export default function App() {
     abrirConexaoIA();
   }, [acabouDeEntrar, consumirEntrada, abrirConexaoIA]);
   const fecharFiltros = useCallback(() => setFiltrosAbertos(false), []);
+
+  // Busca global do cabeçalho: abre o acervo com o período completo e só o filtro escolhido.
+  const abrirAcervoCom = useCallback(
+    (filtro: Partial<Filtros>) => {
+      setFiltros({ ...FILTROS_INICIAIS, dataInicio: periodoCompleto.inicio, dataFim: periodoCompleto.fim, ...filtro });
+      navegar('acervo');
+    },
+    [periodoCompleto, navegar],
+  );
+  const pesquisar = useCallback(
+    (busca: string) => {
+      setPilhaPerfis([]);
+      abrirAcervoCom({ busca });
+    },
+    [abrirAcervoCom],
+  );
+  const verCategoria = useCallback(
+    (categoria: string) => {
+      setPilhaPerfis([]);
+      abrirAcervoCom({ categorias: [categoria] });
+    },
+    [abrirAcervoCom],
+  );
 
   // --- Carregamento inicial dos datasets ---
   useEffect(() => {
@@ -98,12 +164,16 @@ export default function App() {
   const atores = acervo?.atores ?? [];
 
   // --- Aplicação dos filtros ---
+  // Adiado: digitar na busca dos filtros atualiza o campo na hora; o recorte
+  // (e gráficos/rede que dependem dele) recalcula sem travar a digitação.
+  const filtrosEfetivos = useDeferredValue(filtros);
   const noticiasFiltradas = useMemo(() => {
+    const filtros = filtrosEfetivos;
     if (noticias.length === 0) return [];
 
     const inicio = filtros.dataInicio ? new Date(`${filtros.dataInicio}T00:00:00`) : null;
     const fim = filtros.dataFim ? new Date(`${filtros.dataFim}T23:59:59`) : null;
-    const busca = filtros.busca.trim().toLowerCase();
+    const palavrasBusca = palavrasDaConsulta(filtros.busca);
     const categorias = new Set(filtros.categorias);
 
     return noticias.filter((noticia) => {
@@ -118,14 +188,11 @@ export default function App() {
         if (fim && noticia.dataConvertida > fim) return false;
       }
 
-      if (busca) {
-        const alvo = `${noticia.titulo} ${noticia.conteudo}`.toLowerCase();
-        if (!alvo.includes(busca)) return false;
-      }
+      if (palavrasBusca.length > 0 && !casaComBusca(noticia, palavrasBusca)) return false;
 
       return true;
     });
-  }, [noticias, filtros]);
+  }, [noticias, filtrosEfetivos]);
 
   // --- Métricas do recorte ativo ---
   const metricas: MetricasGerais = useMemo(() => {
@@ -153,15 +220,34 @@ export default function App() {
   }, [noticias]);
 
   // --- SNA ---
-  const atoresComSNA = useAtoresComSNA(atores);
+  // Calculado num Web Worker; `null` enquanto calcula (só a tabela de atores espera).
+  const atoresSNA = useAtoresComSNA(atores);
+  const atoresComSNA = atoresSNA ?? SEM_METRICAS;
   const grafo = useGrafoRede({ atores, noticias: noticiasFiltradas, tipo: tipoRede, topN });
+  const idsPorNome = useMemo(() => {
+    const mapa = new Map<string, number>();
+    for (const a of atores) if (!mapa.has(semAcento(a.nome))) mapa.set(semAcento(a.nome), a.id);
+    return mapa;
+  }, [atores]);
+  const perfis = useMemo<ContextoPerfis>(
+    () => ({
+      abrirAtor: (id) => abrirPerfil({ tipo: 'ator', id }),
+      abrirTema: (termo) => abrirPerfil({ tipo: 'tema', termo }),
+      abrirCategoria: (nome) => abrirPerfil({ tipo: 'categoria', nome }),
+      abrirTipoEvento: (nome) => abrirPerfil({ tipo: 'tipoEvento', nome }),
+      pesquisar,
+      verCategoria,
+      idDoAtor: (nome) => idsPorNome.get(semAcento(nome.trim())),
+    }),
+    [abrirPerfil, pesquisar, verCategoria, idsPorNome],
+  );
 
   // --- Estados de carregamento / erro ---
   if (erroCarregamento) {
     return (
       <div className="flex min-h-screen items-center justify-center p-6">
         <div className="fundo" aria-hidden />
-        <div className="card max-w-md p-8 text-center">
+        <div className="card max-w-md p-8 text-center" role="alert">
           <AlertTriangle size={28} className="mx-auto mb-4 text-rose-500" />
           <h1 className="mb-2 text-lg font-semibold text-ink">Não foi possível carregar o acervo</h1>
           <p className="text-sm text-muted">{erroCarregamento}</p>
@@ -178,7 +264,7 @@ export default function App() {
 
   if (!acervo) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center">
+      <div className="flex min-h-screen flex-col items-center justify-center" role="status" aria-live="polite">
         <div className="fundo" aria-hidden />
         <p className="rotulo mb-4">Folha de Coqueiros</p>
         <div className="relative h-px w-48 overflow-hidden bg-line">
@@ -218,40 +304,62 @@ export default function App() {
         return <MetricsOverview noticias={noticiasFiltradas} metricas={metricas} />;
       case 'temas':
         return (
-          <WordCloud
-            noticias={noticiasFiltradas}
-            onSelecionarTermo={(termo) => setFiltros((atual) => ({ ...atual, busca: termo }))}
-          />
+          <div className="space-y-6">
+            <LimiteErro area="a nuvem de termos">
+              <WordCloud noticias={noticiasFiltradas} />
+            </LimiteErro>
+            <LimiteErro area="o painel de eventos">
+              <EventsPanel noticias={noticiasFiltradas} />
+            </LimiteErro>
+          </div>
         );
-      case 'eventos':
-        return <EventsPanel noticias={noticiasFiltradas} />;
       case 'rede':
         return (
-          <NetworkGraph
-            grafo={grafo}
-            tipo={tipoRede}
-            onMudarTipo={setTipoRede}
-            topN={topN}
-            onMudarTopN={setTopN}
-          />
+          <div className="space-y-6">
+            <LimiteErro area="o grafo de coocorrência" chave={grafo}>
+              <NetworkGraph
+                grafo={grafo}
+                tipo={tipoRede}
+                onMudarTipo={setTipoRede}
+                topN={topN}
+                onMudarTopN={setTopN}
+              />
+            </LimiteErro>
+            <LimiteErro area="a tabela de atores">
+              <ActorsTable atores={atoresSNA} />
+            </LimiteErro>
+          </div>
         );
       case 'causal':
         return <CausalDiagram noticias={noticiasFiltradas} onConectarIA={abrirConexaoIA} />;
-      case 'atores':
-        return <ActorsTable atores={atoresComSNA} />;
       case 'acervo':
         return <NewsTable noticias={noticiasFiltradas} totalAcervo={noticias.length} />;
     }
   };
 
   return (
+    <ProvedorPerfis value={perfis}>
     <div className="relative min-h-screen">
       <div className="fundo" aria-hidden />
       <FundoAnimado />
-      <Navbar rota={rota} onAbrirChat={abrirChat} />
+      {/* Pular para o conteúdo (WCAG 2.4.1): só aparece com foco de teclado. Botão,
+          não âncora: `#conteudo` mudaria a rota do roteamento por hash. */}
+      <button
+        type="button"
+        onClick={() => document.getElementById('conteudo')?.focus()}
+        className="botao-primario fixed left-4 top-3 z-[60] -translate-y-16 focus-visible:translate-y-0"
+      >
+        Pular para o conteúdo
+      </button>
+      <Navbar
+        rota={rota}
+        onAbrirChat={abrirChat}
+        noticias={noticias}
+        atores={atores}
+      />
 
       {/* `key` reinicia a animação de entrada a cada troca de página */}
-      <main key={rota} className="animate-entrada-pagina">
+      <main key={rota} id="conteudo" tabIndex={-1} className="animate-entrada-pagina focus:outline-none">
         {modulo ? (
           <PaginaModulo
             modulo={modulo}
@@ -262,7 +370,9 @@ export default function App() {
             totalFiltrado={noticiasFiltradas.length}
             totalGeral={noticias.length}
           >
-            {conteudoModulo()}
+            <LimiteErro area={`o módulo ${modulo.rotulo}`} chave={rota}>
+              <Suspense fallback={<CarregandoModulo />}>{conteudoModulo()}</Suspense>
+            </LimiteErro>
           </PaginaModulo>
         ) : (
           <Inicio
@@ -329,17 +439,38 @@ export default function App() {
         onFechar={fecharFiltros}
       />
 
-      <ChatbotDrawer
-        aberto={chatAberto}
-        onFechar={fecharChat}
-        focarConexao={focarConexao}
-        acervo={noticias}
-        recorte={noticiasFiltradas}
-        filtros={filtros}
-        periodoCompleto={periodoCompleto}
-        metricas={metricas}
-        atores={atoresComSNA}
-      />
+      {perfilMontado && (
+        <LimiteErro area="o perfil" chave={pilhaPerfis}>
+          <Suspense fallback={null}>
+            <PerfilModal
+              pilha={pilhaPerfis}
+              atores={atoresComSNA}
+              noticias={noticias}
+              onVoltar={voltarPerfil}
+              onFechar={fecharPerfil}
+            />
+          </Suspense>
+        </LimiteErro>
+      )}
+
+      {chatMontado && (
+        <LimiteErro area="o assistente">
+          <Suspense fallback={null}>
+            <ChatbotDrawer
+              aberto={chatAberto}
+              onFechar={fecharChat}
+              focarConexao={focarConexao}
+              acervo={noticias}
+              recorte={noticiasFiltradas}
+              filtros={filtrosEfetivos}
+              periodoCompleto={periodoCompleto}
+              metricas={metricas}
+              atores={atoresComSNA}
+            />
+          </Suspense>
+        </LimiteErro>
+      )}
     </div>
+    </ProvedorPerfis>
   );
 }

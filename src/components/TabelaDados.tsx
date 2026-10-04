@@ -1,13 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react';
-import { createPortal } from 'react-dom';
+import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -25,17 +16,10 @@ import {
   type SortingFn,
   type SortingState,
 } from '@tanstack/react-table';
-import {
-  ArrowDown,
-  ArrowUp,
-  ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
-  Filter,
-  Search,
-  X,
-} from 'lucide-react';
-import { usePresenca } from '@/lib/motion';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Filter, Search, X } from 'lucide-react';
+import Popover from './Popover';
+import MenuBaixar from './MenuBaixar';
+import { baixarTabela, type ValorCelula } from '@/lib/exportar';
 
 /**
  * Tabela de dados com ordenação e filtro por coluna, usada em todo o app.
@@ -89,8 +73,7 @@ const filtroData: FilterFn<unknown> = (linha, id, [inicio, fim]: Periodo) => {
   if (!valor) return false;
   const t = valor.getTime();
   return (
-    (!inicio || t >= new Date(`${inicio}T00:00:00`).getTime()) &&
-    (!fim || t <= new Date(`${fim}T23:59:59`).getTime())
+    (!inicio || t >= new Date(`${inicio}T00:00:00`).getTime()) && (!fim || t <= new Date(`${fim}T23:59:59`).getTime())
   );
 };
 
@@ -113,78 +96,22 @@ const FILTROS: Record<TipoColuna, FilterFn<unknown>> = {
 };
 
 const ordenarTexto: SortingFn<unknown> = (a, b, id) =>
-  comoLista(a.getValue(id)).join(', ').localeCompare(comoLista(b.getValue(id)).join(', '), 'pt-BR', {
-    sensitivity: 'base',
-    numeric: true,
-  });
+  comoLista(a.getValue(id))
+    .join(', ')
+    .localeCompare(comoLista(b.getValue(id)).join(', '), 'pt-BR', {
+      sensitivity: 'base',
+      numeric: true,
+    });
 
-// --- Popover de filtro (portal: escapa do overflow da tabela) ---------------
-
-function PopoverFiltro({
-  ancora,
-  aberto,
-  onFechar,
-  children,
+function CampoNumero({
+  valor,
+  placeholder,
+  onMudar,
 }: {
-  ancora: HTMLElement | null;
-  aberto: boolean;
-  onFechar: () => void;
-  children: ReactNode;
+  valor?: number;
+  placeholder: string;
+  onMudar: (v?: number) => void;
 }) {
-  const { montado, visivel } = usePresenca(aberto, 180);
-  const painelRef = useRef<HTMLDivElement>(null);
-  const [posicao, setPosicao] = useState({ top: 0, left: 0 });
-
-  const posicionar = useCallback(() => {
-    if (!ancora) return;
-    const caixa = ancora.getBoundingClientRect();
-    const largura = painelRef.current?.offsetWidth ?? 280;
-    const left = Math.min(Math.max(8, caixa.left), window.innerWidth - largura - 8);
-    setPosicao({ top: caixa.bottom + 6, left });
-  }, [ancora]);
-
-  useLayoutEffect(() => {
-    if (montado) posicionar();
-  }, [montado, posicionar]);
-
-  useEffect(() => {
-    if (!aberto) return;
-    const aoClicar = (evento: PointerEvent) => {
-      const alvo = evento.target as Node;
-      if (!painelRef.current?.contains(alvo) && !ancora?.contains(alvo)) onFechar();
-    };
-    const aoTeclar = (evento: KeyboardEvent) => {
-      if (evento.key === 'Escape') onFechar();
-    };
-    const aoRolar = () => requestAnimationFrame(posicionar);
-    document.addEventListener('pointerdown', aoClicar);
-    document.addEventListener('keydown', aoTeclar);
-    window.addEventListener('scroll', aoRolar, true);
-    window.addEventListener('resize', aoRolar);
-    return () => {
-      document.removeEventListener('pointerdown', aoClicar);
-      document.removeEventListener('keydown', aoTeclar);
-      window.removeEventListener('scroll', aoRolar, true);
-      window.removeEventListener('resize', aoRolar);
-    };
-  }, [aberto, ancora, onFechar, posicionar]);
-
-  if (!montado) return null;
-  return createPortal(
-    <div
-      ref={painelRef}
-      role="dialog"
-      style={{ top: posicao.top, left: posicao.left }}
-      className={`fixed z-[70] w-72 origin-top-left border border-line bg-elevated p-3 text-left normal-case tracking-normal shadow-[0_24px_60px_-20px_rgb(0_0_0/0.55)]
-                  transition duration-200 ease-suave ${visivel ? 'translate-y-0 scale-100 opacity-100' : '-translate-y-1 scale-[0.97] opacity-0'}`}
-    >
-      {children}
-    </div>,
-    document.body,
-  );
-}
-
-function CampoNumero({ valor, placeholder, onMudar }: { valor?: number; placeholder: string; onMudar: (v?: number) => void }) {
   return (
     <input
       type="number"
@@ -233,11 +160,19 @@ function ConteudoFiltro<T>({ coluna, linhasBase }: { coluna: Column<T, unknown>;
       <div className="grid grid-cols-2 gap-2">
         <label>
           <span className="etiqueta">Mínimo</span>
-          <CampoNumero valor={min} placeholder={limiteMin != null ? String(limiteMin) : ''} onMudar={(v) => coluna.setFilterValue([v, max])} />
+          <CampoNumero
+            valor={min}
+            placeholder={limiteMin != null ? String(limiteMin) : ''}
+            onMudar={(v) => coluna.setFilterValue([v, max])}
+          />
         </label>
         <label>
           <span className="etiqueta">Máximo</span>
-          <CampoNumero valor={max} placeholder={limiteMax != null ? String(limiteMax) : ''} onMudar={(v) => coluna.setFilterValue([min, v])} />
+          <CampoNumero
+            valor={max}
+            placeholder={limiteMax != null ? String(limiteMax) : ''}
+            onMudar={(v) => coluna.setFilterValue([min, v])}
+          />
         </label>
       </div>
     );
@@ -249,11 +184,23 @@ function ConteudoFiltro<T>({ coluna, linhasBase }: { coluna: Column<T, unknown>;
       <div className="grid grid-cols-2 gap-2">
         <label>
           <span className="etiqueta">De</span>
-          <input type="date" className="campo py-1.5 text-xs" value={inicio ?? ''} max={fim} onChange={(e) => coluna.setFilterValue([e.target.value || undefined, fim])} />
+          <input
+            type="date"
+            className="campo py-1.5 text-xs"
+            value={inicio ?? ''}
+            max={fim}
+            onChange={(e) => coluna.setFilterValue([e.target.value || undefined, fim])}
+          />
         </label>
         <label>
           <span className="etiqueta">Até</span>
-          <input type="date" className="campo py-1.5 text-xs" value={fim ?? ''} min={inicio} onChange={(e) => coluna.setFilterValue([inicio, e.target.value || undefined])} />
+          <input
+            type="date"
+            className="campo py-1.5 text-xs"
+            value={fim ?? ''}
+            min={inicio}
+            onChange={(e) => coluna.setFilterValue([inicio, e.target.value || undefined])}
+          />
         </label>
       </div>
     );
@@ -284,7 +231,10 @@ function ConteudoFiltro<T>({ coluna, linhasBase }: { coluna: Column<T, unknown>;
       <ul className="max-h-60 space-y-px overflow-y-auto">
         {visiveis.map(([opcao, total]) => (
           <li key={opcao}>
-            <label data-brilho="" className="flex cursor-pointer items-center gap-2 rounded-sm px-1.5 py-1 text-xs text-muted transition hover:bg-signal/5 hover:text-ink">
+            <label
+              data-brilho=""
+              className="flex cursor-pointer items-center gap-2 rounded-sm px-1.5 py-1 text-xs text-muted transition hover:bg-signal/5 hover:text-ink"
+            >
               <input
                 type="checkbox"
                 checked={selecionadas.includes(opcao)}
@@ -304,7 +254,15 @@ function ConteudoFiltro<T>({ coluna, linhasBase }: { coluna: Column<T, unknown>;
   );
 }
 
-function CabecalhoColuna<T>({ coluna, linhasBase, rotulo }: { coluna: Column<T, unknown>; linhasBase: T[]; rotulo: ReactNode }) {
+function CabecalhoColuna<T>({
+  coluna,
+  linhasBase,
+  rotulo,
+}: {
+  coluna: Column<T, unknown>;
+  linhasBase: T[];
+  rotulo: ReactNode;
+}) {
   const [aberto, setAberto] = useState(false);
   const botaoRef = useRef<HTMLButtonElement>(null);
   const fechar = useCallback(() => setAberto(false), []);
@@ -313,7 +271,9 @@ function CabecalhoColuna<T>({ coluna, linhasBase, rotulo }: { coluna: Column<T, 
   const alinhar = coluna.columnDef.meta?.alinhar;
 
   return (
-    <div className={`flex items-center gap-1 ${alinhar === 'direita' ? 'justify-end' : alinhar === 'centro' ? 'justify-center' : ''}`}>
+    <div
+      className={`flex items-center gap-1 ${alinhar === 'direita' ? 'justify-end' : alinhar === 'centro' ? 'justify-center' : ''}`}
+    >
       {coluna.getCanSort() ? (
         <button
           type="button"
@@ -348,17 +308,26 @@ function CabecalhoColuna<T>({ coluna, linhasBase, rotulo }: { coluna: Column<T, 
           >
             <Filter size={11} className={filtrada ? 'fill-current' : ''} />
           </button>
-          <PopoverFiltro ancora={botaoRef.current} aberto={aberto} onFechar={fechar}>
+          <Popover
+            ancora={botaoRef.current}
+            aberto={aberto}
+            onFechar={fechar}
+            rotulo={`Filtrar ${typeof rotulo === 'string' ? rotulo : coluna.id}`}
+          >
             <div className="mb-2.5 flex items-center justify-between">
               <span className="rotulo">Filtrar · {rotulo}</span>
               {filtrada && (
-                <button type="button" onClick={() => coluna.setFilterValue(undefined)} className="rounded-sm text-xs text-signal">
+                <button
+                  type="button"
+                  onClick={() => coluna.setFilterValue(undefined)}
+                  className="rounded-sm text-xs text-signal"
+                >
                   Limpar
                 </button>
               )}
             </div>
             <ConteudoFiltro coluna={coluna} linhasBase={linhasBase} />
-          </PopoverFiltro>
+          </Popover>
         </>
       )}
     </div>
@@ -386,6 +355,8 @@ interface TabelaDadosProps<T> {
   alturaMaxima?: string;
   /** Versão compacta, para tabelas dentro do chat. */
   compacta?: boolean;
+  /** Base do nome do arquivo exportado (padrão: o rótulo dos itens). */
+  nomeArquivo?: string;
 }
 
 export default function TabelaDados<T>({
@@ -399,6 +370,7 @@ export default function TabelaDados<T>({
   larguraMinima = '',
   alturaMaxima = '',
   compacta = false,
+  nomeArquivo,
 }: TabelaDadosProps<T>) {
   const [ordenacao, setOrdenacao] = useState<SortingState>(ordenacaoInicial);
   const [filtros, setFiltros] = useState<ColumnFiltersState>([]);
@@ -411,7 +383,8 @@ export default function TabelaDados<T>({
         const tipo = c.meta?.tipo ?? 'texto';
         return {
           filterFn: FILTROS[tipo] as FilterFn<T>,
-          sortingFn: (tipo === 'numero' ? 'basic' : tipo === 'data' ? 'datetime' : ordenarTexto) as SortingFn<T> | 'basic' | 'datetime',
+          sortingFn: (tipo === 'numero' ? 'basic' : tipo === 'data' ? 'datetime' : ordenarTexto) as
+            SortingFn<T> | 'basic' | 'datetime',
           sortUndefined: 'last' as const,
           sortDescFirst: tipo === 'numero' || tipo === 'data',
           ...c,
@@ -440,6 +413,22 @@ export default function TabelaDados<T>({
   });
 
   const totalFiltrado = tabela.getFilteredRowModel().rows.length;
+
+  // Exporta o que está na tela: filtros e ordenação aplicados, todas as páginas,
+  // com os valores brutos (números como números, datas como datas).
+  const exportar = (formato: 'csv' | 'xlsx') => {
+    const colunasVisiveis = tabela.getVisibleLeafColumns();
+    baixarTabela(
+      {
+        cabecalhos: colunasVisiveis.map((c) => (typeof c.columnDef.header === 'string' ? c.columnDef.header : c.id)),
+        linhas: tabela
+          .getPrePaginationRowModel()
+          .rows.map((linha) => colunasVisiveis.map((c) => linha.getValue(c.id) as ValorCelula)),
+      },
+      formato,
+      nomeArquivo ?? rotuloItens,
+    );
+  };
   const filtrosAtivos = filtros.length + (busca ? 1 : 0);
   const { pageIndex, pageSize } = tabela.getState().pagination;
   const celula = compacta ? 'px-3 py-1.5' : 'px-4 py-3';
@@ -447,40 +436,45 @@ export default function TabelaDados<T>({
 
   return (
     <div>
-      {/* Na versão compacta (chat), a barra só aparece quando há filtro ativo. */}
-      {(titulo || buscaGlobal || !compacta || filtrosAtivos > 0) && (
-        <div className={`flex flex-wrap items-center gap-3 border-b border-line ${compacta ? 'px-3 py-2' : 'px-5 py-3'}`}>
-          {titulo && <div className="mr-auto">{titulo}</div>}
-          {buscaGlobal && (
-            <div className="relative w-full sm:w-64">
-              <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
-              <input
-                type="search"
-                value={busca}
-                onChange={(e) => setBusca(e.target.value)}
-                placeholder={buscaGlobal.placeholder}
-                className="campo py-1.5 pl-9"
-              />
-            </div>
-          )}
-          <span className={`rotulo ${titulo ? '' : 'mr-auto'}`}>
-            <span className="text-ink">{totalFiltrado.toLocaleString('pt-BR')}</span>
-            {totalFiltrado !== dados.length && <> de {dados.length.toLocaleString('pt-BR')}</>} {rotuloItens}
-          </span>
-          {filtrosAtivos > 0 && (
-            <button
-              type="button"
-              onClick={() => {
-                setFiltros([]);
-                setBusca('');
-              }}
-              className="inline-flex animate-fade-in items-center gap-1 rounded-sm border border-signal/30 bg-signal/10 px-2 py-0.5 text-xs text-signal transition hover:border-signal/60"
-            >
-              <X size={11} /> Limpar {filtrosAtivos} {filtrosAtivos === 1 ? 'filtro' : 'filtros'}
-            </button>
-          )}
-        </div>
-      )}
+      <div className={`flex flex-wrap items-center gap-3 border-b border-line ${compacta ? 'px-3 py-2' : 'px-5 py-3'}`}>
+        {titulo && <div className="mr-auto">{titulo}</div>}
+        {buscaGlobal && (
+          <div className="relative w-full sm:w-64">
+            <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
+            <input
+              type="search"
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              placeholder={buscaGlobal.placeholder}
+              className="campo py-1.5 pl-9"
+            />
+          </div>
+        )}
+        <span className={`rotulo ${titulo ? '' : 'mr-auto'}`}>
+          <span className="text-ink">{totalFiltrado.toLocaleString('pt-BR')}</span>
+          {totalFiltrado !== dados.length && <> de {dados.length.toLocaleString('pt-BR')}</>} {rotuloItens}
+        </span>
+        {filtrosAtivos > 0 && (
+          <button
+            type="button"
+            onClick={() => {
+              setFiltros([]);
+              setBusca('');
+            }}
+            className="inline-flex animate-fade-in items-center gap-1 rounded-sm border border-signal/30 bg-signal/10 px-2 py-0.5 text-xs text-signal transition hover:border-signal/60"
+          >
+            <X size={11} /> Limpar {filtrosAtivos} {filtrosAtivos === 1 ? 'filtro' : 'filtros'}
+          </button>
+        )}
+        <MenuBaixar
+          rotulo="Baixar tabela"
+          className="-my-1"
+          opcoes={[
+            { rotulo: 'CSV', detalhe: 'Texto separado por ponto e vírgula', acao: () => exportar('csv') },
+            { rotulo: 'Excel (XLSX)', detalhe: 'Planilha com filtros e cabeçalho fixo', acao: () => exportar('xlsx') },
+          ]}
+        />
+      </div>
 
       <div className={`overflow-auto ${alturaMaxima}`}>
         <table className={`w-full text-sm ${larguraMinima}`}>
@@ -490,6 +484,14 @@ export default function TabelaDados<T>({
                 {grupo.headers.map((cabecalho) => (
                   <th
                     key={cabecalho.id}
+                    scope="col"
+                    aria-sort={
+                      cabecalho.column.getIsSorted() === 'asc'
+                        ? 'ascending'
+                        : cabecalho.column.getIsSorted() === 'desc'
+                          ? 'descending'
+                          : undefined
+                    }
                     className={`rotulo whitespace-nowrap font-normal ${celula} ${alinhamento(cabecalho.column.columnDef.meta?.alinhar)}`}
                   >
                     {cabecalho.isPlaceholder ? null : (

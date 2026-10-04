@@ -1,15 +1,20 @@
 import { useCallback, useRef, useState } from 'react';
 import { Menu, Sparkles, X } from 'lucide-react';
 import SettingsMenu from './SettingsMenu';
-import { MODULOS, hrefDe, type Rota } from '@/lib/rotas';
+import BuscaGlobal from './BuscaGlobal';
+import { carregarChat } from '@/lib/precarregar';
+import type { Ator, Noticia } from '@/types';
+import { MODULOS_VISIVEIS as MODULOS, hrefDe, type Rota } from '@/lib/rotas';
 import { useDispensar, usePresenca } from '@/lib/motion';
 
 interface NavbarProps {
   rota: Rota;
   onAbrirChat: () => void;
+  noticias: Noticia[];
+  atores: Ator[];
 }
 
-export default function Navbar({ rota, onAbrirChat }: NavbarProps) {
+export default function Navbar({ rota, onAbrirChat, noticias, atores }: NavbarProps) {
   const [menuAberto, setMenuAberto] = useState(false);
   const { montado, visivel } = usePresenca(menuAberto, 260);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -64,9 +69,18 @@ export default function Navbar({ rota, onAbrirChat }: NavbarProps) {
         </nav>
 
         <div className="ml-auto flex items-center gap-1.5">
+          <BuscaGlobal noticias={noticias} atores={atores} />
           <SettingsMenu />
 
-          <button type="button" onClick={onAbrirChat} className="botao-primario ml-1 px-3 sm:px-4">
+          <button
+            type="button"
+            onClick={onAbrirChat}
+            // Intenção de abrir: baixa o chunk do assistente antes do clique.
+            onPointerEnter={carregarChat}
+            onFocus={carregarChat}
+            aria-label="Assistente de IA"
+            className="botao-primario ml-1 px-3 sm:px-4"
+          >
             <Sparkles size={15} />
             <span className="hidden sm:inline">Assistente</span>
           </button>

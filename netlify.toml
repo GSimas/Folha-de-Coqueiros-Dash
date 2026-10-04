@@ -14,6 +14,13 @@
   to = "/index.html"
   status = 200
 
+# Assets do Vite têm hash no nome: um arquivo novo a cada mudança, então podem
+# ficar em cache para sempre. (O Netlify já entrega brotli/gzip automaticamente.)
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 [[headers]]
   for = "/data/*"
   [headers.values]

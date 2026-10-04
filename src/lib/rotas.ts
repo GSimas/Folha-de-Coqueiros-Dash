@@ -1,18 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
   BarChart3,
-  CalendarDays,
   Cloud,
   Database,
   Network,
-  Users,
   Workflow,
   type LucideIcon,
 } from 'lucide-react';
 
 /** Roteamento por hash (`#/rede`): sem dependência e compatível com hospedagem estática. */
 
-export type Rota = 'inicio' | 'panorama' | 'temas' | 'eventos' | 'rede' | 'causal' | 'atores' | 'acervo';
+export type Rota = 'inicio' | 'panorama' | 'temas' | 'rede' | 'causal' | 'acervo';
 
 export interface Modulo {
   rota: Exclude<Rota, 'inicio'>;
@@ -25,6 +23,8 @@ export interface Modulo {
   Icone: LucideIcon;
   /** Se o conteúdo responde aos filtros do recorte. */
   usaFiltros: boolean;
+  /** Fora da navegação; continua acessível pelo endereço direto. */
+  oculto?: boolean;
 }
 
 export const MODULOS: Modulo[] = [
@@ -43,28 +43,18 @@ export const MODULOS: Modulo[] = [
     indice: '02',
     rotulo: 'Temas',
     titulo: 'O que o bairro',
-    destaque: 'comenta.',
-    descricao: 'Os termos mais recorrentes nas matérias. Clique em um para filtrar o recorte.',
+    destaque: 'comenta e agenda.',
+    descricao: 'Os termos mais recorrentes e a agenda de eventos identificada pela IA: tipos, gratuidade e datas.',
     Icone: Cloud,
     usaFiltros: true,
   },
   {
-    rota: 'eventos',
-    indice: '03',
-    rotulo: 'Eventos',
-    titulo: 'Agenda do',
-    destaque: 'território.',
-    descricao: 'Eventos identificados pela IA: tipos, gratuidade e a agenda completa.',
-    Icone: CalendarDays,
-    usaFiltros: true,
-  },
-  {
     rota: 'rede',
-    indice: '04',
+    indice: '03',
     rotulo: 'Rede',
     titulo: 'Rede de',
     destaque: 'relações.',
-    descricao: 'Quem aparece junto com quem nas notícias — atores ou palavras-chave.',
+    descricao: 'Quem aparece junto com quem nas notícias e o banco de atores, com métricas de centralidade.',
     Icone: Network,
     usaFiltros: true,
   },
@@ -77,20 +67,11 @@ export const MODULOS: Modulo[] = [
     descricao: 'A IA lê o recorte e desenha cadeias de causa e efeito no bairro.',
     Icone: Workflow,
     usaFiltros: true,
-  },
-  {
-    rota: 'atores',
-    indice: '06',
-    rotulo: 'Atores',
-    titulo: 'Banco de',
-    destaque: 'atores.',
-    descricao: 'Pessoas, organizações, locais e empresas, com métricas de centralidade.',
-    Icone: Users,
-    usaFiltros: false,
+    oculto: true,
   },
   {
     rota: 'acervo',
-    indice: '07',
+    indice: '04',
     rotulo: 'Acervo',
     titulo: 'Acervo',
     destaque: 'completo.',
@@ -100,8 +81,14 @@ export const MODULOS: Modulo[] = [
   },
 ];
 
+/** Módulos exibidos na navegação, na página inicial e no "próximo módulo". */
+export const MODULOS_VISIVEIS = MODULOS.filter((m) => !m.oculto);
+
 function rotaDoHash(): Rota {
-  const nome = window.location.hash.replace(/^#\/?/, '');
+  let nome = window.location.hash.replace(/^#\/?/, '');
+  // Links antigos de páginas que foram incorporadas a outras.
+  if (nome === 'atores') nome = 'rede';
+  if (nome === 'eventos') nome = 'temas';
   return MODULOS.some((m) => m.rota === nome) ? (nome as Rota) : 'inicio';
 }
 

@@ -5,6 +5,8 @@ import { Camera, Crosshair, Search } from 'lucide-react';
 import type { GrafoSNA, TipoRede } from '@/types';
 import { COR_POR_TIPO } from '@/lib/constantes';
 import { useCoresGrafico, type CoresGrafico } from '@/lib/preferencias';
+import { usePerfis } from '@/lib/perfis';
+import { BaixarGrafico } from './MenuBaixar';
 
 /** Nó do vis estendido com o tipo do ator, usado pelo filtro da legenda. */
 interface NoVis extends Node {
@@ -68,17 +70,19 @@ const opcoesVis = (c: CoresGrafico): Options => ({
   },
 });
 
-export default function NetworkGraph({
-  grafo,
-  tipo,
-  onMudarTipo,
-  topN,
-  onMudarTopN,
-}: NetworkGraphProps) {
+export default function NetworkGraph({ grafo, tipo, onMudarTipo, topN, onMudarTopN }: NetworkGraphProps) {
+  const { abrirAtor, abrirTema, idDoAtor } = usePerfis();
   const cores = useCoresGrafico();
   const containerRef = useRef<HTMLDivElement>(null);
   const redeRef = useRef<Network | null>(null);
   const nosRef = useRef<DataSet<NoVis> | null>(null);
+  // Clique no nó abre o perfil (ator ou tema). Ref: trocar o callback não recria a rede.
+  const aoSelecionar = useRef<(id: string) => void>(() => {});
+  aoSelecionar.current = (id) => {
+    if (tipo === 'palavras-chave') return abrirTema(id);
+    const idAtor = idDoAtor(id);
+    if (idAtor !== undefined) abrirAtor(idAtor);
+  };
 
   const [estabilizando, setEstabilizando] = useState(true);
   const [busca, setBusca] = useState('');
@@ -134,6 +138,21 @@ export default function NetworkGraph({
     return { nos: nosVis, arestas: arestasVis };
   }, [grafo, cores]);
 
+  const resumoGrafo = useMemo(() => {
+    if (!grafo || grafo.nos.length === 0) return '';
+    const maisConectados = [...grafo.nos]
+      .sort((x, y) => y.grau - x.grau)
+      .slice(0, 5)
+      .map((no) => `${no.label} (${no.grau} conexões)`)
+      .join(', ');
+    const oQue = tipo === 'atores' ? 'atores' : 'palavras-chave';
+    return (
+      `Grafo de coocorrência com ${grafo.nos.length} ${oQue} e ${grafo.arestas.length} conexões. ` +
+      `Mais conectados: ${maisConectados}.` +
+      (tipo === 'atores' ? ' A tabela de atores abaixo traz todos os dados em formato navegável.' : '')
+    );
+  }, [grafo, tipo]);
+
   // --- Ciclo de vida da instância vis-network ---
   useEffect(() => {
     const container = containerRef.current;
@@ -169,10 +188,12 @@ export default function NetworkGraph({
       );
     });
 
+    rede.on('click', (params: { nodes: string[] }) => {
+      if (params.nodes.length > 0) aoSelecionar.current(String(params.nodes[0]));
+    });
+
     rede.on('blurNode', () => {
-      conjuntoNos.update(
-        conjuntoNos.get().map((no) => ({ id: no.id, opacity: 1 })) as NoVis[],
-      );
+      conjuntoNos.update(conjuntoNos.get().map((no) => ({ id: no.id, opacity: 1 })) as NoVis[]);
     });
 
     return () => {
@@ -227,41 +248,15 @@ export default function NetworkGraph({
     redeRef.current?.fit({ animation: { duration: 700, easingFunction: 'easeInOutQuad' } });
   }, []);
 
-  /**
-   * Exporta o canvas em PNG. O canvas do vis já é renderizado em resolução de
-   * dispositivo (2x em telas retina), então basta preservar suas dimensões
-   * nativas e pintar o fundo do tema por baixo.
-   */
-  const baixarPNG = useCallback(() => {
-    const canvas = containerRef.current?.querySelector('canvas');
-    if (!canvas) return;
-
-    const temporario = document.createElement('canvas');
-    temporario.width = canvas.width;
-    temporario.height = canvas.height;
-
-    const contexto = temporario.getContext('2d');
-    if (!contexto) return;
-
-    contexto.fillStyle = cores.surface;
-    contexto.fillRect(0, 0, temporario.width, temporario.height);
-    contexto.drawImage(canvas, 0, 0);
-
-    const link = document.createElement('a');
-    link.download = `rede-coqueiros-${tipo}-${new Date().toISOString().slice(0, 10)}.png`;
-    link.href = temporario.toDataURL('image/png');
-    link.click();
-  }, [tipo, cores]);
-
   const semDados = !grafo || grafo.nos.length === 0;
 
   return (
     <section className="card overflow-hidden">
       {/* Cabeçalho com os controles de recorte */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-2.5">
-        <h3 className="rotulo">
+        <h2 className="rotulo">
           <span className="text-signal">A</span> · Grafo de coocorrência
-        </h3>
+        </h2>
 
         <div className="flex flex-wrap items-center gap-5">
           <div className="segmentado">
@@ -300,12 +295,11 @@ export default function NetworkGraph({
       </div>
 
       {semDados ? (
-        <p className="vazio py-24">
-          Não há dados suficientes para renderizar este grafo no recorte atual.
-        </p>
+        <p className="vazio py-24">Não há dados suficientes para renderizar este grafo no recorte atual.</p>
       ) : (
         <div className="relative h-[640px] w-full">
-          <div ref={containerRef} className="h-full w-full" />
+          {/* O canvas é invisível a leitores de tela: um resumo textual o substitui. */}
+          <div ref={containerRef} className="h-full w-full" role="img" aria-label={resumoGrafo} />
 
           {/* Painel flutuante de controle */}
           <div className="absolute left-4 top-4 w-60 border border-line bg-elevated/90 p-4 shadow-[0_24px_60px_-24px_rgb(0_0_0/0.5)] backdrop-blur-xl">
@@ -341,10 +335,7 @@ export default function NetworkGraph({
             )}
 
             <div className="relative">
-              <Search
-                size={14}
-                className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-faint"
-              />
+              <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-faint" />
               <input
                 type="search"
                 value={busca}
@@ -358,12 +349,28 @@ export default function NetworkGraph({
               <Crosshair size={13} /> Centralizar
             </button>
 
-            <button type="button" onClick={baixarPNG} className="botao-primario mt-1.5 w-full py-1.5 text-xs">
-              <Camera size={13} /> Salvar imagem
-            </button>
+            <BaixarGrafico
+              alvo={containerRef}
+              nome={`rede-coqueiros-${tipo}`}
+              titulo={`Rede de coocorrência — ${tipo === 'atores' ? 'atores' : 'palavras-chave'} (top ${grafo?.nos.length ?? 0})`}
+              legenda={
+                tipo === 'atores'
+                  ? LEGENDA.filter(({ tipo: t }) => !tiposOcultos.has(t)).map(({ tipo: t, rotulo }) => ({
+                      nome: rotulo,
+                      cor: COR_POR_TIPO[t],
+                    }))
+                  : undefined
+              }
+              className="botao-primario mt-1.5 w-full py-1.5 text-xs"
+              conteudo={
+                <>
+                  <Camera size={13} aria-hidden /> Salvar imagem
+                </>
+              }
+            />
 
             <p className="mt-3 text-[0.6875rem] leading-relaxed text-faint">
-              Passe o cursor sobre um nó para isolar sua vizinhança e ver as métricas de SNA.
+              Passe o cursor sobre um nó para isolar sua vizinhança; clique para abrir o perfil.
             </p>
           </div>
 

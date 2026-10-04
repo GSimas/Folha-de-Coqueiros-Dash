@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { ArrowLeft, ArrowRight, SlidersHorizontal, X } from 'lucide-react';
 import type { Filtros } from '@/types';
-import { MODULOS, hrefDe, type Modulo } from '@/lib/rotas';
+import { MODULOS_VISIVEIS as MODULOS, hrefDe, type Modulo } from '@/lib/rotas';
 
 interface PaginaModuloProps {
   modulo: Modulo;

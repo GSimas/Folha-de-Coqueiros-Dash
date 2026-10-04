@@ -1,21 +1,27 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import type { Noticia } from '@/types';
 import { contarPalavras } from '@/lib/data';
 import { Revelar } from '@/lib/motion';
+import { usePerfis } from '@/lib/perfis';
+import { BaixarGrafico } from './MenuBaixar';
 
 interface WordCloudProps {
   noticias: Noticia[];
-  /** Chamado ao clicar em um termo — alimenta a busca livre. */
-  onSelecionarTermo?: (termo: string) => void;
 }
 
 // Em rem, para acompanhar a preferência de tamanho de fonte.
 const TAMANHO_MIN = 0.75;
 const TAMANHO_MAX = 3;
 
-export default function WordCloud({ noticias, onSelecionarTermo }: WordCloudProps) {
+export default function WordCloud({ noticias }: WordCloudProps) {
+  const { abrirTema } = usePerfis();
+  const nuvemRef = useRef<HTMLDivElement>(null);
   const palavras = useMemo(
-    () => contarPalavras(noticias.map((n) => n.conteudo), 100),
+    () =>
+      contarPalavras(
+        noticias.map((n) => n.conteudo),
+        100,
+      ),
     [noticias],
   );
 
@@ -43,14 +49,21 @@ export default function WordCloud({ noticias, onSelecionarTermo }: WordCloudProp
   return (
     <>
       <Revelar className="card">
-        <h3 className="card-titulo">
+        <h2 className="card-titulo">
           <span className="text-signal">A</span> · Nuvem de termos
           <span className="ml-auto normal-case tracking-normal text-faint">
-            top {palavras.length} · clique para filtrar
+            top {palavras.length} · clique para ver o perfil
           </span>
-        </h3>
+          <span className="-my-2">
+            <BaixarGrafico alvo={nuvemRef} nome="nuvem-de-termos" titulo="O que o bairro comenta — nuvem de termos" />
+          </span>
+        </h2>
 
-        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 px-6 py-10">
+        <div
+          ref={nuvemRef}
+          data-exportar-texto
+          className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 px-6 py-10"
+        >
           {dispostas.map(([palavra, contagem], i) => {
             const relativo = (contagem - minimo) / (maximo - minimo || 1);
             const tamanho = TAMANHO_MIN + relativo * (TAMANHO_MAX - TAMANHO_MIN);
@@ -59,8 +72,9 @@ export default function WordCloud({ noticias, onSelecionarTermo }: WordCloudProp
               <button
                 key={palavra}
                 type="button"
-                onClick={() => onSelecionarTermo?.(palavra)}
-                title={`${palavra} — ${contagem} ocorrências`}
+                data-palavra
+                onClick={() => abrirTema(palavra)}
+                title={`${palavra} — ${contagem} ocorrências · abrir perfil`}
                 className="inline-block animate-fade-in rounded-sm px-1 leading-tight tracking-tight transition duration-300 hover:!text-signal hover:[text-shadow:0_0_24px_rgb(var(--signal)/0.6)]"
                 style={{
                   fontSize: `${tamanho}rem`,
@@ -84,7 +98,7 @@ export default function WordCloud({ noticias, onSelecionarTermo }: WordCloudProp
             <li key={palavra} className="bg-surface">
               <button
                 type="button"
-                onClick={() => onSelecionarTermo?.(palavra)}
+                onClick={() => abrirTema(palavra)}
                 className="group flex h-full w-full flex-col p-5 text-left"
               >
                 <span className="rotulo">

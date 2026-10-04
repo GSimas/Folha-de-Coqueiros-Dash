@@ -162,7 +162,7 @@ function TabelaMarkdown({ no, urlsVerificadas }: { no?: NoHast; urlsVerificadas?
 
   return (
     <div className="overflow-hidden rounded-sm border border-line">
-      <TabelaDados dados={linhas} colunas={colunas} rotuloItens="linhas" porPagina={null} compacta />
+      <TabelaDados dados={linhas} colunas={colunas} rotuloItens="linhas" nomeArquivo="tabela-do-assistente" porPagina={null} compacta />
     </div>
   );
 }

@@ -146,3 +146,49 @@ export function ligarIluminacao() {
   };
   document.addEventListener('pointermove', aoMover, { passive: true });
 }
+
+const FOCAVEIS =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+/**
+ * Diálogo modal acessível: com ele aberto, Tab/Shift+Tab circulam só pelos
+ * seus controles; ao fechar, o foco volta ao elemento que o abriu.
+ * Foco fora do diálogo (ex.: popover em portal) não é interceptado.
+ */
+export function useFocoPreso(ref: RefObject<HTMLElement | null>, ativo: boolean) {
+  useEffect(() => {
+    if (!ativo) return;
+    const anterior = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const focaveisDe = (dialogo: HTMLElement) =>
+      [...dialogo.querySelectorAll<HTMLElement>(FOCAVEIS)].filter(
+        (el) => el.getClientRects().length > 0 && !el.closest('[inert]'),
+      );
+    // Se o próprio diálogo não levou o foco para dentro (cada um escolhe o seu
+    // campo inicial), leva para o primeiro controle depois da animação de entrada.
+    const timer = setTimeout(() => {
+      const dialogo = ref.current;
+      if (dialogo && !dialogo.contains(document.activeElement)) focaveisDe(dialogo)[0]?.focus();
+    }, 400);
+    const aoTeclar = (evento: KeyboardEvent) => {
+      const dialogo = ref.current;
+      if (evento.key !== 'Tab' || !dialogo || !dialogo.contains(document.activeElement)) return;
+      const focaveis = focaveisDe(dialogo);
+      if (focaveis.length === 0) return;
+      const primeiro = focaveis[0];
+      const ultimo = focaveis[focaveis.length - 1];
+      if (evento.shiftKey && document.activeElement === primeiro) {
+        evento.preventDefault();
+        ultimo.focus();
+      } else if (!evento.shiftKey && document.activeElement === ultimo) {
+        evento.preventDefault();
+        primeiro.focus();
+      }
+    };
+    document.addEventListener('keydown', aoTeclar);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('keydown', aoTeclar);
+      if (anterior?.isConnected) anterior.focus({ preventScroll: true });
+    };
+  }, [ativo, ref]);
+}

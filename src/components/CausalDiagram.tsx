@@ -174,9 +174,9 @@ export default function CausalDiagram({ noticias, onConectarIA }: CausalDiagramP
     <Revelar como="section" className="card overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line px-5 py-4">
         <div>
-          <h3 className="rotulo">
+          <h2 className="rotulo">
             <span className="text-signal">A</span> · Diagrama de enlace causal (CLD)
-          </h3>
+          </h2>
           <p className="mt-1 text-sm text-muted">
             Relações de causa e efeito extraídas das notícias filtradas por IA generativa.
           </p>

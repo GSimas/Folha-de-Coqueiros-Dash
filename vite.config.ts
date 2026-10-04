@@ -26,20 +26,15 @@ export default defineConfig({
     chunkSizeWarningLimit: 1200,
     rollupOptions: {
       output: {
-        // Separa as bibliotecas pesadas de visualização do bundle principal,
-        // para que a primeira pintura não espere por vis-network/recharts.
+        // Só o núcleo do React vai num chunk próprio (cache estável entre deploys).
+        // As bibliotecas pesadas (vis-network, Recharts, React Flow, Markdown)
+        // ficam com o chunk lazy do módulo que as usa — agrupá-las à mão fazia
+        // dependências compartilhadas puxarem esses chunks para a carga inicial.
         manualChunks(id) {
           if (!id.includes('node_modules')) return undefined;
-          if (id.includes('vis-network') || id.includes('vis-data') || id.includes('vis-util')) {
-            return 'network';
-          }
-          if (id.includes('@xyflow') || id.includes('dagre') || id.includes('graphlib')) {
-            return 'flow';
-          }
-          if (id.includes('recharts') || id.includes('d3-') || id.includes('victory')) {
-            return 'charts';
-          }
-          if (id.includes('react')) return 'vendor';
+          // Só o núcleo do React: um `includes('react')` puxaria react-markdown,
+          // @tanstack/react-table etc. para o chunk inicial.
+          if (/node_modules\/(react|react-dom|scheduler)\//.test(id)) return 'vendor';
           return undefined;
         },
       },

@@ -74,6 +74,15 @@ export function paraBR(data: Date | null): string {
 
 const CATEGORIA_VAZIA = 'Não categorizado';
 
+/** Converte a chave `AAAA-MM` em rótulo legível (`ago/26`). */
+const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+export function rotularMes(mesAno: string): string {
+  const [ano, mes] = mesAno.split('-');
+  const indice = Number(mes) - 1;
+  if (!MESES[indice]) return mesAno;
+  return `${MESES[indice]}/${ano.slice(2)}`;
+}
+
 export function normalizarNoticia(raw: NoticiaRaw, indice: number): Noticia {
   const conteudo = paraTextoOuNulo(raw['Conteúdo']) ?? '';
   const dataConvertida = paraData(raw.Data);
@@ -175,17 +184,29 @@ export const STOPWORDS = new Set([
 ]);
 
 /** Conta as palavras mais frequentes de um conjunto de textos, ignorando stopwords. */
-export function contarPalavras(textos: string[], limite = 100): Array<[string, number]> {
-  const contagem = new Map<string, number>();
+// Contagem por texto, calculada uma vez por sessão: trocar o recorte só soma
+// mapas já prontos em vez de tokenizar ~3 MB de texto de novo (o acervo é fixo).
+const contagemPorTexto = new Map<string, Map<string, number>>();
 
-  for (const texto of textos) {
-    if (!texto) continue;
+function contarTexto(texto: string): Map<string, number> {
+  let contagem = contagemPorTexto.get(texto);
+  if (!contagem) {
+    contagem = new Map();
     const limpo = texto.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ');
     for (const palavra of limpo.split(/\s+/)) {
       if (palavra.length <= 3 || STOPWORDS.has(palavra)) continue;
       contagem.set(palavra, (contagem.get(palavra) ?? 0) + 1);
     }
+    contagemPorTexto.set(texto, contagem);
   }
+  return contagem;
+}
 
+export function contarPalavras(textos: string[], limite = 100): Array<[string, number]> {
+  const contagem = new Map<string, number>();
+  for (const texto of textos) {
+    if (!texto) continue;
+    for (const [palavra, n] of contarTexto(texto)) contagem.set(palavra, (contagem.get(palavra) ?? 0) + n);
+  }
   return [...contagem.entries()].sort((a, b) => b[1] - a[1]).slice(0, limite);
 }

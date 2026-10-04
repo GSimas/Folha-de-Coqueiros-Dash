@@ -1,7 +1,7 @@
 import { useMemo, type CSSProperties } from "react";
 import { ArrowDown, ArrowUpRight, Sparkles } from "lucide-react";
 import type { Ator, Noticia } from "@/types";
-import { MODULOS, hrefDe } from "@/lib/rotas";
+import { MODULOS_VISIVEIS as MODULOS, hrefDe } from "@/lib/rotas";
 import { Revelar, useContagem } from "@/lib/motion";
 
 interface InicioProps {
@@ -111,8 +111,8 @@ export default function Inicio({
             style={{ animationDelay: "200ms" }}
           >
             {numeros.noticias.toLocaleString("pt-BR")} notícias do bairro lidas
-            por modelos de linguagem: quem aparece, do que se fala, o que causa
-            o quê. Escolha um caminho e aprofunde no seu ritmo.
+            por modelos de linguagem: quem aparece, do que se fala, o que vem
+            por aí. Escolha um caminho e aprofunde no seu ritmo.
           </p>
 
           <div
@@ -173,7 +173,7 @@ export default function Inicio({
               Módulos
             </p>
             <h2 className="mt-5 text-4xl font-semibold leading-[1.02] tracking-[-0.035em] text-ink sm:text-6xl">
-              Sete formas de
+              Quatro formas de
               <br />
               <span className="titulo-serif">ler o bairro.</span>
             </h2>

@@ -21,7 +21,7 @@ import { useAssistente } from '@/hooks/useAssistente';
 import { useIA } from '@/lib/ia/conexao';
 import { LIMITES } from '@/lib/ia/guardrails';
 import { PROVEDORES, PROVEDORES_BYOK, type IdProvedor } from '@/lib/ia/provedores';
-import { usePresenca } from '@/lib/motion';
+import { useFocoPreso, usePresenca } from '@/lib/motion';
 import Markdown from './Markdown';
 import SeletorModelo from './SeletorModelo';
 
@@ -364,6 +364,14 @@ export default function ChatbotDrawer({
   const fundo = usePresenca(aberto, 300);
   const fimDaListaRef = useRef<HTMLDivElement>(null);
   const entradaRef = useRef<HTMLTextAreaElement>(null);
+  const dialogoRef = useRef<HTMLDivElement>(null);
+  const ultima = mensagens[mensagens.length - 1];
+  const anuncio = !ultima || ultima.role !== 'assistant'
+    ? ''
+    : ultima.carregando || ultima.streaming
+      ? 'O assistente está respondendo…'
+      : `${ultima.erro ? 'Erro do assistente' : 'Resposta do assistente'}: ${ultima.content.slice(0, 600)}`;
+  useFocoPreso(dialogoRef, aberto);
 
   const pronto = Boolean(ia.conexao && ia.modelo) && avisoAceito;
   const nomeProvedor = ia.conexao ? PROVEDORES[ia.conexao.provedor].nome : 'o provedor de IA escolhido';
@@ -431,16 +439,17 @@ export default function ChatbotDrawer({
       )}
 
       {/* Sempre montado: a conversa sobrevive ao fechar e reabrir o painel. */}
-      <aside
+      <div
+        ref={dialogoRef}
         role="dialog"
         aria-modal="true"
         aria-label="Assistente editorial (inteligência artificial)"
         inert={!aberto}
         className={`fixed inset-y-0 right-0 z-50 flex w-full max-w-lg flex-col border-l border-line bg-elevated
                     shadow-[-24px_0_60px_-24px_rgb(0_0_0/0.5)] transition-transform duration-500 ease-suave
-                    ${aberto ? 'translate-x-0' : 'translate-x-full'}`}
+                    ${fundo.visivel ? 'translate-x-0' : 'translate-x-full'}`}
       >
-        <header className="flex items-center gap-3 border-b border-line px-5 py-4">
+        <div className="flex items-center gap-3 border-b border-line px-5 py-4">
           <div className="min-w-0 flex-1">
             <h2 className="text-lg font-semibold text-ink">
               Assistente <span className="titulo-serif">editorial</span>
@@ -476,7 +485,7 @@ export default function ChatbotDrawer({
           <button type="button" onClick={onFechar} className="botao-icone" aria-label="Fechar assistente">
             <X size={18} />
           </button>
-        </header>
+        </div>
 
         {/* Conexão e modelo (acordeão) */}
         <div
@@ -492,7 +501,12 @@ export default function ChatbotDrawer({
         </div>
 
         {/* Conversa */}
-        <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5" aria-live="polite">
+        {/* Anúncio para leitores de tela: início e resposta concluída — não cada
+            pedaço do stream, que faria o leitor repetir a resposta dezenas de vezes. */}
+        <p className="sr-only" role="status">
+          {anuncio}
+        </p>
+        <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5" role="log" aria-live="off" aria-label="Conversa">
           <AvisoIA
             aceito={avisoAceito}
             onAceitar={aceitarAviso}
@@ -617,7 +631,7 @@ export default function ChatbotDrawer({
         </div>
 
         {/* Entrada */}
-        <footer className="border-t border-line px-5 py-4">
+        <div className="border-t border-line px-5 py-4">
           {avisoEntrada && (
             <div className="mb-3 flex animate-fade-in items-start gap-2 border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-ink">
               <AlertTriangle size={14} className="mt-0.5 shrink-0 text-amber-500" />
@@ -677,8 +691,8 @@ export default function ChatbotDrawer({
               </span>
             )}
           </p>
-        </footer>
-      </aside>
+        </div>
+      </div>
     </>
   );
 }
