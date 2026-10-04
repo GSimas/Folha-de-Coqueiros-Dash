@@ -27,6 +27,9 @@ export interface ContextoPerfis {
 const Contexto = createContext<ContextoPerfis | null>(null);
 export const ProvedorPerfis = Contexto.Provider;
 
+/** Versão tolerante: `null` fora do provedor (ex.: renderização isolada em testes). */
+export const usePerfisOpcional = () => useContext(Contexto);
+
 export function usePerfis(): ContextoPerfis {
   const valor = useContext(Contexto);
   if (!valor) throw new Error('usePerfis precisa estar dentro de <ProvedorPerfis>.');

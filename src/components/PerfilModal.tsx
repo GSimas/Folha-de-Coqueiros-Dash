@@ -397,12 +397,16 @@ export default function PerfilModal({ pilha, atores, noticias, onVoltar, onFecha
     rolagemRef.current?.scrollTo({ top: 0 });
     const timer = setTimeout(() => fecharRef.current?.focus(), 60);
     const aoTeclar = (evento: KeyboardEvent) => {
-      if (evento.key === 'Escape') onFechar();
+      if (evento.key !== 'Escape') return;
+      // No `document`, antes do `window` onde o assistente escuta: com ele aberto
+      // por baixo, Esc fecha só o perfil (popovers internos, também no document, seguem ouvindo).
+      evento.stopPropagation();
+      onFechar();
     };
-    window.addEventListener('keydown', aoTeclar);
+    document.addEventListener('keydown', aoTeclar);
     return () => {
       clearTimeout(timer);
-      window.removeEventListener('keydown', aoTeclar);
+      document.removeEventListener('keydown', aoTeclar);
     };
   }, [atual, onFechar]);
 
@@ -499,7 +503,8 @@ export default function PerfilModal({ pilha, atores, noticias, onVoltar, onFecha
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-hidden px-3 py-4 sm:px-6 sm:py-8">
+    // Acima do assistente (z-50): perfis também abrem a partir das respostas dele.
+    <div className="fixed inset-0 z-[55] flex items-start justify-center overflow-hidden px-3 py-4 sm:px-6 sm:py-8">
       <div
         className={`absolute inset-0 bg-canvas/70 backdrop-blur-sm transition-opacity duration-300 ${
           visivel ? 'opacity-100' : 'opacity-0'

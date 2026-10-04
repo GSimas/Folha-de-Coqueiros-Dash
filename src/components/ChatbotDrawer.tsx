@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertTriangle,
   Bot,
@@ -23,6 +23,7 @@ import { LIMITES } from '@/lib/ia/guardrails';
 import { PROVEDORES, PROVEDORES_BYOK, type IdProvedor } from '@/lib/ia/provedores';
 import { useFocoPreso, usePresenca } from '@/lib/motion';
 import Markdown from './Markdown';
+import { criarDicionario } from '@/lib/entidades';
 import SeletorModelo from './SeletorModelo';
 
 interface ChatbotDrawerProps {
@@ -365,6 +366,8 @@ export default function ChatbotDrawer({
   const fimDaListaRef = useRef<HTMLDivElement>(null);
   const entradaRef = useRef<HTMLTextAreaElement>(null);
   const dialogoRef = useRef<HTMLDivElement>(null);
+  // Atores, temas, categorias e tipos de evento citados viram links para os perfis.
+  const entidades = useMemo(() => criarDicionario(atores, acervo), [atores, acervo]);
   const ultima = mensagens[mensagens.length - 1];
   const anuncio = !ultima || ultima.role !== 'assistant'
     ? ''
@@ -586,6 +589,8 @@ export default function ChatbotDrawer({
                       <Markdown
                         texto={mensagem.content}
                         urlsVerificadas={new Set(mensagem.urlsVerificadas ?? [])}
+                        // Só ao terminar: casar o dicionário a cada quadro do stream é desperdício.
+                        entidades={mensagem.streaming ? undefined : entidades}
                       />
                       {mensagem.streaming && (
                         <span

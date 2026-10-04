@@ -3,6 +3,8 @@ import ReactMarkdown, { defaultUrlTransform, type Components } from 'react-markd
 import remarkGfm from 'remark-gfm';
 import { createColumnHelper } from '@tanstack/react-table';
 import { paraData } from '@/lib/data';
+import { lerHrefDePerfil, PREFIXO_PERFIL, remarkEntidades, type DicionarioEntidades } from '@/lib/entidades';
+import { CLASSE_LINK, usePerfisOpcional } from '@/lib/perfis';
 import TabelaDados, { type TipoColuna } from './TabelaDados';
 
 /**
@@ -24,8 +26,40 @@ function urlSegura(url: string): string {
   return /^(https?:|mailto:|#)/i.test(limpa) ? limpa : '';
 }
 
+/** Menção a ator, tema, categoria ou tipo de evento: abre o perfil no próprio painel. */
+function LinkPerfil({ href, children }: { href: string; children: ReactNode }) {
+  const perfis = usePerfisOpcional();
+  const alvo = lerHrefDePerfil(href);
+  if (!perfis || !alvo) return <span>{children}</span>;
+  const idAtor = alvo.tipo === 'ator' ? perfis.idDoAtor(alvo.nome) : undefined;
+  if (alvo.tipo === 'ator' && idAtor === undefined) return <span>{children}</span>;
+  const abrir = () => {
+    if (alvo.tipo === 'ator') perfis.abrirAtor(idAtor!);
+    else if (alvo.tipo === 'tema') perfis.abrirTema(alvo.nome);
+    else if (alvo.tipo === 'categoria') perfis.abrirCategoria(alvo.nome);
+    else perfis.abrirTipoEvento(alvo.nome);
+  };
+  const rotulo = { ator: 'do ator', tema: 'do tema', categoria: 'da categoria', tipoEvento: 'do tipo de evento' }[alvo.tipo];
+  return (
+    // Âncora, não botão: <button> é sempre inline-block e quebraria o fluxo do texto
+    // (pontuação caindo sozinha na linha seguinte). O clique não muda a rota.
+    <a
+      href={href}
+      onClick={(evento) => {
+        evento.preventDefault();
+        abrir();
+      }}
+      title={`Abrir o perfil ${rotulo} “${alvo.nome}”`}
+      className={`${CLASSE_LINK} text-signal`}
+    >
+      {children}
+    </a>
+  );
+}
+
 function Link({ href, urlsVerificadas, children }: { href: string; urlsVerificadas?: Set<string>; children: ReactNode }) {
   if (!href) return <span>{children}</span>;
+  if (href.startsWith(PREFIXO_PERFIL)) return <LinkPerfil href={href}>{children}</LinkPerfil>;
   const verificado = !urlsVerificadas || href.startsWith('#') || urlsVerificadas.has(href);
   if (!verificado) {
     return (
@@ -162,7 +196,7 @@ function TabelaMarkdown({ no, urlsVerificadas }: { no?: NoHast; urlsVerificadas?
 
   return (
     <div className="overflow-hidden rounded-sm border border-line">
-      <TabelaDados dados={linhas} colunas={colunas} rotuloItens="linhas" nomeArquivo="tabela-do-assistente" porPagina={null} compacta />
+      <TabelaDados dados={linhas} colunas={colunas} rotuloItens={linhas.length === 1 ? 'linha' : 'linhas'} nomeArquivo="tabela-do-assistente" porPagina={null} compacta />
     </div>
   );
 }
@@ -183,17 +217,26 @@ function criarComponentes(urlsVerificadas?: Set<string>): Components {
 export default function Markdown({
   texto,
   urlsVerificadas,
+  entidades,
 }: {
   texto: string;
   urlsVerificadas?: Set<string>;
+  /** Com o dicionário, menções a elementos do painel viram links para os perfis. */
+  entidades?: DicionarioEntidades;
 }) {
+  const plugins = useMemo(() => (entidades ? [remarkGfm, remarkEntidades(entidades)] : [remarkGfm]), [entidades]);
+  // Componentes estáveis entre renderizações: recriá-los remontaria os links (perdendo
+  // o foco que volta ao link ao fechar um perfil). O chat recria o Set a cada render.
+  const chaveUrls = urlsVerificadas ? [...urlsVerificadas].join('\n') : null;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const componentes = useMemo(() => criarComponentes(urlsVerificadas), [chaveUrls]);
   return (
     <div className="markdown">
       <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
+        remarkPlugins={plugins}
         skipHtml
         urlTransform={urlSegura}
-        components={criarComponentes(urlsVerificadas)}
+        components={componentes}
       >
         {texto}
       </ReactMarkdown>
