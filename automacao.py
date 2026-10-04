@@ -13,10 +13,13 @@ Roda a cada 3 dias no GitHub Actions (.github/workflows/coleta_noticias.yml):
   3. SALVA    — grava noticias.json e atores.json na raiz e em public/data/
                 (de onde o painel React os serve), de forma atômica.
 
-Provedor de IA (variáveis de ambiente):
-  OPENROUTER_API_KEY  → OpenRouter (padrão: IA_MODELO=openrouter/free, gratuito)
-  GEMINI_API_KEY      → alternativa, via endpoint OpenAI-compatível do Google
-  IA_MODELO, LIMITE_IA (40), IA_PAUSA (4 s entre chamadas)
+Classificador (variáveis de ambiente, em ordem de prioridade):
+  TYPESAFE_API_KEY    → Jev (TypeSafe System One), ver classificador_jev.py
+                        (JEV_MODELO, padrão jev-latest)
+  OPENROUTER_API_KEY  → LLM no OpenRouter (IA_MODELO, padrão openrouter/free)
+  GEMINI_API_KEY      → LLM do Google, via endpoint OpenAI-compatível
+  IA_CLASSIFICADOR=llm força o LLM mesmo com a chave TypeSafe presente.
+  LIMITE_IA (40), IA_PAUSA (4 s entre chamadas; 0.5 s com Jev)
 
 Falhas de IA não perdem a coleta: os dados são salvos e o processo termina com
 código 1, para o workflow ficar vermelho e o GitHub avisar por e-mail.
@@ -41,6 +44,8 @@ from typing import Callable
 
 import requests
 from bs4 import BeautifulSoup
+
+from classificador_jev import ClassificadorJev, ErroJev, vocabulario_do_acervo
 
 URL_LISTAGEM = "https://folhadecoqueiros.com.br/noticias/"
 CABECALHOS_HTTP = {"User-Agent": "Mozilla/5.0 (compatible; FolhaDeCoqueirosDash/2.0; +https://folhadecoqueiros.com.br)"}
@@ -432,7 +437,7 @@ def salvar_json(caminho: Path, dados) -> None:
 
 def processar(
     pasta: Path,
-    classificar: Callable[[dict], dict] | None,
+    classificar: Callable[[dict, dict], dict] | None,
     limite_ia: int,
     pausa: float,
     coletar: Callable[[set[str]], list[str]] = buscar_links_novos,
@@ -468,15 +473,20 @@ def processar(
     fila = pendencias(noticias, atores)
     log(f"🧠 {len(fila)} notícia(s) aguardando classificação/atores; limite desta execução: {limite_ia}.")
     if classificar:
+        # Contexto para classificadores que selecionam candidatos (Jev): atores
+        # conhecidos (atualizados a cada notícia) e vocabulário de palavras-chave.
+        contexto = {"atores": atores, "vocabulario": vocabulario_do_acervo(noticias)}
         for noticia in fila[:limite_ia]:
             try:
-                resultado = classificar(noticia)
+                resultado = classificar(noticia, contexto)
                 aplicar_classificacao(noticia, resultado)
                 resumo["atores_novos"] += sincronizar_atores(atores, resultado.get("atores", []), int(noticia["ID"]))
                 noticia["Atores Extraídos"] = True
                 resumo["classificadas"] += 1
-                log(f"   ✅ [ID {noticia['ID']}] {noticia['Categorias']} · {noticia['Título'][:70]}")
-            except ErroIA as erro:
+                confianca = resultado.get("_confianca_categoria")
+                marca = f" (confiança {confianca:.2f})" if isinstance(confianca, (int, float)) else ""
+                log(f"   ✅ [ID {noticia['ID']}] {noticia['Categorias']}{marca} · {noticia['Título'][:70]}")
+            except (ErroIA, ErroJev) as erro:
                 resumo["falhas_ia"] += 1
                 log(f"   ⚠️ [ID {noticia['ID']}] {erro}")
                 if erro.fatal:
@@ -502,18 +512,29 @@ def main() -> int:
     pausa = float(os.environ.get("IA_PAUSA", "4"))
     log(f"🚀 Coleta iniciada em {datetime.now():%d/%m/%Y %H:%M} · pasta {pasta}")
 
-    ia = None if args.sem_ia else configurar_ia()
-    erro_config = None
-    if not args.sem_ia and not ia:
-        erro_config = "nenhuma chave de IA configurada (OPENROUTER_API_KEY ou GEMINI_API_KEY)."
-    elif ia:
+    classificar, erro_config = None, None
+    usar_jev = os.environ.get("TYPESAFE_API_KEY") and os.environ.get("IA_CLASSIFICADOR", "").lower() != "llm"
+    if args.sem_ia:
+        pass
+    elif usar_jev:
+        jev = ClassificadorJev(os.environ["TYPESAFE_API_KEY"], os.environ.get("JEV_MODELO") or "jev-latest")
+        try:
+            jev.validar()
+            classificar = jev.classificar
+            pausa = float(os.environ.get("IA_PAUSA", "0.5"))
+            log(f"🤖 IA: Jev (TypeSafe) · {jev.modelo}")
+        except (ErroJev, requests.RequestException) as erro:
+            erro_config = str(erro)
+    elif ia := configurar_ia():
         try:
             validar_chave(ia)
+            classificar = lambda n, _contexto: chamar_modelo(ia, construir_prompt(n))
             log(f"🤖 IA: {ia['nome']} · {ia['modelo']}")
         except (ErroIA, requests.RequestException) as erro:
-            erro_config, ia = str(erro), None
+            erro_config = str(erro)
+    else:
+        erro_config = "nenhuma chave de IA configurada (TYPESAFE_API_KEY, OPENROUTER_API_KEY ou GEMINI_API_KEY)."
 
-    classificar = (lambda n: chamar_modelo(ia, construir_prompt(n))) if ia else None
     resumo = processar(pasta, classificar, limite, pausa)
     if erro_config:
         resumo["erro_fatal"] = resumo["erro_fatal"] or erro_config

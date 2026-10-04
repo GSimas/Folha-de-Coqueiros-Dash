@@ -134,7 +134,7 @@ class FluxoCompleto(unittest.TestCase):
         return json.loads((self.pasta / nome).read_text("utf-8"))
 
     def test_coleta_classifica_e_extrai_atores(self):
-        ia = lambda n: {"categoria": "Cultura, Eventos e Gastronomia", "palavras_chave": "feira", "e_evento": True,
+        ia = lambda n, _c: {"categoria": "Cultura, Eventos e Gastronomia", "palavras_chave": "feira", "e_evento": True,
                         "tipo_evento": "Feiras e Mercados", "atores": [{"nome": "Praça XV", "tipo": "Local", "descricao": "local"}]}
         resumo = a.processar(self.pasta, ia, limite_ia=10, pausa=0, coletar=self.coletar, baixar_noticia=self.baixar)
         noticias, atores = self.ler("noticias.json"), self.ler("atores.json")
@@ -147,7 +147,7 @@ class FluxoCompleto(unittest.TestCase):
         self.assertEqual(resumo["pendentes"], 0)
 
     def test_chave_invalida_interrompe_mas_salva_a_coleta(self):
-        def ia(_):
+        def ia(_n, _c):
             raise a.ErroIA("chave recusada", fatal=True)
 
         resumo = a.processar(self.pasta, ia, limite_ia=10, pausa=0, coletar=self.coletar, baixar_noticia=self.baixar)
@@ -158,7 +158,7 @@ class FluxoCompleto(unittest.TestCase):
     def test_falha_pontual_nao_impede_as_demais(self):
         chamadas = []
 
-        def ia(n):
+        def ia(n, _c):
             chamadas.append(n["ID"])
             if len(chamadas) == 1:
                 raise a.ErroIA("JSON inválido")
@@ -174,7 +174,7 @@ class FluxoCompleto(unittest.TestCase):
     def test_limite_por_execucao(self):
         dados = [{"ID": i, "URL": f"u{i}", "Título": "t", "Data": "", "Conteúdo": "c", "Categorias": "Não categorizado", "Palavras-Chaves": "N/A"} for i in range(5)]
         (self.pasta / "noticias.json").write_text(json.dumps(dados), "utf-8")
-        resumo = a.processar(self.pasta, lambda n: {"categoria": "Educação", "palavras_chave": "x"}, limite_ia=2, pausa=0,
+        resumo = a.processar(self.pasta, lambda n, _c: {"categoria": "Educação", "palavras_chave": "x"}, limite_ia=2, pausa=0,
                              coletar=lambda c: [], baixar_noticia=self.baixar)
         self.assertEqual((resumo["classificadas"], resumo["pendentes"]), (2, 3))
 

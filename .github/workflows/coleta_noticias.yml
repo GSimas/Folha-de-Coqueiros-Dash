@@ -36,17 +36,19 @@ jobs:
       - name: Instalar dependências
         run: pip install requests beautifulsoup4
 
-      - name: Testes da coleta
-        run: python -m unittest tests/test_automacao.py
+      - name: Testes da coleta e da classificação
+        run: python -m unittest tests/test_automacao.py tests/test_classificador_jev.py
 
       - name: Coletar e classificar
         env:
-          # Recomendado: OpenRouter (modelos gratuitos). Crie o secret OPENROUTER_API_KEY.
+          # Classificador principal: Jev (TypeSafe). Crie o secret TYPESAFE_API_KEY.
+          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
+          JEV_MODELO: ${{ vars.JEV_MODELO }}
+          # Alternativas (LLM), usadas só sem a chave TypeSafe ou com IA_CLASSIFICADOR=llm.
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          # Alternativa, usada só se não houver OPENROUTER_API_KEY.
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          # Opcional (Settings → Variables): outro modelo, ex. "google/gemini-2.5-flash-lite".
           IA_MODELO: ${{ vars.IA_MODELO }}
+          IA_CLASSIFICADOR: ${{ vars.IA_CLASSIFICADOR }}
           LIMITE_IA: ${{ inputs.limite_ia || '40' }}
         run: python automacao.py
 

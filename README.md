@@ -104,15 +104,18 @@ O workflow [`coleta_noticias.yml`](.github/workflows/coleta_noticias.yml) roda `
 
 1. **Coleta** — compara a listagem do site com o banco e baixa toda notícia ausente.
 2. **IA** — numa chamada por notícia, classifica (categoria, palavras-chave, evento) e extrai os atores; também recupera pendências antigas, até `LIMITE_IA` (40) por execução.
+   O classificador principal é o **Jev** ([TypeSafe](https://docs.typesafe.ai)), em [`classificador_jev.py`](classificador_jev.py). Como o Jev devolve julgamentos tipados em vez de texto, o código acha candidatos no texto (datas, horários, valores, locais, nomes próprios, termos do vocabulário do acervo) e o Jev escolhe entre eles — numa única requisição por notícia. Categoria, evento e gratuidade são perguntas `Choice`/`Noul` diretas; datas relativas ("sábado", "dia 13") são resolvidas em código a partir da data de publicação.
 3. **Salva** — atualiza `noticias.json`/`atores.json` na raiz e em `public/data/`, e faz o commit (o Netlify publica em seguida).
 
 Configure em **Settings → Secrets and variables → Actions**:
 
 | Nome | Tipo | Uso |
 |---|---|---|
-| `OPENROUTER_API_KEY` | secret | Recomendado. Padrão `openrouter/free` (gratuito). |
-| `GEMINI_API_KEY` | secret | Alternativa, usada só sem a chave do OpenRouter. |
-| `IA_MODELO` | variable | Opcional: outro modelo. |
+| `TYPESAFE_API_KEY` | secret | Recomendado: classificação com Jev. |
+| `JEV_MODELO` | variable | Opcional: fixa uma versão (padrão `jev-latest`). |
+| `OPENROUTER_API_KEY` | secret | Alternativa por LLM, padrão `openrouter/free` (gratuito). |
+| `GEMINI_API_KEY` | secret | Alternativa por LLM, usada só sem as anteriores. |
+| `IA_MODELO` / `IA_CLASSIFICADOR` | variable | Opcional: modelo do LLM; `llm` força o LLM mesmo com a chave TypeSafe. |
 
 Se a IA falhar (chave inválida, cota), a coleta é salva mesmo assim e o workflow fica **vermelho** — o GitHub avisa por e-mail. Localmente: `python automacao.py --sem-ia` só coleta. O `npm run build` sincroniza `public/data` automaticamente (`prebuild`).
 
@@ -120,7 +123,7 @@ Se a IA falhar (chave inválida, cota), a coleta é salva mesmo assim e o workfl
 
 ```bash
 npm test                                   # 76 testes: guardrails, streaming, contexto, rodadas, Markdown
-python3 -m unittest tests/test_automacao.py # coleta e classificação
+python3 -m unittest tests/test_automacao.py tests/test_classificador_jev.py  # coleta e classificação (Jev)
 IA_CHAVE=sk-or-v1-… npm run avaliar        # avaliação ao vivo do assistente (gera relatorio-avaliacao.md)
 ```
 
@@ -140,6 +143,7 @@ A avaliação ao vivo faz 14 perguntas a um modelo real e confere as respostas c
 │   └── sync-data.mjs          # Copia os JSONs da raiz para public/data
 ├── tests/                     # Vitest (TS) + unittest (coleta Python)
 ├── automacao.py               # Coleta + classificação (GitHub Actions, a cada 3 dias)
+├── classificador_jev.py       # Classificação com Jev (TypeSafe)
 ├── src/
 │   ├── components/
 │   │   ├── Navbar.tsx
