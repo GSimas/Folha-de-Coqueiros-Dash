@@ -3,8 +3,8 @@
 ![React](https://img.shields.io/badge/React-19-61DAFB.svg?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6.svg?logo=typescript&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8-646CFF.svg?logo=vite&logoColor=white)
-![Netlify](https://img.shields.io/badge/Netlify-Functions-00C7B7.svg?logo=netlify&logoColor=white)
-![Gemini](https://img.shields.io/badge/Google_Gemini-3.1_%7C_2.5_Flash-orange.svg)
+![Netlify](https://img.shields.io/badge/Netlify-static-00C7B7.svg?logo=netlify&logoColor=white)
+![OpenRouter](https://img.shields.io/badge/IA-OpenRouter_%7C_BYOK-6f9fd8.svg)
 
 Painel de inteligência territorial sobre o acervo histórico do jornal local **Folha de Coqueiros** (Florianópolis/SC). Combina análise de redes sociais, dinâmica de sistemas e IA generativa para revelar o panorama editorial, social e de infraestrutura do bairro.
 
@@ -31,15 +31,30 @@ Os valores foram verificados contra o `networkx` original e batem até a 4ª cas
 ### 2. 🔀 Diagrama de Enlace Causal (CLD)
 Sob demanda, a IA lê as notícias filtradas e extrai pares **causa → efeito** com polaridade e evidência textual, renderizados com **React Flow** e layout hierárquico via **dagre**:
 
-* **Verde (`#27ae60`)** — enlace de reforço (`increase`, +)
-* **Vermelho (`#c0392b`)** — enlace de balanço (`decrease`, −)
+* **Verde** — enlace de reforço (`increase`, +)
+* **Vermelho** — enlace de balanço (`decrease`, −)
 
 Cada relação carrega o trecho literal que a sustenta, exposto numa caixa retrátil de transparência (incluindo o JSON bruto).
 
 ### 3. 💬 Assistente Editorial (RAG)
-Chatbot que responde sobre o acervo citando as fontes. O contexto é montado no cliente (recuperação lexical sobre notícias + atores com SNA) e enviado a uma função serverless que consulta o Gemini. Modelos disponíveis: `gemini-3.1-flash-lite-preview` (padrão), `gemini-2.5-flash` e `gemini-2.5-flash-lite`.
+Chatbot que responde sobre todo o acervo e os indicadores do painel, citando as fontes. O usuário conecta a própria IA, de duas formas:
 
-**A `GEMINI_API_KEY` nunca chega ao browser** — vive apenas no ambiente serverless do Netlify.
+* **Login OpenRouter (principal)** — OAuth PKCE, sem copiar chaves. Padrão: `openrouter/free` (roteador de modelos gratuitos); um seletor com busca dá acesso a todos os modelos do OpenRouter.
+* **Chave própria (BYOK)** — OpenAI, Anthropic, Google Gemini, DeepSeek, Groq, Mistral, xAI, Together, Fireworks, Cerebras, Perplexity, Cohere e Moonshot.
+
+As chamadas vão **direto do navegador ao provedor**: não há backend, e a chave nunca passa por servidores da Folha. Ela fica na `sessionStorage` (ou `localStorage`, se o usuário marcar "manter conectado"). A mesma conexão alimenta o mapa causal.
+
+O contexto combina agregados do acervo completo e do recorte filtrado (categorias, volume mensal/anual, eventos, termos, palavras-chave), rankings de SNA, pares de atores mais conectados e recuperação TF-IDF sobre todas as notícias.
+
+**Guardrails** (`src/lib/ia/guardrails.ts`, testados em `tests/`):
+* entrada: limite de tamanho, intervalo mínimo entre envios, remoção de caracteres invisíveis e bloqueio de CPF, cartão (Luhn) e chaves de API;
+* injeção de prompt: detecção heurística + aviso explícito ao modelo; o acervo entra delimitado e higienizado como *dado*;
+* prompt de sistema com regras de escopo, ética, privacidade, neutralidade política e proibição de inventar fatos ou URLs;
+* saída: canário secreto que derruba respostas que vazem as instruções; links fora das fontes enviadas aparecem como "link não verificado";
+* transparência (ISO/IEC 42001): aviso de IA aceito antes da primeira mensagem, rótulo "Gerado por IA · modelo" em cada resposta;
+* deploy: Content-Security-Policy com `connect-src` restrito aos provedores suportados e sem scripts inline.
+
+Testes: ver [Testes](#5-testes).
 
 ### Também no painel
 * **KPIs e volume temporal** — agregado ou empilhado por categoria (Recharts)
@@ -60,8 +75,8 @@ Chatbot que responde sobre o acervo citando as fontes. O contexto é montado no 
 | Diagrama causal | @xyflow/react (React Flow) + dagre |
 | Gráficos | Recharts |
 | Tabelas | @tanstack/react-table |
-| Serverless | Netlify Functions (TypeScript) |
-| IA | `@google/genai` |
+| IA | OpenRouter (OAuth PKCE) ou BYOK, direto do navegador — sem backend |
+| Hospedagem | Netlify (estático) |
 
 ---
 
@@ -72,61 +87,66 @@ Chatbot que responde sobre o acervo citando as fontes. O contexto é montado no 
 npm install
 ```
 
-### 2. Chave da API
-```bash
-cp .env.example .env
-```
-Preencha `GEMINI_API_KEY` (obtenha em [aistudio.google.com/apikey](https://aistudio.google.com/apikey)).
-
-Em produção, defina a variável em **Netlify → Site settings → Environment variables**.
-
-### 3. Desenvolvimento
-
-Painel completo, **com** as funções de IA — sobe o Vite (`:5174`) e o servidor de funções (`:9999`) juntos:
-```bash
-npm run dev:full
-```
-Abra <http://localhost:5174>.
-
-Só o frontend — tudo funciona, exceto o chat e o mapa causal, que dependem das funções:
+### 2. Desenvolvimento
 ```bash
 npm run dev
 ```
+Abra <http://localhost:5174>. Não há chaves a configurar: a IA é conectada por cada usuário no próprio assistente (o login OpenRouter funciona em `localhost`).
 
-> **Por que não `netlify dev`?** O fallback de SPA (`/* → /index.html`) do `netlify.toml` é necessário em produção, mas em desenvolvimento ele intercepta os módulos ES do Vite (`/src/*.tsx`, `/@vite/client`) e os devolve como HTML — a página fica em branco. O `dev:full` evita isso reproduzindo o mapeamento `/api/*` pelo proxy do Vite, sem o catch-all.
-
-### 4. Build de produção
+### 3. Build de produção
 ```bash
 npm run build
 ```
 
-### 5. Atualizando os dados
+### 4. Coleta automática (a cada 3 dias)
 
-O pipeline Python continua gerando `noticias.json` e `atores.json` na raiz. Depois de rodá-lo, sincronize para a pasta servida pelo Vite:
+O workflow [`coleta_noticias.yml`](.github/workflows/coleta_noticias.yml) roda `automacao.py` a cada 3 dias (06:00 de Brasília) e também sob demanda (**Actions → Coleta e classificação de notícias → Run workflow**):
+
+1. **Coleta** — compara a listagem do site com o banco e baixa toda notícia ausente.
+2. **IA** — numa chamada por notícia, classifica (categoria, palavras-chave, evento) e extrai os atores; também recupera pendências antigas, até `LIMITE_IA` (40) por execução.
+3. **Salva** — atualiza `noticias.json`/`atores.json` na raiz e em `public/data/`, e faz o commit (o Netlify publica em seguida).
+
+Configure em **Settings → Secrets and variables → Actions**:
+
+| Nome | Tipo | Uso |
+|---|---|---|
+| `OPENROUTER_API_KEY` | secret | Recomendado. Padrão `openrouter/free` (gratuito). |
+| `GEMINI_API_KEY` | secret | Alternativa, usada só sem a chave do OpenRouter. |
+| `IA_MODELO` | variable | Opcional: outro modelo. |
+
+Se a IA falhar (chave inválida, cota), a coleta é salva mesmo assim e o workflow fica **vermelho** — o GitHub avisa por e-mail. Localmente: `python automacao.py --sem-ia` só coleta. O `npm run build` sincroniza `public/data` automaticamente (`prebuild`).
+
+### 5. Testes
 
 ```bash
-npm run sync:data
+npm test                                   # 76 testes: guardrails, streaming, contexto, rodadas, Markdown
+python3 -m unittest tests/test_automacao.py # coleta e classificação
+IA_CHAVE=sk-or-v1-… npm run avaliar        # avaliação ao vivo do assistente (gera relatorio-avaliacao.md)
 ```
+
+A avaliação ao vivo faz 14 perguntas a um modelo real e confere as respostas contra os dados: números corretos, fontes verificadas, recusa fora do escopo, resistência a injeção (direta e escondida numa notícia), alucinação, neutralidade política, identidade de IA, idioma e respostas longas com tabela. Variáveis: `IA_PROVEDOR` (padrão `openrouter`) e `IA_MODELO` (padrão `openrouter/free`).
 
 ---
 
 ## 📂 Estrutura do projeto
 
 ```text
-├── netlify/
-│   └── functions/
-│       ├── chat.ts            # Endpoint RAG (Gemini) — /api/chat
-│       └── causal.ts          # Extração causal em lote — /api/causal
 ├── public/
+│   ├── preferencias.js        # Aplica tema/fonte antes da 1ª pintura
 │   └── data/                  # Datasets servidos ao browser
 │       ├── noticias.json
 │       └── atores.json
 ├── scripts/
 │   └── sync-data.mjs          # Copia os JSONs da raiz para public/data
+├── tests/                     # Vitest (TS) + unittest (coleta Python)
+├── automacao.py               # Coleta + classificação (GitHub Actions, a cada 3 dias)
 ├── src/
 │   ├── components/
 │   │   ├── Navbar.tsx
-│   │   ├── SidebarFilters.tsx
+│   │   ├── FiltersDrawer.tsx
+│   │   ├── SettingsMenu.tsx   # Tema, fonte, contraste, movimento
+│   │   ├── FundoAnimado.tsx   # Rede animada de fundo (canvas)
+│   │   ├── SeletorModelo.tsx  # Combobox de modelos de IA
 │   │   ├── MetricsOverview.tsx
 │   │   ├── WordCloud.tsx
 │   │   ├── EventsPanel.tsx
@@ -139,8 +159,17 @@ npm run sync:data
 │   │   └── SocialIcons.tsx
 │   ├── hooks/
 │   │   ├── useNetworkData.ts  # Construção do grafo + métricas SNA
-│   │   └── useGeminiChat.ts   # Cliente do assistente + montagem do contexto
+│   │   └── useAssistente.ts   # Conversa + guardrails
+│   ├── pages/                 # Início e páginas de módulo
 │   ├── lib/
+│   │   ├── ia/
+│   │   │   ├── provedores.ts  # Catálogo, listagem de modelos
+│   │   │   ├── cliente.ts     # Streaming OpenAI/Anthropic/Gemini
+│   │   │   ├── openrouter.ts  # Login OAuth PKCE
+│   │   │   ├── conexao.tsx    # Estado da conexão (React context)
+│   │   │   ├── contexto.ts    # Prompt de sistema + RAG
+│   │   │   ├── guardrails.ts
+│   │   │   └── causal.ts      # Extração do mapa causal
 │   │   ├── data.ts            # Carregamento e normalização dos JSONs
 │   │   ├── sna.ts             # Brandes, closeness, coocorrência
 │   │   └── constantes.ts

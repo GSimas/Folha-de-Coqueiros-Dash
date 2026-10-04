@@ -11,15 +11,94 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { CalendarDays, ExternalLink } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
+import { createColumnHelper } from '@tanstack/react-table';
 import type { Noticia } from '@/types';
-import { PALETA_GRAFICOS } from '@/lib/constantes';
+import { COR_REDUCAO, COR_REFORCO, PALETA_GRAFICOS } from '@/lib/constantes';
+import { eixoGrafico, tooltipGrafico, useCoresGrafico } from '@/lib/preferencias';
+import { Revelar } from '@/lib/motion';
+import { paraData } from '@/lib/data';
+import TabelaDados from './TabelaDados';
 
 interface EventsPanelProps {
   noticias: Noticia[];
 }
 
+const COR_GRATUITO = COR_REFORCO;
+const COR_PAGO = COR_REDUCAO;
+
+const coluna = createColumnHelper<Noticia>();
+
+/** Colunas da agenda — tipos definem o filtro de cada uma (ver TabelaDados). */
+const COLUNAS_AGENDA = [
+  coluna.accessor('titulo', {
+    header: 'Evento',
+    meta: { tipo: 'texto', classe: 'max-w-xs' },
+    cell: (info) => (
+      <a
+        href={info.row.original.url}
+        target="_blank"
+        rel="noreferrer noopener"
+        className="group inline-flex items-start gap-1 rounded-sm font-medium text-ink transition hover:text-signal"
+      >
+        <span className="line-clamp-2">{info.getValue()}</span>
+        <ArrowUpRight size={12} className="mt-1 shrink-0 text-faint transition group-hover:text-signal" />
+      </a>
+    ),
+  }),
+  // Data do evento quando informada; senão, a data de publicação da notícia.
+  coluna.accessor((e) => paraData(e.dataEvento) ?? e.dataConvertida ?? undefined, {
+    id: 'data',
+    header: 'Data',
+    meta: { tipo: 'data', classe: 'whitespace-nowrap' },
+    cell: (info) => {
+      const e = info.row.original;
+      return (
+        <span className="font-mono text-xs text-muted">
+          {e.dataEvento ?? e.data}
+          {e.dataFimEvento && e.dataFimEvento !== e.dataEvento && (
+            <span className="text-faint"> → {e.dataFimEvento}</span>
+          )}
+        </span>
+      );
+    },
+  }),
+  coluna.accessor((e) => e.tipoEvento ?? 'Não classificado', {
+    id: 'tipo',
+    header: 'Tipo',
+    meta: { tipo: 'categoria' },
+    cell: (info) => <span className="text-xs text-muted">{info.getValue()}</span>,
+  }),
+  coluna.accessor((e) => e.localEvento ?? 'Não informado', {
+    id: 'local',
+    header: 'Local',
+    meta: { tipo: 'categoria', classe: 'max-w-[200px]' },
+    cell: (info) => <span className="line-clamp-2 text-xs text-muted">{info.row.original.localEvento ?? '—'}</span>,
+  }),
+  coluna.accessor((e) => e.horarioEvento ?? '', {
+    id: 'horario',
+    header: 'Horário',
+    meta: { tipo: 'texto', classe: 'whitespace-nowrap' },
+    cell: (info) => <span className="font-mono text-xs text-muted">{info.getValue() || '—'}</span>,
+  }),
+  coluna.accessor((e) => (e.ehPago ? 'Pago' : 'Gratuito'), {
+    id: 'custo',
+    header: 'Custo',
+    meta: { tipo: 'categoria' },
+    cell: (info) => {
+      const e = info.row.original;
+      const cor = e.ehPago ? COR_PAGO : COR_GRATUITO;
+      return (
+        <span className="chip" style={{ color: cor, backgroundColor: `${cor}1f` }}>
+          {e.ehPago ? (e.valorEvento ?? 'Pago') : 'Gratuito'}
+        </span>
+      );
+    },
+  }),
+];
+
 export default function EventsPanel({ noticias }: EventsPanelProps) {
+  const cores = useCoresGrafico();
   const eventos = useMemo(() => noticias.filter((n) => n.ehEvento), [noticias]);
 
   const porTipo = useMemo(() => {
@@ -46,188 +125,142 @@ export default function EventsPanel({ noticias }: EventsPanelProps) {
   }, [eventos]);
 
   if (eventos.length === 0) {
-    return (
-      <section className="card">
-        <h3 className="card-titulo">
-          <CalendarDays size={16} className="text-brand-600" />
-          Eventos no Período
-        </h3>
-        <p className="py-14 text-center text-sm text-slate-400">
-          Nenhum evento identificado no recorte atual.
-        </p>
-      </section>
-    );
+    return <p className="card vazio">Nenhum evento identificado no recorte atual.</p>;
   }
 
+  const tooltip = tooltipGrafico(cores);
+  const eixo = eixoGrafico(cores, 10);
+  const pagos = eventos.filter((e) => e.ehPago).length;
+
   return (
-    <section className="space-y-4">
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="card">
-          <h3 className="card-titulo">
-            <CalendarDays size={16} className="text-brand-600" />
-            Tipos de Evento
-          </h3>
-          <div className="p-4">
-            <div className="flex flex-col items-center gap-4 sm:flex-row">
-              <div className="h-[260px] w-full sm:w-1/2">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                        isAnimationActive={false}
-                      data={porTipo}
-                      dataKey="total"
-                      nameKey="nome"
-                      innerRadius="50%"
-                      outerRadius="85%"
-                      paddingAngle={2}
-                      stroke="#fff"
-                      strokeWidth={2}
-                    >
-                      {porTipo.map((entrada, indice) => (
-                        <Cell
-                          key={entrada.nome}
-                          fill={PALETA_GRAFICOS[indice % PALETA_GRAFICOS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(valor, nome) => [`${valor} eventos`, String(nome)]}
-                      contentStyle={{ borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 12 }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-
-              <ul className="max-h-[260px] w-full space-y-1 overflow-y-auto sm:w-1/2">
-                {porTipo.map((entrada, indice) => (
-                  <li key={entrada.nome} className="flex items-center gap-2 text-[11px]">
-                    <span
-                      className="h-2.5 w-2.5 shrink-0 rounded-full"
-                      style={{ backgroundColor: PALETA_GRAFICOS[indice % PALETA_GRAFICOS.length] }}
-                    />
-                    <span className="flex-1 truncate text-slate-600" title={entrada.nome}>
-                      {entrada.nome}
-                    </span>
-                    <span className="shrink-0 font-medium tabular-nums text-slate-800">
-                      {entrada.total}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+    <section className="space-y-6">
+      {/* --- 1. Resumo --- */}
+      <Revelar>
+        <div className="grid grid-cols-3 gap-px border border-line bg-line">
+          {[
+            ['01', 'Eventos', eventos.length],
+            ['02', 'Gratuitos', eventos.length - pagos],
+            ['03', 'Pagos', pagos],
+          ].map(([indice, rotulo, valor]) => (
+            <div key={indice} className="bg-surface px-5 py-6">
+              <p className="rotulo">
+                <span className="text-faint">{indice} ·</span> {rotulo}
+              </p>
+              <p className="mt-3 text-4xl font-semibold tabular-nums tracking-[-0.03em] text-ink">
+                {Number(valor).toLocaleString('pt-BR')}
+              </p>
             </div>
-          </div>
+          ))}
         </div>
+      </Revelar>
 
-        <div className="card">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-5 py-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-              Pagos vs. Gratuitos
+      {/* --- 2. Tipos e gratuidade --- */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Revelar className="card">
+          <h3 className="card-titulo">
+            <span className="text-signal">A</span> · Tipos de evento
+          </h3>
+          <div className="grid items-center gap-4 p-5 sm:grid-cols-2">
+            <div className="h-[240px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    isAnimationActive={false}
+                    data={porTipo}
+                    dataKey="total"
+                    nameKey="nome"
+                    innerRadius="62%"
+                    outerRadius="92%"
+                    paddingAngle={1.5}
+                    stroke={cores.surface}
+                    strokeWidth={2}
+                  >
+                    {porTipo.map((entrada, indice) => (
+                      <Cell
+                        key={entrada.nome}
+                        fill={PALETA_GRAFICOS[indice % PALETA_GRAFICOS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    {...tooltip}
+                    formatter={(valor, nome) => [`${valor} eventos`, String(nome)]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+
+            <ul className="space-y-1.5">
+              {porTipo.map((entrada, indice) => (
+                <li key={entrada.nome} className="flex items-center gap-2 text-[0.8125rem]">
+                  <span
+                    className="h-2 w-2 shrink-0 rounded-full"
+                    style={{ backgroundColor: PALETA_GRAFICOS[indice % PALETA_GRAFICOS.length] }}
+                  />
+                  <span className="flex-1 truncate text-muted" title={entrada.nome}>
+                    {entrada.nome}
+                  </span>
+                  <span className="font-mono text-xs tabular-nums text-ink">{entrada.total}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Revelar>
+
+        <Revelar className="card" atraso={100}>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-5 py-3.5">
+            <h3 className="rotulo">
+              <span className="text-signal">B</span> · Pagos vs. gratuitos
             </h3>
-            <div className="flex items-center gap-3 text-[11px] text-slate-600">
+            <div className="flex items-center gap-3 text-xs text-muted">
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#2ecc71]" /> Gratuito
+                <span className="h-2 w-2 rounded-full" style={{ background: COR_GRATUITO }} />{' '}
+                Gratuito
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#e74c3c]" /> Pago
+                <span className="h-2 w-2 rounded-full" style={{ background: COR_PAGO }} /> Pago
               </span>
             </div>
           </div>
-          <div className="p-4">
+          <div className="p-5">
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart
-                data={custoPorTipo}
-                margin={{ top: 8, right: 8, left: -18, bottom: 60 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+              <BarChart data={custoPorTipo} margin={{ top: 8, right: 8, left: -18, bottom: 60 }}>
+                <CartesianGrid stroke={cores.line} strokeDasharray="2 4" vertical={false} />
                 <XAxis
                   dataKey="nome"
-                  tick={{ fontSize: 10, fill: '#64748b' }}
-                  axisLine={{ stroke: '#e2e8f0' }}
-                  tickLine={false}
+                  {...eixo}
                   angle={-35}
                   textAnchor="end"
                   interval={0}
                   height={70}
                 />
-                <YAxis
-                  tick={{ fontSize: 11, fill: '#64748b' }}
-                  axisLine={false}
-                  tickLine={false}
-                  allowDecimals={false}
-                />
-                <Tooltip
-                  contentStyle={{ borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 12 }}
-                  cursor={{ fill: '#f8fafc' }}
-                />
-                <Bar isAnimationActive={false} dataKey="Gratuito" fill="#2ecc71" radius={[3, 3, 0, 0]} />
-                <Bar isAnimationActive={false} dataKey="Pago" fill="#e74c3c" radius={[3, 3, 0, 0]} />
+                <YAxis {...eixo} axisLine={false} allowDecimals={false} />
+                <Tooltip {...tooltip} />
+                <Bar isAnimationActive={false} dataKey="Gratuito" fill={COR_GRATUITO} radius={[2, 2, 0, 0]} />
+                <Bar isAnimationActive={false} dataKey="Pago" fill={COR_PAGO} radius={[2, 2, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </Revelar>
       </div>
 
-      {/* Agenda detalhada */}
-      <div className="card overflow-hidden">
-        <h3 className="card-titulo">
-          Agenda ({eventos.length.toLocaleString('pt-BR')} eventos)
-        </h3>
-        <div className="max-h-96 overflow-auto">
-          <table className="w-full min-w-[860px] text-sm">
-            <thead className="sticky top-0 bg-slate-50">
-              <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                <th className="px-4 py-2.5">Evento</th>
-                <th className="px-4 py-2.5">Data</th>
-                <th className="px-4 py-2.5">Tipo</th>
-                <th className="px-4 py-2.5">Local</th>
-                <th className="px-4 py-2.5">Horário</th>
-                <th className="px-4 py-2.5">Custo</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {eventos.map((evento) => (
-                <tr key={evento.id} className="transition hover:bg-slate-50/70">
-                  <td className="max-w-xs px-4 py-2.5">
-                    <a
-                      href={evento.url}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      className="inline-flex items-start gap-1 font-medium text-slate-800 hover:text-brand-700"
-                    >
-                      <span className="line-clamp-2">{evento.titulo}</span>
-                      <ExternalLink size={11} className="mt-1 shrink-0 text-slate-400" />
-                    </a>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-2.5 text-slate-600">
-                    {evento.dataEvento ?? evento.data}
-                    {evento.dataFimEvento && evento.dataFimEvento !== evento.dataEvento && (
-                      <span className="text-slate-400"> → {evento.dataFimEvento}</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-2.5 text-xs text-slate-600">
-                    {evento.tipoEvento ?? '—'}
-                  </td>
-                  <td className="max-w-[200px] truncate px-4 py-2.5 text-xs text-slate-600">
-                    {evento.localEvento ?? '—'}
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-2.5 text-xs text-slate-600">
-                    {evento.horarioEvento ?? '—'}
-                  </td>
-                  <td className="px-4 py-2.5">
-                    {evento.ehPago ? (
-                      <span className="chip bg-rose-50 text-rose-700">
-                        {evento.valorEvento ?? 'Pago'}
-                      </span>
-                    ) : (
-                      <span className="chip bg-emerald-50 text-emerald-700">Gratuito</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* --- 3. Agenda detalhada --- */}
+      <Revelar className="card overflow-hidden">
+        <TabelaDados
+          dados={eventos}
+          colunas={COLUNAS_AGENDA}
+          rotuloItens="eventos"
+          ordenacaoInicial={[{ id: 'data', desc: true }]}
+          porPagina={null}
+          larguraMinima="min-w-[860px]"
+          alturaMaxima="max-h-[28rem]"
+          titulo={
+            <h3 className="rotulo">
+              <span className="text-signal">C</span> · Agenda
+            </h3>
+          }
+        />
+      </Revelar>
     </section>
   );
 }

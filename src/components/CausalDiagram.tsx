@@ -9,22 +9,20 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import dagre from 'dagre';
-import {
-  AlertCircle,
-  Brain,
-  ChevronDown,
-  Code2,
-  Loader2,
-  Minus,
-  Plus,
-  Workflow,
-} from 'lucide-react';
+import { AlertCircle, Brain, ChevronDown, Loader2, Minus, Plug, Plus, Workflow } from 'lucide-react';
 import type { Noticia, RelacaoCausal, RespostaCausal } from '@/types';
 import { COR_REDUCAO, COR_REFORCO } from '@/lib/constantes';
+import { useCoresGrafico } from '@/lib/preferencias';
+import { Revelar } from '@/lib/motion';
+import { useIA } from '@/lib/ia/conexao';
+import { extrairRelacoesCausais } from '@/lib/ia/causal';
+import { PROVEDORES } from '@/lib/ia/provedores';
 
 interface CausalDiagramProps {
   /** Notícias atualmente filtradas na UI — a base da extração. */
   noticias: Noticia[];
+  /** Abre o painel de conexão de IA (no assistente). */
+  onConectarIA: () => void;
 }
 
 const LARGURA_NO = 190;
@@ -84,15 +82,17 @@ function construirGrafo(relacoes: RelacaoCausal[]): { nos: Node[]; arestas: Edge
         alignItems: 'center',
         justifyContent: 'center',
         padding: '6px 10px',
-        borderRadius: 10,
-        border: `${destaque ? 2 : 1}px solid ${destaque ? '#1a5276' : '#cbd5e1'}`,
-        background: destaque ? '#eef5fb' : '#ffffff',
-        color: '#1e293b',
+        // Estilo inline aceita variáveis CSS: os nós acompanham o tema sem re-render.
+        borderRadius: 3,
+        border: `1px solid ${destaque ? 'rgb(var(--signal))' : 'rgb(var(--line))'}`,
+        background: destaque ? 'rgb(var(--signal) / 0.12)' : 'rgb(var(--elevated))',
+        color: 'rgb(var(--ink))',
+        fontFamily: 'Manrope, sans-serif',
         fontSize: 11.5,
         fontWeight: destaque ? 700 : 500,
         lineHeight: 1.25,
         textAlign: 'center' as const,
-        boxShadow: '0 1px 3px rgba(15, 23, 42, 0.08)',
+        boxShadow: destaque ? '0 0 24px -6px rgb(var(--signal) / 0.6)' : 'none',
       },
     };
   });
@@ -109,10 +109,10 @@ function construirGrafo(relacoes: RelacaoCausal[]): { nos: Node[]; arestas: Edge
       animated: false,
       label: reforco ? '+' : '−',
       labelStyle: { fill: cor, fontWeight: 800, fontSize: 15 },
-      labelBgStyle: { fill: '#ffffff', fillOpacity: 0.9 },
+      labelBgStyle: { fill: 'rgb(var(--elevated))', fillOpacity: 0.95 },
       labelBgPadding: [5, 3] as [number, number],
       labelBgBorderRadius: 4,
-      style: { stroke: cor, strokeWidth: 2.8 },
+      style: { stroke: cor, strokeWidth: 2 },
       markerEnd: {
         type: MarkerType.ArrowClosed,
         color: cor,
@@ -125,40 +125,23 @@ function construirGrafo(relacoes: RelacaoCausal[]): { nos: Node[]; arestas: Edge
   return { nos, arestas };
 }
 
-export default function CausalDiagram({ noticias }: CausalDiagramProps) {
+export default function CausalDiagram({ noticias, onConectarIA }: CausalDiagramProps) {
+  const { conexao, modelo } = useIA();
   const [resposta, setResposta] = useState<RespostaCausal | null>(null);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [jsonAberto, setJsonAberto] = useState(false);
+  const cores = useCoresGrafico();
 
   const gerar = useCallback(async () => {
     if (noticias.length === 0 || carregando) return;
+    if (!conexao || !modelo) return onConectarIA();
 
     setCarregando(true);
     setErro(null);
 
     try {
-      const requisicao = await fetch('/api/causal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          noticias: noticias.map((n) => ({
-            id: n.id,
-            titulo: n.titulo,
-            data: n.data,
-            conteudo: n.conteudo,
-          })),
-        }),
-      });
-
-      const dados = (await requisicao.json().catch(() => null)) as
-        | (RespostaCausal & { erro?: string })
-        | null;
-
-      if (!requisicao.ok || !dados || dados.erro) {
-        throw new Error(dados?.erro ?? `Falha na extração (HTTP ${requisicao.status})`);
-      }
-
+      const dados = await extrairRelacoesCausais(conexao, modelo, noticias);
       setResposta(dados);
       if (dados.relacoes.length === 0) {
         setErro('Nenhuma relação causal clara foi identificada neste recorte de notícias.');
@@ -169,7 +152,7 @@ export default function CausalDiagram({ noticias }: CausalDiagramProps) {
     } finally {
       setCarregando(false);
     }
-  }, [noticias, carregando]);
+  }, [noticias, carregando, conexao, modelo, onConectarIA]);
 
   const { nos, arestas } = useMemo(() => {
     if (!resposta || resposta.relacoes.length === 0) {
@@ -188,15 +171,14 @@ export default function CausalDiagram({ noticias }: CausalDiagramProps) {
   }, [resposta]);
 
   return (
-    <section id="causal" className="card overflow-hidden">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
+    <Revelar como="section" className="card overflow-hidden">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line px-5 py-4">
         <div>
-          <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-700">
-            <Workflow size={16} className="text-brand-600" />
-            Diagrama de Enlace Causal (CLD)
+          <h3 className="rotulo">
+            <span className="text-signal">A</span> · Diagrama de enlace causal (CLD)
           </h3>
-          <p className="mt-1 text-xs text-slate-500">
-            Extrai relações de causa e efeito das notícias filtradas usando IA generativa.
+          <p className="mt-1 text-sm text-muted">
+            Relações de causa e efeito extraídas das notícias filtradas por IA generativa.
           </p>
         </div>
 
@@ -206,7 +188,12 @@ export default function CausalDiagram({ noticias }: CausalDiagramProps) {
           disabled={carregando || noticias.length === 0}
           className="botao-primario"
         >
-          {carregando ? (
+          {!conexao ? (
+            <>
+              <Plug size={16} />
+              Conectar IA
+            </>
+          ) : carregando ? (
             <>
               <Loader2 size={16} className="animate-spin" />
               Analisando {Math.min(noticias.length, 40)} notícias…
@@ -214,7 +201,7 @@ export default function CausalDiagram({ noticias }: CausalDiagramProps) {
           ) : (
             <>
               <Brain size={16} />
-              Gerar Mapa Causal
+              {resposta ? 'Gerar novamente' : 'Gerar mapa causal'}
             </>
           )}
         </button>
@@ -222,83 +209,78 @@ export default function CausalDiagram({ noticias }: CausalDiagramProps) {
 
       {/* Estado inicial */}
       {!resposta && !carregando && !erro && (
-        <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
-          <div className="mb-4 rounded-full bg-brand-50 p-4">
-            <Workflow size={28} className="text-brand-600" />
+        <div className="flex animate-fade-in flex-col items-center justify-center px-6 py-24 text-center">
+          <div className="relative mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-line">
+            <span className="absolute inset-0 animate-ping rounded-full border border-signal/30 [animation-duration:2.4s]" />
+            <Workflow size={24} className="text-signal" />
           </div>
-          <p className="max-w-md text-sm text-slate-600">
-            Clique em <strong>Gerar Mapa Causal</strong> para que a IA leia as notícias do recorte
-            atual e identifique cadeias de causa e efeito no território.
+          <p className="max-w-md text-base text-muted">
+            A IA lê as notícias do recorte e identifica cadeias de{' '}
+            <span className="titulo-serif text-lg">causa e efeito</span> no território.
           </p>
-          <p className="mt-2 text-xs text-slate-400">
-            {noticias.length.toLocaleString('pt-BR')} notícias no filtro atual — as mais
-            substanciais serão priorizadas.
+          <p className="rotulo mt-3 text-faint">
+            {noticias.length.toLocaleString('pt-BR')} notícias no recorte · as mais substanciais
+            primeiro
+          </p>
+          <p className="mt-4 max-w-sm text-xs text-faint">
+            {conexao
+              ? `Gerado por IA com ${modelo} (${PROVEDORES[conexao.provedor].nome}). Relações extraídas automaticamente podem conter erros — confira as evidências.`
+              : 'Usa a mesma conexão do assistente: entre com OpenRouter (há modelos gratuitos) ou use sua própria chave.'}
           </p>
         </div>
       )}
 
       {/* Carregando */}
       {carregando && (
-        <div className="flex flex-col items-center justify-center px-6 py-20">
-          <Loader2 size={32} className="mb-4 animate-spin text-brand-600" />
-          <p className="text-sm font-medium text-slate-700">Lendo as notícias e mapeando causalidades…</p>
-          <p className="mt-1 text-xs text-slate-400">
+        <div className="flex animate-fade-in flex-col items-center justify-center px-6 py-24">
+          <div className="relative h-px w-56 overflow-hidden bg-line">
+            <div className="absolute inset-y-0 w-1/3 animate-barra-carregando bg-signal shadow-[0_0_12px_rgb(var(--signal))]" />
+          </div>
+          <p className="mt-5 text-sm font-medium text-ink">Lendo as notícias e mapeando causalidades…</p>
+          <p className="mt-1 text-xs text-faint">
             O processamento é feito em lotes e pode levar alguns segundos.
           </p>
-          <div className="mt-6 w-full max-w-sm space-y-2">
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className="h-3 animate-pulse rounded bg-slate-100"
-                style={{ width: `${100 - i * 18}%`, animationDelay: `${i * 120}ms` }}
-              />
-            ))}
-          </div>
         </div>
       )}
 
       {/* Erro / vazio */}
       {erro && !carregando && (
-        <div className="mx-5 my-5 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
-          <AlertCircle size={18} className="mt-0.5 shrink-0 text-amber-600" />
+        <div className="m-5 flex animate-fade-in items-start gap-3 border border-amber-500/30 bg-amber-500/10 p-4">
+          <AlertCircle size={18} className="mt-0.5 shrink-0 text-amber-500" />
           <div>
-            <p className="text-sm font-medium text-amber-900">Não foi possível montar o diagrama</p>
-            <p className="mt-0.5 text-xs text-amber-800">{erro}</p>
+            <p className="text-sm font-medium text-ink">Não foi possível montar o diagrama</p>
+            <p className="mt-0.5 text-xs text-muted">{erro}</p>
           </div>
         </div>
       )}
 
       {/* Diagrama */}
       {resposta && resposta.relacoes.length > 0 && !carregando && (
-        <>
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-slate-100 bg-slate-50 px-5 py-2.5 text-xs">
-            <span className="inline-flex items-center gap-1.5 font-medium text-slate-700">
-              <span
-                className="inline-block h-0.5 w-6 rounded"
-                style={{ backgroundColor: COR_REFORCO }}
-              />
+        <div className="animate-fade-in">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-line px-5 py-2.5 text-xs">
+            <span className="inline-flex items-center gap-1.5 font-medium text-ink">
+              <span className="inline-block h-px w-6" style={{ backgroundColor: COR_REFORCO }} />
               <Plus size={11} strokeWidth={3} style={{ color: COR_REFORCO }} />
               Reforço ({contagem.reforco})
             </span>
-            <span className="inline-flex items-center gap-1.5 font-medium text-slate-700">
-              <span
-                className="inline-block h-0.5 w-6 rounded"
-                style={{ backgroundColor: COR_REDUCAO }}
-              />
+            <span className="inline-flex items-center gap-1.5 font-medium text-ink">
+              <span className="inline-block h-px w-6" style={{ backgroundColor: COR_REDUCAO }} />
               <Minus size={11} strokeWidth={3} style={{ color: COR_REDUCAO }} />
               Redução ({contagem.reducao})
             </span>
-            <span className="text-slate-500">
-              <strong className="text-slate-700">{nos.length}</strong> variáveis ·{' '}
-              <strong className="text-slate-700">{resposta.noticiasAnalisadas}</strong> notícias
-              analisadas · <span className="text-slate-400">{resposta.modelo}</span>
+            <span className="rotulo">
+              <span className="text-ink">{nos.length}</span> variáveis ·{' '}
+              <span className="text-ink">{resposta.noticiasAnalisadas}</span> notícias ·{' '}
+              <span className="text-faint">{resposta.modelo}</span>
             </span>
           </div>
 
-          <div className="h-[560px] w-full bg-slate-50">
+          <div className="h-[580px] w-full">
             <ReactFlow
               nodes={nos}
               edges={arestas}
+              colorMode={cores.escuro ? 'dark' : 'light'}
+              style={{ background: 'transparent' }}
               fitView
               fitViewOptions={{ padding: 0.15 }}
               minZoom={0.1}
@@ -308,72 +290,76 @@ export default function CausalDiagram({ noticias }: CausalDiagramProps) {
               elementsSelectable
               proOptions={{ hideAttribution: true }}
             >
-              <Background color="#cbd5e1" gap={18} size={1} />
+              <Background color={cores.line} gap={24} size={1} />
               <Controls showInteractive={false} />
             </ReactFlow>
           </div>
 
           {/* Transparência: evidências textuais extraídas */}
-          <div className="border-t border-slate-100">
+          <div className="border-t border-line">
             <button
               type="button"
               onClick={() => setJsonAberto((v) => !v)}
-              className="flex w-full items-center justify-between px-5 py-3 text-left transition hover:bg-slate-50"
+              aria-expanded={jsonAberto}
+              className="flex w-full items-center justify-between px-5 py-3.5 text-left"
             >
-              <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
-                <Code2 size={14} className="text-brand-600" />
-                Evidências extraídas ({resposta.relacoes.length})
+              <span className="rotulo">
+                <span className="text-signal">B</span> · Evidências extraídas ({resposta.relacoes.length})
               </span>
               <ChevronDown
                 size={16}
-                className={`text-slate-400 transition-transform ${jsonAberto ? 'rotate-180' : ''}`}
+                className={`text-faint transition-transform duration-300 ${jsonAberto ? 'rotate-180' : ''}`}
               />
             </button>
 
-            {jsonAberto && (
-              <div className="animate-fade-in space-y-3 border-t border-slate-100 bg-slate-50 px-5 py-4">
-                <ul className="space-y-2">
-                  {resposta.relacoes.map((relacao, indice) => {
-                    const cor =
-                      relacao.polaridade === 'increase' ? COR_REFORCO : COR_REDUCAO;
-                    return (
-                      <li
-                        key={`${relacao.causa}-${relacao.efeito}-${indice}`}
-                        className="rounded-lg border border-slate-200 bg-white p-3 text-xs"
-                      >
-                        <p className="font-medium text-slate-800">
-                          {relacao.causa}{' '}
-                          <span style={{ color: cor }} className="font-bold">
-                            {relacao.polaridade === 'increase' ? '──▶ (+)' : '──▶ (−)'}
-                          </span>{' '}
-                          {relacao.efeito}
-                        </p>
-                        <p className="mt-1.5 border-l-2 border-slate-200 pl-2 italic text-slate-600">
-                          “{relacao.evidencia}”
-                        </p>
-                        {relacao.noticiaTitulo && (
-                          <p className="mt-1.5 text-[11px] text-slate-400">
-                            Fonte: #{relacao.noticiaId} — {relacao.noticiaTitulo}
+            {/* Acordeão: grid-rows 0fr → 1fr anima a altura sem medir o conteúdo */}
+            <div
+              className={`grid transition-[grid-template-rows] duration-500 ease-suave ${
+                jsonAberto ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+              }`}
+            >
+              <div className="overflow-hidden" inert={!jsonAberto}>
+                <div className="space-y-3 border-t border-line px-5 py-4">
+                  <ul className="space-y-2">
+                    {resposta.relacoes.map((relacao, indice) => {
+                      const cor = relacao.polaridade === 'increase' ? COR_REFORCO : COR_REDUCAO;
+                      return (
+                        <li
+                          key={`${relacao.causa}-${relacao.efeito}-${indice}`}
+                          className="border border-line bg-canvas/50 p-3 text-xs"
+                        >
+                          <p className="font-medium text-ink">
+                            {relacao.causa}{' '}
+                            <span style={{ color: cor }} className="font-bold">
+                              {relacao.polaridade === 'increase' ? '──▶ (+)' : '──▶ (−)'}
+                            </span>{' '}
+                            {relacao.efeito}
                           </p>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
+                          <p className="mt-1.5 border-l border-signal/40 pl-2 font-serif text-sm italic text-muted">
+                            “{relacao.evidencia}”
+                          </p>
+                          {relacao.noticiaTitulo && (
+                            <p className="mt-1.5 font-mono text-[0.6875rem] text-faint">
+                              Fonte: #{relacao.noticiaId} — {relacao.noticiaTitulo}
+                            </p>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
 
-                <details className="rounded-lg border border-slate-200 bg-white">
-                  <summary className="cursor-pointer px-3 py-2 text-xs font-medium text-slate-600">
-                    Ver JSON bruto
-                  </summary>
-                  <pre className="max-h-80 overflow-auto border-t border-slate-100 p-3 text-[11px] leading-relaxed text-slate-700">
-                    {JSON.stringify(resposta.relacoes, null, 2)}
-                  </pre>
-                </details>
+                  <details className="group border border-line">
+                    <summary className="rotulo cursor-pointer px-3 py-2">Ver JSON bruto</summary>
+                    <pre className="max-h-80 overflow-auto border-t border-line p-3 font-mono text-[0.6875rem] leading-relaxed text-muted">
+                      {JSON.stringify(resposta.relacoes, null, 2)}
+                    </pre>
+                  </details>
+                </div>
               </div>
-            )}
+            </div>
           </div>
-        </>
+        </div>
       )}
-    </section>
+    </Revelar>
   );
 }

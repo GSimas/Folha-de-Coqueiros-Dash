@@ -29,3 +29,4 @@ yarn-error.log*
 
 # Gerado pelo Netlify CLI (edge functions)
 deno.lock
+relatorio-avaliacao.md

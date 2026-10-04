@@ -32,29 +32,30 @@ function arredondar(valor: number): number {
  * Métricas SNA de TODOS os atores, calculadas sobre o grafo global de
  * coocorrência (dois atores se conectam quando citados na mesma notícia).
  */
-export function useAtoresComSNA(atores: Ator[]): AtorComSNA[] {
-  return useMemo(() => {
-    if (atores.length === 0) return [];
+export function calcularAtoresComSNA(atores: Ator[]): AtorComSNA[] {
+  if (atores.length === 0) return [];
 
-    const nos = atores.map((a) => a.nome);
-    const arestas = arestasPorCoocorrencia(
-      atores.map((a) => ({ nome: a.nome, documentos: a.noticias })),
-      1,
-    );
+  const nos = atores.map((a) => a.nome);
+  const arestas = arestasPorCoocorrencia(
+    atores.map((a) => ({ nome: a.nome, documentos: a.noticias })),
+    1,
+  );
 
-    const grafo = criarGrafo(nos, arestas);
-    const metricas = calcularMetricasSNA(grafo);
+  const grafo = criarGrafo(nos, arestas);
+  const metricas = calcularMetricasSNA(grafo);
 
-    return atores.map((ator) => ({
-      ...ator,
-      citacoes: ator.noticias.length,
-      grauAbsoluto: metricas.grau[ator.nome] ?? 0,
-      centralidadeGrau: arredondar(metricas.centralidadeGrau[ator.nome] ?? 0),
-      betweenness: arredondar(metricas.betweenness[ator.nome] ?? 0),
-      closeness: arredondar(metricas.closeness[ator.nome] ?? 0),
-    }));
-  }, [atores]);
+  return atores.map((ator) => ({
+    ...ator,
+    citacoes: ator.noticias.length,
+    grauAbsoluto: metricas.grau[ator.nome] ?? 0,
+    centralidadeGrau: arredondar(metricas.centralidadeGrau[ator.nome] ?? 0),
+    betweenness: arredondar(metricas.betweenness[ator.nome] ?? 0),
+    closeness: arredondar(metricas.closeness[ator.nome] ?? 0),
+  }));
 }
+
+export const useAtoresComSNA = (atores: Ator[]): AtorComSNA[] =>
+  useMemo(() => calcularAtoresComSNA(atores), [atores]);
 
 interface OpcoesGrafo {
   atores: Ator[];

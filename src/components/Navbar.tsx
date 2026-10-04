@@ -1,117 +1,121 @@
-import {
-  MessageSquare,
-  Menu,
-  Newspaper,
-  PanelLeftClose,
-  PanelLeftOpen,
-} from 'lucide-react';
-import { GithubIcon } from './SocialIcons';
+import { useCallback, useRef, useState } from 'react';
+import { Menu, Sparkles, X } from 'lucide-react';
+import SettingsMenu from './SettingsMenu';
+import { MODULOS, hrefDe, type Rota } from '@/lib/rotas';
+import { useDispensar, usePresenca } from '@/lib/motion';
 
 interface NavbarProps {
+  rota: Rota;
   onAbrirChat: () => void;
-  /** Abre/fecha a gaveta de filtros no mobile. */
-  onAlternarFiltros: () => void;
-  /** Recolhe/expande a barra lateral no desktop. */
-  onAlternarRecolhida: () => void;
-  sidebarRecolhida: boolean;
 }
 
-const SECOES = [
-  { id: 'visao-geral', rotulo: 'Visão Geral' },
-  { id: 'rede', rotulo: 'Rede de Atores' },
-  { id: 'causal', rotulo: 'Mapa Causal' },
-  { id: 'atores', rotulo: 'Banco de Atores' },
-  { id: 'acervo', rotulo: 'Acervo' },
-];
+export default function Navbar({ rota, onAbrirChat }: NavbarProps) {
+  const [menuAberto, setMenuAberto] = useState(false);
+  const { montado, visivel } = usePresenca(menuAberto, 260);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const fecharMenu = useCallback(() => setMenuAberto(false), []);
+  useDispensar(menuRef, menuAberto, fecharMenu);
 
-const REDES = [
-  {
-    href: 'https://folhadecoqueiros.com.br',
-    rotulo: 'Site da Folha de Coqueiros',
-    Icone: Newspaper,
-  },
-  { href: 'https://github.com/GSimas', rotulo: 'GitHub', Icone: GithubIcon },
-];
-
-export default function Navbar({
-  onAbrirChat,
-  onAlternarFiltros,
-  onAlternarRecolhida,
-  sidebarRecolhida,
-}: NavbarProps) {
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-[1600px] items-center gap-4 px-4 sm:px-6">
-        {/* Mobile: abre a gaveta de filtros */}
-        <button
-          type="button"
-          onClick={onAlternarFiltros}
-          className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
-          aria-label="Abrir filtros"
-        >
-          <Menu size={20} />
-        </button>
-
-        {/* Desktop: recolhe/expande a barra lateral */}
-        <button
-          type="button"
-          onClick={onAlternarRecolhida}
-          className="hidden rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 hover:text-brand-700 lg:inline-flex"
-          aria-label={sidebarRecolhida ? 'Expandir painel de filtros' : 'Recolher painel de filtros'}
-          aria-expanded={!sidebarRecolhida}
-          title={sidebarRecolhida ? 'Expandir filtros' : 'Recolher filtros'}
-        >
-          {sidebarRecolhida ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
-        </button>
-
-        <a href="#visao-geral" className="flex shrink-0 items-center gap-3">
-          {/* A arte é 200x50 (4:1): `object-contain` + largura automática
-              preservam a marca inteira, em vez de recortá-la num quadrado. */}
-          <img
-            src="/folhadecoqueiros-logo.jpg"
-            alt="Folha de Coqueiros"
-            width={200}
-            height={50}
-            className="h-8 w-auto shrink-0 object-contain"
-          />
-          <span className="hidden leading-tight lg:block">
-            <span className="block text-sm font-bold text-slate-900">Folha de Coqueiros</span>
-            <span className="block text-xs text-slate-500">Dashboard Analítico e IA</span>
+    <header className="sticky top-0 z-30 border-b border-line bg-canvas/75 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-4 px-4 sm:px-6">
+        <a href={hrefDe('inicio')} className="group flex shrink-0 items-center gap-3 rounded-sm">
+          {/* A arte tem fundo branco: vai num selo claro, como um cabeçalho de jornal. */}
+          <span className="flex h-9 items-center border border-line bg-[#fbfbf8] px-2 transition group-hover:border-signal/50">
+            <img
+              src="/folhadecoqueiros-logo.jpg"
+              alt="Folha de Coqueiros"
+              width={200}
+              height={50}
+              className="h-6 w-auto object-contain"
+            />
+          </span>
+          <span className="hidden leading-tight sm:block">
+            <span className="block font-mono text-[0.625rem] uppercase tracking-[0.18em] text-muted">
+              Dados · Território · IA
+            </span>
+            <span className="block text-sm font-semibold text-ink">
+              Dashboard <span className="font-serif text-base font-normal italic text-signal">analítico</span>
+            </span>
           </span>
         </a>
 
-        <nav className="ml-4 hidden items-center gap-1 xl:flex">
-          {SECOES.map((secao) => (
-            <a
-              key={secao.id}
-              href={`#${secao.id}`}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-brand-700"
-            >
-              {secao.rotulo}
-            </a>
-          ))}
+        <nav className="ml-6 hidden items-center xl:flex" aria-label="Módulos">
+          {MODULOS.map((modulo) => {
+            const ativo = rota === modulo.rota;
+            return (
+              <a
+                key={modulo.rota}
+                href={hrefDe(modulo.rota)}
+                aria-current={ativo ? 'page' : undefined}
+                className={`relative rounded-sm px-3 py-2 text-[0.8125rem] font-medium transition ${
+                  ativo ? 'text-ink' : 'text-muted hover:text-ink'
+                }`}
+              >
+                {modulo.rotulo}
+                <span
+                  className={`absolute inset-x-3 -bottom-[13px] h-px bg-signal shadow-[0_0_12px_rgb(var(--signal))] transition-all duration-500 ease-suave ${
+                    ativo ? 'scale-x-100 opacity-100' : 'scale-x-0 opacity-0'
+                  }`}
+                />
+              </a>
+            );
+          })}
         </nav>
 
-        <div className="ml-auto flex items-center gap-1">
-          <div className="mr-2 hidden items-center gap-1 md:flex">
-            {REDES.map(({ href, rotulo, Icone }) => (
-              <a
-                key={rotulo}
-                href={href}
-                target="_blank"
-                rel="noreferrer noopener"
-                aria-label={rotulo}
-                className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-brand-700"
-              >
-                <Icone size={18} />
-              </a>
-            ))}
-          </div>
+        <div className="ml-auto flex items-center gap-1.5">
+          <SettingsMenu />
 
-          <button type="button" onClick={onAbrirChat} className="botao-primario">
-            <MessageSquare size={16} />
-            <span className="hidden sm:inline">Assistente IA</span>
+          <button type="button" onClick={onAbrirChat} className="botao-primario ml-1 px-3 sm:px-4">
+            <Sparkles size={15} />
+            <span className="hidden sm:inline">Assistente</span>
           </button>
+
+          {/* Menu de módulos em telas menores */}
+          <div ref={menuRef} className="relative xl:hidden">
+            <button
+              type="button"
+              onClick={() => setMenuAberto((v) => !v)}
+              className="botao-icone"
+              aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu de módulos'}
+              aria-expanded={menuAberto}
+            >
+              {menuAberto ? <X size={20} /> : <Menu size={20} />}
+            </button>
+
+            {montado && (
+              <nav
+                aria-label="Módulos"
+                className={`absolute right-0 top-[calc(100%+0.6rem)] z-50 w-72 origin-top-right border border-line bg-elevated/95 p-2 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.5)] backdrop-blur-xl
+                            transition duration-200 ease-suave
+                            ${visivel ? 'translate-y-0 scale-100 opacity-100' : '-translate-y-1 scale-[0.97] opacity-0'}`}
+              >
+                <a
+                  href={hrefDe('inicio')}
+                  onClick={fecharMenu}
+                  className="flex items-center gap-3 rounded-sm px-3 py-2 text-sm text-muted transition hover:text-ink"
+                >
+                  <span className="font-mono text-[0.6875rem] text-faint">00</span> Início
+                </a>
+                {MODULOS.map((modulo, i) => (
+                  <a
+                    key={modulo.rota}
+                    href={hrefDe(modulo.rota)}
+                    onClick={fecharMenu}
+                    aria-current={rota === modulo.rota ? 'page' : undefined}
+                    style={{ transitionDelay: visivel ? `${40 + i * 25}ms` : '0ms' }}
+                    className={`flex items-center gap-3 rounded-sm px-3 py-2 text-sm transition duration-300 ${
+                      visivel ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0'
+                    } ${rota === modulo.rota ? 'bg-signal/10 text-signal' : 'text-muted hover:text-ink'}`}
+                  >
+                    <span className="font-mono text-[0.6875rem] text-faint">{modulo.indice}</span>
+                    <modulo.Icone size={15} />
+                    {modulo.rotulo}
+                  </a>
+                ))}
+              </nav>
+            )}
+          </div>
         </div>
       </div>
     </header>

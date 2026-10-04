@@ -27,5 +27,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "netlify/functions", "vite.config.ts", "scripts"]
+  "include": ["src", "tests", "vite.config.ts", "scripts"]
 }

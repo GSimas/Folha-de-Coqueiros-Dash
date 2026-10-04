@@ -169,66 +169,26 @@ export interface RespostaCausal {
 // Chat / RAG
 // ---------------------------------------------------------------------------
 
-export const MODELOS_GEMINI = [
-  {
-    id: 'gemini-3.1-flash-lite-preview',
-    nome: 'Gemini 3.1 Flash Lite',
-    descricao: 'Mais rápido — padrão do painel',
-  },
-  {
-    id: 'gemini-2.5-flash',
-    nome: 'Gemini 2.5 Flash',
-    descricao: 'Raciocínio mais profundo, um pouco mais lento',
-  },
-  {
-    id: 'gemini-2.5-flash-lite',
-    nome: 'Gemini 2.5 Flash Lite',
-    descricao: 'Equilíbrio entre custo e velocidade',
-  },
-] as const;
-
-export type ModeloGemini = (typeof MODELOS_GEMINI)[number]['id'];
-
-export const MODELO_PADRAO: ModeloGemini = 'gemini-3.1-flash-lite-preview';
-
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  /** Marca mensagens em carregamento para renderizar o skeleton (nenhum caractere revelado ainda). */
+  /** Momento em que a mensagem foi criada (epoch ms) — exibido como timestamp. */
+  criadaEm: number;
+  /** Marca mensagens em carregamento para renderizar o skeleton (nenhum caractere chegou ainda). */
   carregando?: boolean;
-  /** `true` enquanto o texto ainda está sendo revelado em efeito de máquina de escrever. */
+  /** `true` enquanto o texto ainda está chegando pelo stream. */
   streaming?: boolean;
   erro?: boolean;
-}
-
-/** Payload enviado para a função serverless `/api/chat`. */
-export interface ChatRequest {
-  mensagens: Array<Pick<ChatMessage, 'role' | 'content'>>;
-  modelo: ModeloGemini;
-  contexto: ContextoRAG;
-}
-
-/** Recorte de dados (já filtrado na UI) que alimenta o RAG. */
-export interface ContextoRAG {
-  metricas: MetricasGerais;
-  noticias: Array<{
-    id: number;
-    titulo: string;
-    data: string;
-    url: string;
-    categorias: string;
-    conteudo: string;
-  }>;
-  atores: Array<{
-    nome: string;
-    tipo: string;
-    descricao: string;
-    citacoes: number;
-    grauAbsoluto: number;
-    betweenness: number;
-    closeness: number;
-  }>;
+  /** Modelo e provedor que geraram a resposta — rótulo de transparência. */
+  modelo?: string;
+  /** URLs do acervo enviadas como contexto; links fora desta lista são sinalizados. */
+  urlsVerificadas?: string[];
+  /** Resposta interrompida pelo limite de tokens — a interface oferece "continuar". */
+  cortado?: boolean;
+  /** Pergunta que originou a resposta (para continuar com o mesmo contexto). */
+  pergunta?: string;
+  suspeitaInjecao?: boolean;
 }
 
 export interface MetricasGerais {

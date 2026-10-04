@@ -1,0 +1,67 @@
+name: Coleta e classificação de notícias
+
+# A cada 3 dias, às 06:00 de Brasília (09:00 UTC). Observação: o cron "*/3" no
+# dia do mês recomeça a cada mês (dias 1, 4, 7 … 28, 31), então na virada de
+# mês o intervalo pode cair para 1–2 dias — nunca passa de 3.
+on:
+  schedule:
+    - cron: '0 9 */3 * *'
+  workflow_dispatch:
+    inputs:
+      limite_ia:
+        description: 'Máximo de notícias enviadas à IA nesta execução'
+        default: '40'
+
+# Nunca roda duas coletas ao mesmo tempo (evita conflito ao gravar os JSONs).
+concurrency:
+  group: coleta-noticias
+  cancel-in-progress: false
+
+jobs:
+  coletar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependências
+        run: pip install requests beautifulsoup4
+
+      - name: Testes da coleta
+        run: python -m unittest tests/test_automacao.py
+
+      - name: Coletar e classificar
+        env:
+          # Recomendado: OpenRouter (modelos gratuitos). Crie o secret OPENROUTER_API_KEY.
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          # Alternativa, usada só se não houver OPENROUTER_API_KEY.
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Opcional (Settings → Variables): outro modelo, ex. "google/gemini-2.5-flash-lite".
+          IA_MODELO: ${{ vars.IA_MODELO }}
+          LIMITE_IA: ${{ inputs.limite_ia || '40' }}
+        run: python automacao.py
+
+      # Roda mesmo se a IA falhar: a coleta nunca é perdida. O passo anterior
+      # termina com erro nesses casos, deixando o workflow vermelho (o GitHub avisa).
+      - name: Salvar no repositório
+        if: always()
+        run: |
+          git config --global user.name "Robô Folha de Coqueiros"
+          git config --global user.email "automacao@folhadecoqueiros.com"
+          git add noticias.json atores.json public/data/noticias.json public/data/atores.json
+          if git diff --staged --quiet; then
+            echo "Nada novo para salvar."
+          else
+            git commit -m "🤖 Coleta automática: notícias e atores atualizados"
+            git pull --rebase --autostash
+            git push
+          fi

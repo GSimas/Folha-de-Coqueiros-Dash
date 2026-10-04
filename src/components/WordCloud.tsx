@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { Cloud } from 'lucide-react';
 import type { Noticia } from '@/types';
 import { contarPalavras } from '@/lib/data';
+import { Revelar } from '@/lib/motion';
 
 interface WordCloudProps {
   noticias: Noticia[];
@@ -9,8 +9,9 @@ interface WordCloudProps {
   onSelecionarTermo?: (termo: string) => void;
 }
 
-const TAMANHO_MIN = 12;
-const TAMANHO_MAX = 46;
+// Em rem, para acompanhar a preferência de tamanho de fonte.
+const TAMANHO_MIN = 0.75;
+const TAMANHO_MAX = 3;
 
 export default function WordCloud({ noticias, onSelecionarTermo }: WordCloudProps) {
   const palavras = useMemo(
@@ -34,44 +35,72 @@ export default function WordCloud({ noticias, onSelecionarTermo }: WordCloudProp
   }, [palavras]);
 
   if (palavras.length === 0) {
-    return null;
+    return <p className="card vazio">Sem termos suficientes no recorte.</p>;
   }
 
+  const destaques = palavras.slice(0, 5);
+
   return (
-    <section className="card">
-      <h3 className="card-titulo">
-        <Cloud size={16} className="text-brand-600" />
-        Nuvem de Palavras
-        <span className="ml-auto text-[11px] font-normal normal-case tracking-normal text-slate-400">
-          Top {palavras.length} termos · clique para filtrar
-        </span>
-      </h3>
+    <>
+      <Revelar className="card">
+        <h3 className="card-titulo">
+          <span className="text-signal">A</span> · Nuvem de termos
+          <span className="ml-auto normal-case tracking-normal text-faint">
+            top {palavras.length} · clique para filtrar
+          </span>
+        </h3>
 
-      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 p-6">
-        {dispostas.map(([palavra, contagem]) => {
-          const relativo = (contagem - minimo) / (maximo - minimo || 1);
-          const tamanho = TAMANHO_MIN + relativo * (TAMANHO_MAX - TAMANHO_MIN);
-          // Termos mais frequentes ficam mais escuros e mais pesados
-          const luminosidade = 62 - relativo * 40;
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 px-6 py-10">
+          {dispostas.map(([palavra, contagem], i) => {
+            const relativo = (contagem - minimo) / (maximo - minimo || 1);
+            const tamanho = TAMANHO_MIN + relativo * (TAMANHO_MAX - TAMANHO_MIN);
 
-          return (
-            <button
-              key={palavra}
-              type="button"
-              onClick={() => onSelecionarTermo?.(palavra)}
-              title={`${palavra} — ${contagem} ocorrências`}
-              className="inline-block leading-tight transition duration-150 hover:scale-110 hover:text-brand-600"
-              style={{
-                fontSize: `${tamanho}px`,
-                fontWeight: 400 + Math.round(relativo * 3) * 100,
-                color: `hsl(205, ${30 + relativo * 35}%, ${luminosidade}%)`,
-              }}
-            >
-              {palavra}
-            </button>
-          );
-        })}
-      </div>
-    </section>
+            return (
+              <button
+                key={palavra}
+                type="button"
+                onClick={() => onSelecionarTermo?.(palavra)}
+                title={`${palavra} — ${contagem} ocorrências`}
+                className="inline-block animate-fade-in rounded-sm px-1 leading-tight tracking-tight transition duration-300 hover:!text-signal hover:[text-shadow:0_0_24px_rgb(var(--signal)/0.6)]"
+                style={{
+                  fontSize: `${tamanho}rem`,
+                  fontWeight: 400 + Math.round(relativo * 3) * 100,
+                  // Do tom secundário ao azul de sinal conforme a frequência.
+                  color: `color-mix(in oklab, rgb(var(--signal)) ${Math.round(25 + relativo * 75)}%, rgb(var(--muted)))`,
+                  animationDelay: `${i * 6}ms`,
+                }}
+              >
+                {palavra}
+              </button>
+            );
+          })}
+        </div>
+      </Revelar>
+
+      {/* Os cinco termos dominantes, em leitura direta */}
+      <Revelar atraso={120}>
+        <ol className="grid gap-px border border-line bg-line sm:grid-cols-5">
+          {destaques.map(([palavra, contagem], i) => (
+            <li key={palavra} className="bg-surface">
+              <button
+                type="button"
+                onClick={() => onSelecionarTermo?.(palavra)}
+                className="group flex h-full w-full flex-col p-5 text-left"
+              >
+                <span className="rotulo">
+                  <span className="text-signal">{String(i + 1).padStart(2, '0')}</span> · termo
+                </span>
+                <span className="mt-3 truncate text-xl font-semibold tracking-tight text-ink transition group-hover:text-signal">
+                  {palavra}
+                </span>
+                <span className="mt-1 font-mono text-xs text-faint">
+                  {contagem.toLocaleString('pt-BR')} ocorrências
+                </span>
+              </button>
+            </li>
+          ))}
+        </ol>
+      </Revelar>
+    </>
   );
 }

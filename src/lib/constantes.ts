@@ -1,32 +1,35 @@
 /** Constantes visuais e taxonomias compartilhadas entre os componentes. */
 import type { TipoAtor } from '@/types';
 
-/** Cores canônicas por tipo de ator — paridade com a versão Pyvis. */
+/**
+ * Cores por tipo de ator. Mantêm as famílias do Pyvis original (azul, vermelho,
+ * verde, amarelo), suavizadas para conviver com a paleta azul nos dois temas.
+ */
 export const COR_POR_TIPO: Record<TipoAtor | 'Desconhecido' | 'Termo', string> = {
-  Pessoa: '#3498db',
-  'Organização': '#e74c3c',
-  Local: '#2ecc71',
-  Empresa: '#f1c40f',
-  Desconhecido: '#95a5a6',
-  Termo: '#1a5276',
+  Pessoa: '#5b9be0',
+  'Organização': '#e07a6b',
+  Local: '#5fbf8f',
+  Empresa: '#dfb85a',
+  Desconhecido: '#94a3b8',
+  Termo: '#6f9fd8',
 };
 
-export const COR_REFORCO = '#27ae60';
-export const COR_REDUCAO = '#c0392b';
+export const COR_REFORCO = '#4fae7f';
+export const COR_REDUCAO = '#d96a5f';
 
-/** Paleta sequencial usada nos gráficos de categoria. */
+/** Paleta categórica: azuis e cianos à frente, acentos quentes para distinguir. */
 export const PALETA_GRAFICOS = [
-  '#1a5276',
-  '#2e86c1',
-  '#48c9b0',
-  '#f5b041',
-  '#e74c3c',
-  '#8e44ad',
-  '#16a085',
-  '#d35400',
-  '#5d6d7e',
-  '#c0392b',
-  '#27ae60',
+  '#4f8fd6',
+  '#6fc3d9',
+  '#8a9df0',
+  '#57b7a0',
+  '#e0b25c',
+  '#d9806b',
+  '#b48ad8',
+  '#7fa36b',
+  '#9aa8b8',
+  '#d97a9a',
+  '#3f6fa8',
 ];
 
 export const CATEGORIAS_VALIDAS = [

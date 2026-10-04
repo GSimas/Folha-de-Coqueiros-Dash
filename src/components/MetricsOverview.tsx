@@ -11,28 +11,14 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import {
-  BadgeCheck,
-  CalendarDays,
-  FileText,
-  Newspaper,
-  Ticket,
-  type LucideIcon,
-} from 'lucide-react';
 import type { MetricasGerais, Noticia } from '@/types';
-import { corDaCategoria, formatarNumero } from '@/lib/constantes';
+import { corDaCategoria } from '@/lib/constantes';
+import { eixoGrafico, tooltipGrafico, useCoresGrafico } from '@/lib/preferencias';
+import { Revelar, useContagem } from '@/lib/motion';
 
 interface MetricsOverviewProps {
   noticias: Noticia[];
   metricas: MetricasGerais;
-}
-
-interface CartaoMetrica {
-  rotulo: string;
-  valor: string;
-  detalhe?: string;
-  Icone: LucideIcon;
-  cor: string;
 }
 
 /** Converte a chave `AAAA-MM` em rótulo legível (`ago/26`). */
@@ -44,47 +30,36 @@ function rotularMes(mesAno: string): string {
   return `${MESES[indice]}/${ano.slice(2)}`;
 }
 
+function Kpi({
+  indice,
+  rotulo,
+  valor,
+  detalhe,
+  className = '',
+}: {
+  indice: string;
+  rotulo: string;
+  valor: number;
+  detalhe?: string;
+  className?: string;
+}) {
+  const exibido = useContagem(valor, 900);
+  return (
+    <div className={`bg-surface px-5 py-6 ${className}`}>
+      <p className="rotulo">
+        <span className="text-faint">{indice} ·</span> {rotulo}
+      </p>
+      <p className="mt-3 text-4xl font-semibold tabular-nums tracking-[-0.03em] text-ink">
+        {exibido.toLocaleString('pt-BR')}
+      </p>
+      <p className="mt-1 h-4 text-xs text-muted">{detalhe}</p>
+    </div>
+  );
+}
+
 export default function MetricsOverview({ noticias, metricas }: MetricsOverviewProps) {
   const [visaoVolume, setVisaoVolume] = useState<'geral' | 'categoria'>('geral');
-
-  const cartoes: CartaoMetrica[] = [
-    {
-      rotulo: 'Notícias no recorte',
-      valor: formatarNumero(metricas.totalNoticias),
-      Icone: Newspaper,
-      cor: 'text-brand-600 bg-brand-50',
-    },
-    {
-      rotulo: 'Média de palavras',
-      valor: formatarNumero(metricas.mediaPalavras),
-      detalhe: 'por matéria',
-      Icone: FileText,
-      cor: 'text-violet-600 bg-violet-50',
-    },
-    {
-      rotulo: 'Categorizadas pela IA',
-      valor: `${formatarNumero(metricas.categorizadas)}`,
-      detalhe: `de ${formatarNumero(metricas.totalNoticias)}`,
-      Icone: BadgeCheck,
-      cor: 'text-emerald-600 bg-emerald-50',
-    },
-    {
-      rotulo: 'Eventos identificados',
-      valor: formatarNumero(metricas.totalEventos),
-      Icone: CalendarDays,
-      cor: 'text-amber-600 bg-amber-50',
-    },
-    {
-      rotulo: 'Eventos pagos',
-      valor: formatarNumero(metricas.eventosPagos),
-      detalhe:
-        metricas.totalEventos > 0
-          ? `${Math.round((metricas.eventosPagos / metricas.totalEventos) * 100)}% dos eventos`
-          : undefined,
-      Icone: Ticket,
-      cor: 'text-rose-600 bg-rose-50',
-    },
-  ];
+  const cores = useCoresGrafico();
 
   // Distribuição por categoria (apenas notícias efetivamente categorizadas)
   const dadosCategorias = useMemo(() => {
@@ -130,166 +105,180 @@ export default function MetricsOverview({ noticias, metricas }: MetricsOverviewP
     };
   }, [noticias, visaoVolume]);
 
+  const tooltip = tooltipGrafico(cores);
+  const eixo = eixoGrafico(cores);
+
   return (
-    <section id="visao-geral" className="space-y-6">
-      {/* --- KPIs --- */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
-        {cartoes.map(({ rotulo, valor, detalhe, Icone, cor }) => (
-          <div key={rotulo} className="card p-4">
-            <div className={`mb-3 inline-flex rounded-lg p-2 ${cor}`}>
-              <Icone size={18} />
-            </div>
-            <p className="text-2xl font-bold tabular-nums text-slate-900">{valor}</p>
-            <p className="mt-0.5 text-xs font-medium text-slate-600">{rotulo}</p>
-            {detalhe && <p className="text-[11px] text-slate-400">{detalhe}</p>}
-          </div>
-        ))}
-      </div>
+    <section className="space-y-6">
+      {/* --- 1. Os números --- */}
+      <Revelar>
+        <div className="grid grid-cols-2 gap-px border border-line bg-line md:grid-cols-3 xl:grid-cols-5">
+          <Kpi indice="01" rotulo="Notícias" valor={metricas.totalNoticias} />
+          <Kpi
+            indice="02"
+            rotulo="Palavras / matéria"
+            valor={metricas.mediaPalavras}
+            detalhe="média"
+          />
+          <Kpi
+            indice="03"
+            rotulo="Categorizadas"
+            valor={metricas.categorizadas}
+            detalhe={`de ${metricas.totalNoticias.toLocaleString('pt-BR')} pela IA`}
+          />
+          <Kpi indice="04" rotulo="Eventos" valor={metricas.totalEventos} />
+          <Kpi
+            indice="05"
+            rotulo="Eventos pagos"
+            // 5 células em grades de 2 ou 3 colunas: a última ocupa o espaço restante.
+            className="col-span-2 xl:col-span-1"
+            valor={metricas.eventosPagos}
+            detalhe={
+              metricas.totalEventos > 0
+                ? `${Math.round((metricas.eventosPagos / metricas.totalEventos) * 100)}% dos eventos`
+                : undefined
+            }
+          />
+        </div>
+      </Revelar>
 
-      {/* --- Gráficos --- */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="card">
-          <h3 className="card-titulo">Categorias no período</h3>
-          <div className="p-4">
-            {dadosCategorias.length > 0 ? (
-              <div className="flex flex-col items-center gap-4 sm:flex-row">
-                <div className="h-[280px] w-full sm:w-1/2">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        isAnimationActive={false}
-                        data={dadosCategorias}
-                        dataKey="total"
-                        nameKey="nome"
-                        innerRadius="50%"
-                        outerRadius="85%"
-                        paddingAngle={2}
-                        stroke="#fff"
-                        strokeWidth={2}
-                      >
-                        {dadosCategorias.map((entrada, indice) => (
-                          <Cell key={entrada.nome} fill={corDaCategoria(entrada.nome, indice)} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        formatter={(valor, nome) => [`${valor} notícias`, String(nome)]}
-                        contentStyle={{
-                          borderRadius: 8,
-                          border: '1px solid #e2e8f0',
-                          fontSize: 12,
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-
-                <ul className="max-h-[280px] w-full space-y-1 overflow-y-auto sm:w-1/2">
-                  {dadosCategorias.map((entrada, indice) => (
-                    <li key={entrada.nome} className="flex items-center gap-2 text-[11px]">
-                      <span
-                        className="h-2.5 w-2.5 shrink-0 rounded-full"
-                        style={{ backgroundColor: corDaCategoria(entrada.nome, indice) }}
-                      />
-                      <span className="flex-1 truncate text-slate-600" title={entrada.nome}>
-                        {entrada.nome}
-                      </span>
-                      <span className="shrink-0 font-medium tabular-nums text-slate-800">
-                        {entrada.total}
-                      </span>
-                      <span className="w-9 shrink-0 text-right tabular-nums text-slate-400">
-                        {Math.round((entrada.total / totalCategorizado) * 100)}%
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+      {/* --- 2. Do que se fala --- */}
+      <Revelar className="card">
+        <h3 className="card-titulo">
+          <span className="text-signal">A</span> · Categorias no recorte
+        </h3>
+        <div className="p-5">
+          {dadosCategorias.length > 0 ? (
+            <div className="grid items-center gap-6 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+              <div className="h-[280px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      isAnimationActive={false}
+                      data={dadosCategorias}
+                      dataKey="total"
+                      nameKey="nome"
+                      innerRadius="62%"
+                      outerRadius="92%"
+                      paddingAngle={1.5}
+                      stroke={cores.surface}
+                      strokeWidth={2}
+                    >
+                      {dadosCategorias.map((entrada, indice) => (
+                        <Cell key={entrada.nome} fill={corDaCategoria(entrada.nome, indice)} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      {...tooltip}
+                      formatter={(valor, nome) => [`${valor} notícias`, String(nome)]}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
-            ) : (
-              <p className="py-16 text-center text-sm text-slate-400">
-                Nenhuma notícia categorizada no período selecionado.
-              </p>
-            )}
-          </div>
-        </div>
 
-        <div className="card">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-5 py-3">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-              Volume temporal (mensal)
-            </h3>
-            <div className="flex rounded-lg bg-slate-100 p-0.5">
-              {(
-                [
-                  ['geral', 'Geral'],
-                  ['categoria', 'Por categoria'],
-                ] as const
-              ).map(([valor, rotulo]) => (
-                <button
-                  key={valor}
-                  type="button"
-                  onClick={() => setVisaoVolume(valor)}
-                  className={`rounded-md px-3 py-1 text-xs font-medium transition ${
-                    visaoVolume === valor
-                      ? 'bg-white text-brand-700 shadow-sm'
-                      : 'text-slate-500 hover:text-slate-700'
-                  }`}
-                >
-                  {rotulo}
-                </button>
-              ))}
+              {/* Legenda como barras proporcionais */}
+              <ul className="space-y-2.5">
+                {dadosCategorias.map((entrada, indice) => {
+                  const fracao = entrada.total / totalCategorizado;
+                  const cor = corDaCategoria(entrada.nome, indice);
+                  return (
+                    <li key={entrada.nome} className="group">
+                      <div className="flex items-baseline gap-2 text-[0.8125rem]">
+                        <span
+                          className="h-2 w-2 shrink-0 translate-y-[-1px] rounded-full"
+                          style={{ backgroundColor: cor }}
+                        />
+                        <span className="flex-1 truncate text-muted transition group-hover:text-ink" title={entrada.nome}>
+                          {entrada.nome}
+                        </span>
+                        <span className="font-mono text-xs tabular-nums text-ink">{entrada.total}</span>
+                        <span className="w-10 text-right font-mono text-xs tabular-nums text-faint">
+                          {Math.round(fracao * 100)}%
+                        </span>
+                      </div>
+                      <div className="ml-4 mt-1 h-px bg-line">
+                        <div
+                          className="h-px transition-all duration-700 ease-suave"
+                          style={{ width: `${fracao * 100}%`, backgroundColor: cor }}
+                        />
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
-          </div>
+          ) : (
+            <p className="vazio">Nenhuma notícia categorizada no recorte.</p>
+          )}
+        </div>
+      </Revelar>
 
-          <div className="p-4">
-            {dadosTemporais.length > 0 ? (
-              <ResponsiveContainer width="100%" height={320}>
-                <BarChart data={dadosTemporais} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                  <XAxis
-                    dataKey="rotulo"
-                    tick={{ fontSize: 11, fill: '#64748b' }}
-                    axisLine={{ stroke: '#e2e8f0' }}
-                    tickLine={false}
-                    interval="preserveStartEnd"
-                    minTickGap={12}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 11, fill: '#64748b' }}
-                    axisLine={false}
-                    tickLine={false}
-                    allowDecimals={false}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: 8,
-                      border: '1px solid #e2e8f0',
-                      fontSize: 12,
-                    }}
-                    cursor={{ fill: '#f8fafc' }}
-                  />
-                  {visaoVolume === 'geral' ? (
-                    <Bar isAnimationActive={false} dataKey="total" name="Notícias" fill="#1a5276" radius={[4, 4, 0, 0]} />
-                  ) : (
-                    categoriasEmpilhadas.map((categoria, indice) => (
-                      <Bar
-                        isAnimationActive={false}
-                        key={categoria}
-                        dataKey={categoria}
-                        name={categoria}
-                        stackId="categorias"
-                        fill={corDaCategoria(categoria, indice)}
-                      />
-                    ))
-                  )}
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <p className="py-16 text-center text-sm text-slate-400">
-                Sem dados temporais no período selecionado.
-              </p>
-            )}
+      {/* --- 3. Ao longo do tempo --- */}
+      <Revelar className="card">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-2.5">
+          <h3 className="rotulo">
+            <span className="text-signal">B</span> · Volume mensal
+          </h3>
+          <div className="segmentado">
+            {(
+              [
+                ['geral', 'Geral'],
+                ['categoria', 'Por categoria'],
+              ] as const
+            ).map(([valor, rotulo]) => (
+              <button
+                key={valor}
+                type="button"
+                aria-pressed={visaoVolume === valor}
+                onClick={() => setVisaoVolume(valor)}
+              >
+                {rotulo}
+              </button>
+            ))}
           </div>
         </div>
-      </div>
+
+        <div className="p-5">
+          {dadosTemporais.length > 0 ? (
+            <ResponsiveContainer width="100%" height={340}>
+              <BarChart data={dadosTemporais} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+                <CartesianGrid stroke={cores.line} strokeDasharray="2 4" vertical={false} />
+                <XAxis
+                  dataKey="rotulo"
+                  {...eixo}
+                  interval="preserveStartEnd"
+                  minTickGap={12}
+                />
+                <YAxis {...eixo} axisLine={false} allowDecimals={false} />
+                <Tooltip {...tooltip} />
+                {visaoVolume === 'geral' ? (
+                  <Bar
+                    isAnimationActive={false}
+                    dataKey="total"
+                    name="Notícias"
+                    fill={cores.signal}
+                    fillOpacity={0.85}
+                    radius={[2, 2, 0, 0]}
+                  />
+                ) : (
+                  categoriasEmpilhadas.map((categoria, indice) => (
+                    <Bar
+                      isAnimationActive={false}
+                      key={categoria}
+                      dataKey={categoria}
+                      name={categoria}
+                      stackId="categorias"
+                      fill={corDaCategoria(categoria, indice)}
+                    />
+                  ))
+                )}
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="vazio">Sem dados temporais no recorte.</p>
+          )}
+        </div>
+      </Revelar>
     </section>
   );
 }

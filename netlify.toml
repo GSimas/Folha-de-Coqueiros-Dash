@@ -1,7 +1,6 @@
 [build]
   command = "npm run build"
   publish = "dist"
-  functions = "netlify/functions"
 
 [build.environment]
   # O Vite 8 exige "^20.19.0 || >=22.12.0". Um "20" genérico depende de qual
@@ -9,31 +8,7 @@
   # build; o 22 satisfaz a faixa com folga.
   NODE_VERSION = "22"
 
-[functions]
-  node_bundler = "esbuild"
-  # O @google/genai depende de google-auth-library, que faz `require()` dinâmico
-  # de módulos nativos. Empacotá-lo em ESM quebra no runtime com
-  # "Dynamic require of child_process is not supported", então ele é enviado
-  # como dependência resolvida pelo Node em vez de ser embutido no bundle.
-  external_node_modules = ["@google/genai"]
-
-# As funções serverless respondem em /api/* (ex.: /api/chat, /api/causal).
-# Em desenvolvimento, esse mesmo mapeamento é feito pelo proxy do Vite
-# (ver `server.proxy` em vite.config.ts).
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-  force = true
-
-# Fallback de SPA — precisa vir DEPOIS do redirect de /api.
-#
-# Atenção ao desenvolvimento: esta regra intercepta qualquer caminho, então o
-# `netlify dev` acaba devolvendo os módulos ES do Vite (/src/*.tsx,
-# /@vite/client) como HTML e a página fica em branco. Por isso o fluxo local
-# recomendado é `npm run dev:full` (Vite + netlify functions:serve), e não
-# `netlify dev`. Em produção esta regra só age quando nenhum arquivo estático
-# corresponde ao caminho, que é exatamente o comportamento desejado.
+# Fallback de SPA: só age quando nenhum arquivo estático corresponde ao caminho.
 [[redirects]]
   from = "/*"
   to = "/index.html"
@@ -43,3 +18,17 @@
   for = "/data/*"
   [headers.values]
     Cache-Control = "public, max-age=3600, must-revalidate"
+
+# Cabeçalhos de segurança. As chaves de IA do usuário vivem no navegador, então
+# a CSP é a principal barreira contra exfiltração: scripts só da própria origem
+# (nada inline) e conexões só com a origem e os provedores de IA suportados —
+# a mesma lista de src/lib/ia/provedores.ts. Ao adicionar um provedor lá,
+# acrescente o domínio em `connect-src` aqui.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://openrouter.ai https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com https://api.deepseek.com https://api.groq.com https://api.mistral.ai https://api.x.ai https://api.together.xyz https://api.fireworks.ai https://api.cerebras.ai https://api.perplexity.ai https://api.cohere.ai https://api.moonshot.ai; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"

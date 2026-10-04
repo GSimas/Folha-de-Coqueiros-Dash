@@ -2,91 +2,457 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================================================
+   Tokens de tema
+   Cores em canais RGB ("r g b") para aceitar os modificadores de opacidade do
+   Tailwind (`bg-signal/15`). Os atributos em <html> são aplicados antes da
+   primeira pintura pelo script inline de index.html:
+     data-tema="claro|escuro" · data-contraste="normal|alto"
+     data-fonte="p|m|g"       · data-movimento="normal|reduzido"
+   ========================================================================== */
 @layer base {
+  :root,
+  [data-tema='claro'] {
+    color-scheme: light;
+    --canvas: 243 244 240;
+    --surface: 250 250 248;
+    --elevated: 255 255 255;
+    --ink: 11 22 34;
+    --muted: 84 97 112;
+    --faint: 128 140 153;
+    --line: 217 221 216;
+    --signal: 44 104 168;
+    --signal-ink: 255 255 255;
+    --grade: 11 22 34;
+    --grade-forca: 0.05;
+
+    --slate-50: 244 245 242;
+    --slate-100: 236 238 233;
+    --slate-200: 223 226 220;
+    --slate-300: 200 205 198;
+    --slate-400: 149 160 170;
+    --slate-500: 107 119 133;
+    --slate-600: 79 91 105;
+    --slate-700: 54 65 78;
+    --slate-800: 31 42 54;
+    --slate-900: 14 24 35;
+
+    --brand-50: 237 243 250;
+    --brand-100: 217 230 244;
+    --brand-200: 181 205 232;
+    --brand-300: 139 177 218;
+    --brand-400: 91 143 198;
+    --brand-500: 58 116 177;
+    --brand-600: 44 95 152;
+    --brand-700: 35 77 126;
+    --brand-800: 27 60 99;
+    --brand-900: 20 44 73;
+  }
+
+  [data-tema='escuro'] {
+    color-scheme: dark;
+    --canvas: 7 13 20;
+    --surface: 11 19 29;
+    --elevated: 16 26 39;
+    --ink: 232 237 243;
+    --muted: 150 164 182;
+    --faint: 102 117 136;
+    --line: 30 42 57;
+    --signal: 125 178 240;
+    --signal-ink: 6 16 28;
+    --grade: 190 215 245;
+    --grade-forca: 0.045;
+
+    --slate-50: 14 23 35;
+    --slate-100: 19 30 44;
+    --slate-200: 28 40 56;
+    --slate-300: 40 54 73;
+    --slate-400: 95 111 132;
+    --slate-500: 131 146 166;
+    --slate-600: 167 179 195;
+    --slate-700: 197 207 219;
+    --slate-800: 221 228 236;
+    --slate-900: 238 242 246;
+
+    --brand-50: 15 28 44;
+    --brand-100: 19 38 61;
+    --brand-200: 27 53 84;
+    --brand-300: 42 77 117;
+    --brand-400: 74 120 168;
+    --brand-500: 107 155 208;
+    --brand-600: 138 180 226;
+    --brand-700: 168 200 236;
+    --brand-800: 198 219 243;
+    --brand-900: 226 237 249;
+  }
+
+  /* Alto contraste: texto secundário e linhas mais fortes, sinal mais saturado. */
+  [data-tema='claro'][data-contraste='alto'] {
+    --canvas: 255 255 255;
+    --surface: 255 255 255;
+    --ink: 0 0 0;
+    --muted: 34 44 56;
+    --faint: 62 72 84;
+    --line: 96 106 118;
+    --signal: 14 62 130;
+    --slate-200: 150 158 168;
+    --slate-300: 110 120 132;
+    --slate-400: 70 80 92;
+    --slate-500: 50 60 72;
+    --slate-600: 30 38 48;
+    --slate-700: 16 22 30;
+    --brand-600: 18 60 116;
+    --brand-700: 12 48 96;
+    --grade-forca: 0.08;
+  }
+
+  [data-tema='escuro'][data-contraste='alto'] {
+    --canvas: 0 0 0;
+    --surface: 3 6 10;
+    --elevated: 10 16 24;
+    --ink: 255 255 255;
+    --muted: 214 223 234;
+    --faint: 176 188 202;
+    --line: 118 134 154;
+    --signal: 166 210 255;
+    --slate-200: 84 100 120;
+    --slate-300: 110 126 146;
+    --slate-400: 168 180 196;
+    --slate-500: 192 203 216;
+    --slate-600: 214 222 232;
+    --slate-700: 232 238 244;
+    --brand-600: 176 210 248;
+    --brand-700: 200 225 252;
+    --grade-forca: 0.08;
+  }
+
+  /* Tamanho de fonte: todo o layout usa rem, então escala junto. */
+  html {
+    font-size: 16px;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  html[data-fonte='p'] {
+    font-size: 14px;
+  }
+  html[data-fonte='g'] {
+    font-size: 18px;
+  }
+
   html {
     scroll-behavior: smooth;
   }
 
   body {
-    @apply bg-slate-50 text-slate-800 antialiased;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    @apply bg-canvas font-sans text-ink antialiased;
+    transition:
+      background-color 0.4s var(--ease),
+      color 0.4s var(--ease);
   }
 
-  /* Barras de rolagem discretas, para não competir com os gráficos */
+  ::selection {
+    background: rgb(var(--signal) / 0.28);
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--signal));
+    outline-offset: 2px;
+  }
+
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
   }
   ::-webkit-scrollbar-track {
-    @apply bg-slate-100;
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply rounded-full bg-slate-300;
+    background: rgb(var(--line));
+    border: 3px solid rgb(var(--canvas));
+    border-radius: 999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-slate-400;
+    background: rgb(var(--faint));
   }
 }
 
+/* ==========================================================================
+   Iluminação no hover
+   Um único listener (main.tsx) grava a posição do cursor em --mx/--my; aqui
+   um gradiente radial na cor de sinal acende sob o ponteiro. `--brilho` é
+   registrado para que a intensidade possa ser animada por `transition`.
+   ========================================================================== */
+@property --brilho {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+
+:where(button, a, summary, .card, .campo, [data-brilho]) {
+  /* Especificidade zero: utilitários `transition*` do Tailwind sobrescrevem
+     isto (e já incluem --brilho, ver tailwind.config.js). */
+  transition:
+    --brilho 0.3s var(--ease),
+    border-color 0.3s var(--ease),
+    color 0.2s var(--ease);
+}
+
+/* `:is()` (especificidade de classe) vence o reset de `background-image` do
+   preflight em botões; utilitários de fundo do Tailwind só mexem na cor. */
+:is(button, a, summary, .card, .campo, [data-brilho]) {
+  background-image: radial-gradient(
+    var(--brilho-raio, 140px) circle at var(--mx, 50%) var(--my, 50%),
+    rgb(var(--signal) / calc(var(--brilho) * var(--brilho-forca, 0.16))),
+    transparent 70%
+  );
+}
+
+:where(button, a, summary, .card, .campo, [data-brilho]):is(:hover, :focus-visible) {
+  --brilho: 1;
+}
+
+button:disabled {
+  background-image: none;
+}
+
+/* ==========================================================================
+   Revelação progressiva e redução de movimento
+   ========================================================================== */
+[data-revelar] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.8s var(--ease) var(--atraso, 0ms),
+    transform 0.8s var(--ease) var(--atraso, 0ms),
+    --brilho 0.3s var(--ease),
+    border-color 0.3s var(--ease);
+}
+[data-revelar][data-visivel='true'] {
+  opacity: 1;
+  transform: none;
+}
+
+[data-movimento='reduzido'],
+[data-movimento='reduzido'] *,
+[data-movimento='reduzido'] *::before,
+[data-movimento='reduzido'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  transition-delay: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ==========================================================================
+   Componentes
+   ========================================================================== */
 @layer components {
+  /* Fundo Scientata: grade fina + halo azul, fixo atrás de tudo. */
+  .fundo {
+    @apply pointer-events-none fixed inset-0 -z-10;
+    background-image:
+      radial-gradient(60rem 32rem at 50% -8rem, rgb(var(--signal) / 0.13), transparent 70%),
+      linear-gradient(rgb(var(--grade) / var(--grade-forca)) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--grade) / var(--grade-forca)) 1px, transparent 1px);
+    background-size:
+      100% 100%,
+      72px 72px,
+      72px 72px;
+    mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
+  }
+
   .card {
-    @apply rounded-xl border border-slate-200 bg-white shadow-sm;
+    @apply relative border border-line bg-surface/90;
+    --brilho-raio: 460px;
+    --brilho-forca: 0.07;
+  }
+  .card:hover {
+    border-color: rgb(var(--signal) / 0.32);
+  }
+
+  /* Rótulo técnico em mono, maiúsculas espaçadas. */
+  .rotulo {
+    @apply font-mono text-[0.6875rem] font-normal uppercase tracking-[0.16em] text-muted;
   }
 
   .card-titulo {
-    @apply flex items-center gap-2 border-b border-slate-100 px-5 py-4 text-sm font-semibold uppercase tracking-wide text-slate-700;
+    @apply rotulo flex items-center gap-2 border-b border-line px-5 py-3.5;
+  }
+
+  .titulo-serif {
+    @apply font-serif font-normal italic text-signal;
   }
 
   .botao {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition
-           disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-sm px-4 py-2 text-sm font-semibold
+           transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
   }
 
   .botao-primario {
-    @apply botao bg-brand-700 text-white hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-400;
+    @apply botao bg-signal text-signal-ink hover:brightness-110;
+    --brilho-forca: 0;
+  }
+  .botao-primario:not(:disabled):hover {
+    box-shadow:
+      0 0 0 1px rgb(var(--signal)),
+      0 8px 28px -8px rgb(var(--signal) / 0.7);
   }
 
   .botao-secundario {
-    @apply botao border border-slate-300 bg-white text-slate-700 hover:bg-slate-50;
+    @apply botao border border-line bg-transparent text-ink hover:border-signal/50 hover:text-signal;
+  }
+
+  .botao-icone {
+    @apply inline-flex items-center justify-center rounded-sm p-2 text-muted transition
+           hover:bg-slate-100 hover:text-ink active:scale-95 disabled:opacity-40;
+    --brilho-raio: 40px;
   }
 
   .campo {
-    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800
-           placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100;
+    @apply w-full rounded-sm border border-line bg-canvas/60 px-3 py-2 text-sm text-ink transition
+           placeholder:text-faint focus:border-signal/60 focus:outline-none focus:ring-2 focus:ring-signal/15;
+    --brilho-forca: 0.08;
   }
 
   .etiqueta {
-    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500;
+    @apply rotulo mb-1.5 block;
   }
 
   .chip {
-    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
+    @apply inline-flex items-center gap-1 rounded-sm px-2 py-0.5 text-[0.6875rem] font-medium;
+  }
+
+  /* Grupo de botões alternáveis (aria-pressed marca o ativo). */
+  .segmentado {
+    @apply inline-flex border border-line p-0.5;
+  }
+  .segmentado > button {
+    @apply rounded-sm px-3 py-1 text-xs font-medium text-muted transition hover:text-ink;
+  }
+  .segmentado > button[aria-pressed='true'] {
+    @apply bg-signal/15 text-signal;
+  }
+
+  .vazio {
+    @apply py-16 text-center text-sm text-faint;
+  }
+
+  /* Markdown das respostas do assistente (GFM completo). */
+  .markdown {
+    @apply space-y-2.5 break-words;
+  }
+  .markdown :where(h1, h2, h3, h4, h5, h6) {
+    @apply mt-4 font-semibold leading-snug tracking-tight text-ink first:mt-0;
+  }
+  .markdown h1 {
+    @apply text-lg;
+  }
+  .markdown h2 {
+    @apply text-base;
+  }
+  .markdown :where(h3, h4, h5, h6) {
+    @apply text-sm;
+  }
+  .markdown strong {
+    @apply font-semibold text-ink;
+  }
+  .markdown del {
+    @apply text-faint;
+  }
+  .markdown a {
+    @apply rounded-sm font-medium text-signal underline decoration-signal/40 underline-offset-2 transition hover:decoration-signal;
+  }
+  .markdown :where(ul, ol) {
+    @apply space-y-1 pl-5;
+  }
+  .markdown ul {
+    @apply list-disc;
+  }
+  .markdown ol {
+    @apply list-decimal;
+  }
+  .markdown li > :where(ul, ol) {
+    @apply mt-1;
+  }
+  .markdown li::marker {
+    @apply text-faint;
+  }
+  /* Listas de tarefas do GFM */
+  .markdown .contains-task-list {
+    @apply list-none pl-1;
+  }
+  .markdown input[type='checkbox'] {
+    @apply mr-1.5 translate-y-[1px] accent-[rgb(var(--signal))];
+  }
+  .markdown blockquote {
+    @apply border-l-2 border-signal/50 pl-3 font-serif text-[1.02em] italic text-muted;
+  }
+  .markdown hr {
+    @apply my-4 border-line;
+  }
+  .markdown :not(pre) > code {
+    @apply rounded-sm bg-signal/10 px-1 py-0.5 font-mono text-[0.85em] text-ink;
+  }
+  .markdown pre {
+    @apply overflow-x-auto rounded-sm border border-line bg-canvas/70 p-3 font-mono text-[0.78rem] leading-relaxed text-ink;
+  }
+  .markdown table {
+    @apply w-full border-collapse text-[0.8125rem] tabular-nums;
+  }
+  .markdown thead {
+    @apply bg-signal/[0.08];
+  }
+  .markdown th {
+    @apply whitespace-nowrap px-3 py-2 text-left font-mono text-[0.6875rem] font-normal uppercase tracking-[0.12em] text-muted;
+  }
+  .markdown td {
+    @apply border-t border-line px-3 py-1.5 align-top;
+  }
+  .markdown tbody tr {
+    @apply transition-colors hover:bg-signal/5;
+  }
+  .markdown :where(th, td)[align='right'] {
+    @apply text-right;
+  }
+  .markdown :where(th, td)[align='center'] {
+    @apply text-center;
   }
 }
 
 /* --------------------------------------------------------------------------
-   Tooltip do vis-network: a biblioteca injeta o elemento fora da árvore React,
-   então o estilo precisa ser global.
+   Tooltip do vis-network: injetado fora da árvore React.
    -------------------------------------------------------------------------- */
 div.vis-tooltip {
   position: absolute;
   visibility: hidden;
   padding: 10px 12px;
   white-space: pre-wrap;
-  font-family: 'Inter', system-ui, sans-serif !important;
+  font-family: 'Manrope', system-ui, sans-serif !important;
   font-size: 12px !important;
   line-height: 1.5;
-  color: #f8fafc !important;
-  background-color: rgba(15, 23, 42, 0.96) !important;
-  border: none !important;
-  border-radius: 8px !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  color: rgb(var(--ink)) !important;
+  background-color: rgb(var(--elevated) / 0.97) !important;
+  border: 1px solid rgb(var(--line)) !important;
+  border-radius: 3px !important;
+  box-shadow: 0 16px 40px -12px rgb(0 0 0 / 0.45);
   pointer-events: none;
   z-index: 20;
   max-width: 320px;
 }
 
-/* React Flow: fundo e controles alinhados à paleta do painel */
+/* React Flow: controles na paleta do tema */
 .react-flow__attribution {
   display: none;
+}
+.react-flow__controls {
+  box-shadow: none !important;
+  border: 1px solid rgb(var(--line));
+}
+.react-flow__controls-button {
+  background: rgb(var(--elevated)) !important;
+  border-bottom: 1px solid rgb(var(--line)) !important;
+  fill: rgb(var(--muted)) !important;
+  color: rgb(var(--muted)) !important;
+}
+.react-flow__controls-button:hover {
+  background: rgb(var(--slate-100)) !important;
 }

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataSet } from 'vis-data';
 import { Network, type Edge, type Node, type Options } from 'vis-network';
-import { Camera, Crosshair, Loader2, Network as NetworkIcon, Search } from 'lucide-react';
+import { Camera, Crosshair, Search } from 'lucide-react';
 import type { GrafoSNA, TipoRede } from '@/types';
 import { COR_POR_TIPO } from '@/lib/constantes';
+import { useCoresGrafico, type CoresGrafico } from '@/lib/preferencias';
 
 /** Nó do vis estendido com o tipo do ator, usado pelo filtro da legenda. */
 interface NoVis extends Node {
@@ -28,19 +29,20 @@ const LEGENDA = [
 /** Opacidade aplicada aos nós não-vizinhos durante o hover. */
 const OPACIDADE_APAGADA = 0.12;
 
-const OPCOES_VIS: Options = {
+/** Opções do vis-network no tema atual (o canvas não enxerga variáveis CSS). */
+const opcoesVis = (c: CoresGrafico): Options => ({
   autoResize: true,
   height: '100%',
   width: '100%',
   nodes: {
     shape: 'dot',
     borderWidth: 2,
-    color: { border: '#ffffff' },
-    font: { face: 'Inter, sans-serif', color: '#1e293b', strokeWidth: 4, strokeColor: '#ffffff' },
+    color: { border: c.surface },
+    font: { face: 'Manrope, sans-serif', color: c.ink, strokeWidth: 4, strokeColor: c.surface },
     scaling: { min: 10, max: 60 },
   },
   edges: {
-    color: { color: '#cbd5e1', highlight: '#64748b', hover: '#94a3b8', opacity: 0.75 },
+    color: { color: c.faint, highlight: c.signal, hover: c.muted, opacity: 0.55 },
     smooth: { enabled: true, type: 'continuous', roundness: 0.5 },
     scaling: { min: 0.5, max: 6 },
   },
@@ -64,7 +66,7 @@ const OPCOES_VIS: Options = {
     keyboard: false,
     multiselect: false,
   },
-};
+});
 
 export default function NetworkGraph({
   grafo,
@@ -73,6 +75,7 @@ export default function NetworkGraph({
   topN,
   onMudarTopN,
 }: NetworkGraphProps) {
+  const cores = useCoresGrafico();
   const containerRef = useRef<HTMLDivElement>(null);
   const redeRef = useRef<Network | null>(null);
   const nosRef = useRef<DataSet<NoVis> | null>(null);
@@ -110,10 +113,10 @@ export default function NetworkGraph({
         tipoAtor: no.tipo,
         color: {
           background: COR_POR_TIPO[no.tipo] ?? COR_POR_TIPO.Desconhecido,
-          border: '#ffffff',
+          border: cores.surface,
           highlight: {
             background: COR_POR_TIPO[no.tipo] ?? COR_POR_TIPO.Desconhecido,
-            border: '#0f172a',
+            border: cores.signal,
           },
         },
         font: { size: Math.round(13 + relativo * 9) },
@@ -129,7 +132,7 @@ export default function NetworkGraph({
     }));
 
     return { nos: nosVis, arestas: arestasVis };
-  }, [grafo]);
+  }, [grafo, cores]);
 
   // --- Ciclo de vida da instância vis-network ---
   useEffect(() => {
@@ -143,7 +146,7 @@ export default function NetworkGraph({
     const conjuntoArestas = new DataSet<Edge>(arestas);
     nosRef.current = conjuntoNos;
 
-    const rede = new Network(container, { nodes: conjuntoNos, edges: conjuntoArestas }, OPCOES_VIS);
+    const rede = new Network(container, { nodes: conjuntoNos, edges: conjuntoArestas }, opcoesVis(cores));
     redeRef.current = rede;
 
     rede.once('stabilizationIterationsDone', () => {
@@ -177,7 +180,7 @@ export default function NetworkGraph({
       redeRef.current = null;
       nosRef.current = null;
     };
-  }, [nos, arestas]);
+  }, [nos, arestas, cores]);
 
   // --- Ações do painel de controle ---
   const alternarTipo = useCallback((tipoAtor: string) => {
@@ -227,7 +230,7 @@ export default function NetworkGraph({
   /**
    * Exporta o canvas em PNG. O canvas do vis já é renderizado em resolução de
    * dispositivo (2x em telas retina), então basta preservar suas dimensões
-   * nativas e pintar um fundo branco por baixo.
+   * nativas e pintar o fundo do tema por baixo.
    */
   const baixarPNG = useCallback(() => {
     const canvas = containerRef.current?.querySelector('canvas');
@@ -240,7 +243,7 @@ export default function NetworkGraph({
     const contexto = temporario.getContext('2d');
     if (!contexto) return;
 
-    contexto.fillStyle = '#ffffff';
+    contexto.fillStyle = cores.surface;
     contexto.fillRect(0, 0, temporario.width, temporario.height);
     contexto.drawImage(canvas, 0, 0);
 
@@ -248,21 +251,20 @@ export default function NetworkGraph({
     link.download = `rede-coqueiros-${tipo}-${new Date().toISOString().slice(0, 10)}.png`;
     link.href = temporario.toDataURL('image/png');
     link.click();
-  }, [tipo]);
+  }, [tipo, cores]);
 
   const semDados = !grafo || grafo.nos.length === 0;
 
   return (
-    <section id="rede" className="card overflow-hidden">
+    <section className="card overflow-hidden">
       {/* Cabeçalho com os controles de recorte */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
-        <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-700">
-          <NetworkIcon size={16} className="text-brand-600" />
-          Rede de Relacionamentos
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-2.5">
+        <h3 className="rotulo">
+          <span className="text-signal">A</span> · Grafo de coocorrência
         </h3>
 
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex rounded-lg bg-slate-100 p-0.5">
+        <div className="flex flex-wrap items-center gap-5">
+          <div className="segmentado">
             {(
               [
                 ['atores', 'Atores'],
@@ -272,20 +274,18 @@ export default function NetworkGraph({
               <button
                 key={valor}
                 type="button"
+                aria-pressed={tipo === valor}
                 onClick={() => onMudarTipo(valor as TipoRede)}
-                className={`rounded-md px-3 py-1 text-xs font-medium transition ${
-                  tipo === valor
-                    ? 'bg-white text-brand-700 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
               >
                 {rotulo}
               </button>
             ))}
           </div>
 
-          <label className="flex items-center gap-2 text-xs text-slate-600">
-            <span className="whitespace-nowrap font-medium">Nós: {topN}</span>
+          <label className="flex items-center gap-3 text-xs text-muted">
+            <span className="rotulo whitespace-nowrap">
+              Nós <span className="text-ink">{topN}</span>
+            </span>
             <input
               type="range"
               min={10}
@@ -293,42 +293,41 @@ export default function NetworkGraph({
               step={5}
               value={topN}
               onChange={(e) => onMudarTopN(Number(e.target.value))}
-              className="h-1.5 w-32 cursor-pointer appearance-none rounded-full bg-slate-200 accent-brand-600"
+              className="w-32 cursor-pointer accent-[rgb(var(--signal))]"
             />
           </label>
         </div>
       </div>
 
       {semDados ? (
-        <p className="py-24 text-center text-sm text-slate-400">
+        <p className="vazio py-24">
           Não há dados suficientes para renderizar este grafo no recorte atual.
         </p>
       ) : (
-        <div className="relative h-[620px] w-full bg-white">
+        <div className="relative h-[640px] w-full">
           <div ref={containerRef} className="h-full w-full" />
 
           {/* Painel flutuante de controle */}
-          <div className="absolute left-4 top-4 w-60 rounded-xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur">
-            <p className="mb-3 border-b border-slate-100 pb-2 text-xs font-bold uppercase tracking-wide text-slate-700">
-              Painel de controle
-            </p>
+          <div className="absolute left-4 top-4 w-60 border border-line bg-elevated/90 p-4 shadow-[0_24px_60px_-24px_rgb(0_0_0/0.5)] backdrop-blur-xl">
+            <p className="rotulo mb-3 border-b border-line pb-2">Painel de controle</p>
 
             {tipo === 'atores' && (
-              <div className="mb-3 space-y-1">
+              <div className="mb-3 space-y-0.5">
                 {LEGENDA.map(({ tipo: tipoAtor, rotulo }) => {
                   const oculto = tiposOcultos.has(tipoAtor);
                   return (
                     <button
                       key={tipoAtor}
                       type="button"
+                      aria-pressed={!oculto}
                       onClick={() => alternarTipo(tipoAtor)}
-                      className={`flex w-full items-center gap-2 rounded-md px-1.5 py-1 text-xs transition hover:bg-slate-50 ${
-                        oculto ? 'text-slate-400 line-through' : 'font-medium text-slate-700'
+                      className={`flex w-full items-center gap-2 rounded-sm px-1.5 py-1 text-xs transition hover:bg-signal/5 ${
+                        oculto ? 'text-faint line-through' : 'font-medium text-ink'
                       }`}
                       title={oculto ? `Exibir ${rotulo}` : `Ocultar ${rotulo}`}
                     >
                       <span
-                        className="h-3 w-3 shrink-0 rounded-full ring-1 ring-black/10"
+                        className="h-2.5 w-2.5 shrink-0 rounded-full transition"
                         style={{
                           backgroundColor: COR_POR_TIPO[tipoAtor],
                           opacity: oculto ? 0.3 : 1,
@@ -344,63 +343,51 @@ export default function NetworkGraph({
             <div className="relative">
               <Search
                 size={14}
-                className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"
+                className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-faint"
               />
               <input
                 type="search"
                 value={busca}
                 onChange={(e) => buscarNo(e.target.value)}
                 placeholder="Buscar nó…"
-                className="w-full rounded-lg border border-slate-300 py-1.5 pl-8 pr-2 text-xs focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                className="campo py-1.5 pl-8 text-xs"
               />
             </div>
 
-            <button
-              type="button"
-              onClick={centralizar}
-              className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg bg-slate-700 px-2 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-800"
-            >
-              <Crosshair size={13} /> Centralizar rede
+            <button type="button" onClick={centralizar} className="botao-secundario mt-2 w-full py-1.5 text-xs">
+              <Crosshair size={13} /> Centralizar
             </button>
 
-            <button
-              type="button"
-              onClick={baixarPNG}
-              className="mt-1.5 flex w-full items-center justify-center gap-1.5 rounded-lg bg-brand-700 px-2 py-1.5 text-xs font-semibold text-white transition hover:bg-brand-800"
-            >
+            <button type="button" onClick={baixarPNG} className="botao-primario mt-1.5 w-full py-1.5 text-xs">
               <Camera size={13} /> Salvar imagem
             </button>
 
-            <p className="mt-3 text-[10px] leading-relaxed text-slate-400">
+            <p className="mt-3 text-[0.6875rem] leading-relaxed text-faint">
               Passe o cursor sobre um nó para isolar sua vizinhança e ver as métricas de SNA.
             </p>
           </div>
 
           {/* Overlay de estabilização da física */}
           {estabilizando && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/70 backdrop-blur-sm">
-              <div className="flex items-center gap-3 rounded-xl bg-white px-5 py-3 shadow-lg">
-                <Loader2 size={18} className="animate-spin text-brand-600" />
-                <span className="text-sm font-medium text-slate-700">
-                  Estabilizando a rede…
-                </span>
+            <div className="absolute inset-0 flex animate-fade-in flex-col items-center justify-center bg-surface/70 backdrop-blur-sm">
+              <div className="relative h-px w-40 overflow-hidden bg-line">
+                <div className="absolute inset-y-0 w-1/3 animate-barra-carregando bg-signal shadow-[0_0_12px_rgb(var(--signal))]" />
               </div>
+              <p className="rotulo mt-3">Estabilizando a rede…</p>
             </div>
           )}
         </div>
       )}
 
       {!semDados && (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-slate-100 bg-slate-50 px-5 py-2.5 text-xs text-slate-500">
-          <span>
-            <strong className="text-slate-700">{grafo.nos.length}</strong> nós
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-line px-5 py-2.5 text-xs text-muted">
+          <span className="rotulo">
+            <span className="text-ink">{grafo.nos.length}</span> nós
           </span>
-          <span>
-            <strong className="text-slate-700">{grafo.arestas.length}</strong> conexões
+          <span className="rotulo">
+            <span className="text-ink">{grafo.arestas.length}</span> conexões
           </span>
-          <span className="text-slate-400">
-            Conexão = notícias em que os dois nós aparecem juntos.
-          </span>
+          <span className="text-faint">Conexão = notícias em que os dois nós aparecem juntos.</span>
         </div>
       )}
     </section>

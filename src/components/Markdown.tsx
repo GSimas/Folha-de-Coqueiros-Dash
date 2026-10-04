@@ -1,130 +1,202 @@
-import { Fragment, type ReactNode } from 'react';
+import { useMemo, type ReactNode } from 'react';
+import ReactMarkdown, { defaultUrlTransform, type Components } from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { createColumnHelper } from '@tanstack/react-table';
+import { paraData } from '@/lib/data';
+import TabelaDados, { type TipoColuna } from './TabelaDados';
 
 /**
- * Renderizador Markdown mínimo e seguro.
+ * Markdown das respostas do assistente — GFM completo (tabelas, listas de
+ * tarefas, tachado, autolinks, código, citações) via react-markdown.
  *
- * Cobre exatamente o que o prompt do assistente pede (negrito, itálico, código
- * inline, links `[texto](url)`, listas e parágrafos) construindo elementos React
- * — sem `dangerouslySetInnerHTML`, portanto imune a HTML injetado pelo modelo.
+ * Segurança: HTML cru é descartado (`skipHtml`), só esquemas de navegação
+ * seguros viram link, imagens não são carregadas (evita rastreamento por
+ * pixel) e, com `urlsVerificadas`, links que não estavam entre as fontes
+ * enviadas ao modelo aparecem como "link não verificado" em vez de clicáveis.
+ *
+ * Tabelas viram `TabelaDados` (ordenação e filtro por coluna), com o tipo de
+ * cada coluna inferido do conteúdo.
  */
 
 /** Só permitimos esquemas de navegação; bloqueia `javascript:` e afins. */
-function urlSegura(url: string): string | null {
-  const limpa = url.trim();
-  if (/^(https?:|mailto:|#|\/)/i.test(limpa)) return limpa;
-  return null;
+function urlSegura(url: string): string {
+  const limpa = defaultUrlTransform(url.trim());
+  return /^(https?:|mailto:|#)/i.test(limpa) ? limpa : '';
 }
 
-const PADRAO_INLINE =
-  /(\[([^\]]+)\]\(([^)\s]+)\))|(\*\*([^*]+)\*\*)|(`([^`]+)`)|(\*([^*]+)\*)/g;
-
-function renderizarInline(texto: string, chaveBase: string): ReactNode[] {
-  const nos: ReactNode[] = [];
-  let ultimoIndice = 0;
-  let contador = 0;
-
-  for (const encontro of texto.matchAll(PADRAO_INLINE)) {
-    const indice = encontro.index ?? 0;
-    if (indice > ultimoIndice) {
-      nos.push(texto.slice(ultimoIndice, indice));
-    }
-
-    const chave = `${chaveBase}-i${contador++}`;
-    const [, , rotuloLink, urlLink, , negrito, , codigo, , italico] = encontro;
-
-    if (rotuloLink && urlLink) {
-      const href = urlSegura(urlLink);
-      nos.push(
-        href ? (
-          <a
-            key={chave}
-            href={href}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="font-medium text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-800"
-          >
-            {rotuloLink}
-          </a>
-        ) : (
-          <span key={chave}>{rotuloLink}</span>
-        ),
-      );
-    } else if (negrito) {
-      nos.push(
-        <strong key={chave} className="font-semibold text-slate-900">
-          {negrito}
-        </strong>,
-      );
-    } else if (codigo) {
-      nos.push(
-        <code key={chave} className="rounded bg-slate-100 px-1 py-0.5 text-[0.85em] text-slate-800">
-          {codigo}
-        </code>,
-      );
-    } else if (italico) {
-      nos.push(<em key={chave}>{italico}</em>);
-    }
-
-    ultimoIndice = indice + encontro[0].length;
+function Link({ href, urlsVerificadas, children }: { href: string; urlsVerificadas?: Set<string>; children: ReactNode }) {
+  if (!href) return <span>{children}</span>;
+  const verificado = !urlsVerificadas || href.startsWith('#') || urlsVerificadas.has(href);
+  if (!verificado) {
+    return (
+      <span title="Este link não estava entre as fontes do acervo enviadas ao modelo — pode ser uma alucinação.">
+        {children}{' '}
+        <span className="rounded-sm bg-amber-500/15 px-1 font-mono text-[0.625rem] uppercase tracking-wider text-amber-600 dark:text-amber-300">
+          link não verificado
+        </span>
+      </span>
+    );
   }
-
-  if (ultimoIndice < texto.length) {
-    nos.push(texto.slice(ultimoIndice));
-  }
-  return nos;
+  return (
+    <a href={href} target="_blank" rel="noreferrer noopener">
+      {children}
+    </a>
+  );
 }
 
-export default function Markdown({ texto }: { texto: string }) {
-  const linhas = texto.split('\n');
-  const blocos: ReactNode[] = [];
+// --- Tabelas: da árvore HAST para dados tipados -----------------------------
 
-  let itensLista: string[] = [];
+interface NoHast {
+  type: string;
+  tagName?: string;
+  value?: string;
+  properties?: Record<string, unknown>;
+  children?: NoHast[];
+}
 
-  const descarregarLista = (chave: string) => {
-    if (itensLista.length === 0) return;
-    blocos.push(
-      <ul key={`ul-${chave}`} className="my-1.5 list-disc space-y-1 pl-5">
-        {itensLista.map((item, indice) => (
-          <li key={indice}>{renderizarInline(item, `${chave}-${indice}`)}</li>
-        ))}
-      </ul>,
-    );
-    itensLista = [];
-  };
+const textoDe = (no: NoHast): string =>
+  no.type === 'text' ? (no.value ?? '') : (no.children ?? []).map(textoDe).join('');
 
-  linhas.forEach((linha, indice) => {
-    const conteudo = linha.trim();
-
-    // Item de lista (-, * ou "1.")
-    const itemLista = conteudo.match(/^(?:[-*]|\d+\.)\s+(.*)$/);
-    if (itemLista) {
-      itensLista.push(itemLista[1]);
-      return;
+/** Renderiza o conteúdo inline de uma célula (negrito, itálico, código, links…). */
+function renderizarInline(nos: NoHast[] = [], urls?: Set<string>, chave = 'n'): ReactNode[] {
+  return nos.map((no, i) => {
+    const k = `${chave}-${i}`;
+    if (no.type === 'text') return no.value;
+    const filhos = renderizarInline(no.children, urls, k);
+    switch (no.tagName) {
+      case 'strong':
+        return <strong key={k}>{filhos}</strong>;
+      case 'em':
+        return <em key={k}>{filhos}</em>;
+      case 'del':
+        return <del key={k}>{filhos}</del>;
+      case 'code':
+        return <code key={k}>{filhos}</code>;
+      case 'br':
+        return <br key={k} />;
+      case 'a':
+        return (
+          <Link key={k} href={urlSegura(String(no.properties?.href ?? ''))} urlsVerificadas={urls}>
+            {filhos}
+          </Link>
+        );
+      case 'img':
+        return (
+          <span key={k} className="text-faint">
+            [imagem]
+          </span>
+        );
+      default:
+        return <span key={k}>{filhos}</span>;
     }
-
-    descarregarLista(String(indice));
-
-    if (!conteudo) return;
-
-    // Títulos markdown (#, ##, ###)
-    const titulo = conteudo.match(/^(#{1,3})\s+(.*)$/);
-    if (titulo) {
-      blocos.push(
-        <p key={indice} className="mt-2 font-semibold text-slate-900">
-          {renderizarInline(titulo[2], String(indice))}
-        </p>,
-      );
-      return;
-    }
-
-    blocos.push(
-      <p key={indice} className="my-1">
-        {renderizarInline(conteudo, String(indice))}
-      </p>,
-    );
   });
+}
 
-  descarregarLista('fim');
+const VAZIOS = new Set(['', '—', '-', '–', 'n/d', 'n/a', 'nd']);
 
-  return <Fragment>{blocos}</Fragment>;
+/** "1.234,5" · "−27%" · "+15%" · "R$ 25" · "3.5" → número; senão `undefined`. */
+function paraNumero(texto: string): number | undefined {
+  const limpo = texto.replace(/R\$|%|\s| /g, '').replace(/[−–]/g, '-').replace(/^\+/, '');
+  if (/^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(limpo)) return Number(limpo.replace(/\./g, '').replace(',', '.'));
+  if (/^-?\d+(,\d+)?$/.test(limpo)) return Number(limpo.replace(',', '.'));
+  if (/^-?\d+\.\d+$/.test(limpo)) return Number(limpo);
+  return undefined;
+}
+
+function inferirTipo(textos: string[]): TipoColuna {
+  const preenchidos = textos.map((t) => t.trim()).filter((t) => !VAZIOS.has(t.toLowerCase()));
+  if (preenchidos.length === 0) return 'texto';
+  if (preenchidos.every((t) => paraNumero(t) !== undefined)) return 'numero';
+  if (preenchidos.every((t) => /^\d{2}\/\d{2}\/\d{4}$/.test(t) && paraData(t))) return 'data';
+  const unicos = new Set(preenchidos).size;
+  return unicos <= 12 && (unicos < preenchidos.length || unicos <= 6) ? 'categoria' : 'texto';
+}
+
+interface Celula {
+  texto: string;
+  nos: NoHast[];
+}
+
+function TabelaMarkdown({ no, urlsVerificadas }: { no?: NoHast; urlsVerificadas?: Set<string> }) {
+  const { cabecalhos, linhas } = useMemo(() => {
+    const trs: NoHast[] = [];
+    const coletar = (n: NoHast) => {
+      if (n.tagName === 'tr') trs.push(n);
+      else n.children?.forEach(coletar);
+    };
+    if (no) coletar(no);
+    const celulasDe = (tr: NoHast) =>
+      (tr.children ?? []).filter((c) => c.tagName === 'th' || c.tagName === 'td');
+    const [primeira, ...resto] = trs;
+    return {
+      cabecalhos: primeira
+        ? celulasDe(primeira).map((c) => ({ titulo: textoDe(c).trim(), alinhar: c.properties?.align as string | undefined }))
+        : [],
+      linhas: resto.map((tr) => celulasDe(tr).map((c): Celula => ({ texto: textoDe(c).trim(), nos: c.children ?? [] }))),
+    };
+  }, [no]);
+
+  const colunas = useMemo(() => {
+    const coluna = createColumnHelper<Celula[]>();
+    return cabecalhos.map((cab, i) => {
+      const tipo = inferirTipo(linhas.map((l) => l[i]?.texto ?? ''));
+      return coluna.accessor(
+        (linha) => {
+          const texto = linha[i]?.texto ?? '';
+          if (tipo === 'numero') return paraNumero(texto);
+          if (tipo === 'data') return paraData(texto) ?? undefined;
+          return VAZIOS.has(texto.toLowerCase()) && tipo === 'categoria' ? undefined : texto;
+        },
+        {
+          id: `c${i}`,
+          header: cab.titulo || `Coluna ${i + 1}`,
+          meta: {
+            tipo,
+            alinhar: cab.alinhar === 'right' || tipo === 'numero' ? 'direita' : cab.alinhar === 'center' ? 'centro' : undefined,
+          },
+          cell: (info) => renderizarInline(info.row.original[i]?.nos, urlsVerificadas),
+        },
+      );
+    });
+  }, [cabecalhos, linhas, urlsVerificadas]);
+
+  return (
+    <div className="overflow-hidden rounded-sm border border-line">
+      <TabelaDados dados={linhas} colunas={colunas} rotuloItens="linhas" porPagina={null} compacta />
+    </div>
+  );
+}
+
+function criarComponentes(urlsVerificadas?: Set<string>): Components {
+  return {
+    a: ({ href, children }) => (
+      <Link href={href ?? ''} urlsVerificadas={urlsVerificadas}>
+        {children}
+      </Link>
+    ),
+    // Imagens externas não são carregadas: viram uma referência textual.
+    img: ({ alt }) => <span className="text-faint">[imagem{alt ? `: ${alt}` : ''}]</span>,
+    table: ({ node }) => <TabelaMarkdown no={node as NoHast | undefined} urlsVerificadas={urlsVerificadas} />,
+  };
+}
+
+export default function Markdown({
+  texto,
+  urlsVerificadas,
+}: {
+  texto: string;
+  urlsVerificadas?: Set<string>;
+}) {
+  return (
+    <div className="markdown">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        skipHtml
+        urlTransform={urlSegura}
+        components={criarComponentes(urlsVerificadas)}
+      >
+        {texto}
+      </ReactMarkdown>
+    </div>
+  );
 }
