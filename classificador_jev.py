@@ -128,7 +128,7 @@ PADROES_HORA = [
 PADRAO_VALOR = re.compile(r"R\$\s?\d{1,3}(?:\.\d{3})*(?:,\d{2})?")
 _MAIUSC = "A-ZÁÉÍÓÚÂÊÔÃÕÇÀ"
 # Palavra capitalizada (sem ponto, exceto abreviações comuns de endereços e títulos).
-_PALAVRA_PROPRIA = rf"(?:(?:Av|Eng|Dr|Dra|Prof|Profa|Sr|Sra|Pe|Sta|Sto|Gov|Des|Ver)\.|[{_MAIUSC}][\wÀ-ÿ'’\-]*)"
+_PALAVRA_PROPRIA = rf"(?:(?:Av|Eng|Dr|Dra|Prof|Profa|Sr|Sra|Pe|Sta|Sto|Gov|Des|Ver)\.|[{_MAIUSC}][\wÀ-ÿ'’]*(?:-[\wÀ-ÿ'’]+)*)"
 # Só espaços na mesma linha separam as palavras de um nome; "e" não une nomes.
 _SEQUENCIA = rf"{_PALAVRA_PROPRIA}(?:[ \t]+(?:(?:de|da|do|dos|das)[ \t]+)?{_PALAVRA_PROPRIA}){{0,8}}"
 PADRAO_NOME_PROPRIO = re.compile(_SEQUENCIA)
@@ -142,13 +142,28 @@ PALAVRAS_COMUNS = {
         "Ontem Neste Nesta Próximo Próxima Durante Após Antes Depois Além Entre Sobre Sem Até Desde Cada Todos Todas "
         "Sim Não Já Ainda Se Seu Sua Nosso Nossa Confira Veja Saiba Acesse Clique Informações Serviço Data Local "
         "Horário Valor Entrada Inscrições Contato Telefone Site Instagram Facebook WhatsApp Endereço Rua Avenida "
-        "Programação Evento Atrações Agenda Fonte Crédito Créditos "
-        # Papéis que antecedem nomes ("Morador da Vila Aparecida", "Presidente Gerusa…")
-        "Morador Moradora Moradores Moradoras Presidente Prefeito Prefeita Vereador Vereadora Secretário "
-        "Secretária Diretor Diretora Coordenador Coordenadora Professor Professora Aluno Aluna Atleta "
-        "Domingo Segunda Terça "
+        "Programação Evento Atrações Agenda Fonte Crédito Créditos Domingo Segunda Terça "
         "Quarta Quinta Sexta Sábado Janeiro Fevereiro Março Abril Maio Junho Julho Agosto Setembro Outubro Novembro Dezembro"
     ).split()
+}
+
+
+# Papéis que antecedem nomes ("Morador da Vila Aparecida", "Artista Livia Soares"). Comparados
+# com acento: "Secretária Ana" perde o papel, "Secretaria Municipal de Saúde" não.
+PAPEIS = set(
+    "morador moradora moradores moradoras presidente prefeito prefeita vereador vereadora secretário secretária "
+    "diretor diretora coordenador coordenadora professor professora aluno aluna atleta artista artistas conselheiro "
+    "conselheira maestro maestrina cantor cantora músico musicista escritor escritora fotógrafo fotógrafa jornalista "
+    "empresário empresária médico médica advogado advogada técnico técnica treinador treinadora judô judoca "
+    "lançamento apresentação".split()
+)
+# Créditos e assinaturas: o nome que vem depois não é ator da notícia.
+CREDITOS = {"texto", "textos", "foto", "fotos", "fotografia", "credito", "creditos", "reportagem", "imagem", "imagens", "por", "arte"}
+# Termos genéricos demais para palavra-chave ou ator.
+GENERICOS = {
+    normalizar(p)
+    for p in "Evento Eventos Projeto Projetos Lançamento Apresentação Programação Atividade Atividades Inscrições "
+    "Edital Informações Notícia Notícias Hotel Restaurante Empresa Grupo Escola Centro Coqueiros".split()
 }
 
 
@@ -198,6 +213,13 @@ def nomes_proprios(texto: str) -> Counter:
             nome = m.group(0).strip(" .-’'")
             palavras = nome.split()
             no_inicio = m.start() == 0
+            if normalizar(palavras[0]) in CREDITOS or (len(palavras) > 1 and nome.isupper()):
+                continue  # assinatura/crédito ou título em caixa alta ("VACINAS DISPONÍVEIS")
+            while palavras and palavras[0].lower() in PAPEIS:
+                palavras = palavras[1:]
+            if not palavras:
+                continue
+            nome = " ".join(palavras)
             # Palavra única no início da frase costuma ser só maiúscula de sentença.
             if len(palavras) == 1 and no_inicio and not nome.isupper():
                 continue
@@ -209,7 +231,7 @@ def nomes_proprios(texto: str) -> Counter:
             while palavras and normalizar(palavras[0]) in ("de", "da", "do", "dos", "das"):
                 palavras = palavras[1:]
             nome = " ".join(palavras)
-            if not palavras or len(nome) < 3 or all(normalizar(p) in PALAVRAS_COMUNS for p in palavras):
+            if not palavras or len(nome) < 3 or all(normalizar(p) in PALAVRAS_COMUNS | GENERICOS for p in palavras):
                 continue
             contagem[nome] += 1
     # Palavra única só vale se for sigla (UFSC) ou aparecer mais de uma vez:
@@ -251,7 +273,8 @@ def candidatos_palavras(titulo: str, texto: str, vocabulario: Counter, nomes: li
         pontuados.append((no_titulo * 5 + min(ocorrencias, 5) + min(freq, 20) / 10, termo))
     pontuados.sort(reverse=True)
     termos = [t for _, t in pontuados]
-    return _unicos(termos + (nomes or [])[:8], MAX_CANDIDATOS_PALAVRAS)
+    utilizaveis = (t for t in termos + (nomes or [])[:8] if normalizar(t) not in GENERICOS and not (" " in t and t.isupper()))
+    return _unicos(utilizaveis, MAX_CANDIDATOS_PALAVRAS)
 
 
 def vocabulario_do_acervo(noticias: list[dict]) -> Counter:
@@ -524,6 +547,9 @@ def interpretar(noticia: dict, respostas: dict, candidatos: dict) -> dict:
             and tipo != "nao_entidade"
             and float(resposta_tipo.get("confidence") or 0) >= LIMIAR_CONFIANCA_TIPO
             and relevancia >= LIMIAR_RELEVANCIA_ATOR
+            and normalizar(nome) not in GENERICOS
+            # Palavra solta só como sigla (UFSC) ou lugar (Itacorubi): "Daniela", "Hotel" não.
+            and (" " in nome or nome.isupper() or tipo == "Local")
         ):
             aceitos.append((relevancia, nome, tipo))
     for _, nome, tipo in sorted(aceitos, reverse=True)[:MAX_ATORES_NOVOS]:

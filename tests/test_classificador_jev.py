@@ -40,6 +40,23 @@ class Candidatos(unittest.TestCase):
         self.assertIn("Vila Aparecida", nomes)  # sem o "da" que sobra ao tirar "Morador"
         self.assertNotIn("Edson", nomes)  # nome solto citado uma vez
 
+    def test_nomes_sem_creditos_papeis_caixa_alta_nem_hifen_solto(self):
+        nomes = j.nomes_proprios(
+            "Texto Sibyla Loureiro\nFotos Ana Lima\nVACINAS DISPONÍVEIS\nA mostra da Artista Livia Soares abre hoje. "
+            "A Secretaria Municipal de Saúde apoia. Fica no Coral Center- Avenida Almirante Tamandaré."
+        )
+        self.assertNotIn("Sibyla Loureiro", " | ".join(nomes))
+        self.assertNotIn("Ana Lima", nomes)
+        self.assertNotIn("VACINAS DISPONÍVEIS", nomes)
+        self.assertIn("Livia Soares", nomes)
+        self.assertIn("Secretaria Municipal de Saúde", nomes)
+        self.assertIn("Coral Center", nomes)
+        self.assertIn("Almirante Tamandaré", nomes)  # "Avenida" sai como palavra comum
+
+    def test_palavras_genericas_e_caixa_alta_fora_dos_candidatos(self):
+        candidatos = j.candidatos_palavras("Evento", "Evento. Projeto.", Counter({"Evento": 9, "Projeto": 5}), ["EDITAL DE CONVOCAÇÃO", "Vila Aparecida"])
+        self.assertEqual(candidatos, ["Vila Aparecida"])
+
     def test_palavras_tem_candidatos_mesmo_sem_vocabulario(self):
         candidatos = j.candidatos_palavras("Abraço Centenário acontece na Ponte Hercílio Luz", "Texto.", Counter(), ["Ponte Hercílio Luz"])
         self.assertIn("Ponte Hercílio Luz", candidatos)
@@ -171,6 +188,15 @@ class Interpretacao(unittest.TestCase):
         incerto = respostas_falsas(self.c, **{f"ator_{i}": {"choice": "Pessoa", "confidence": 0.3}})
         self.assertNotIn("Gerusa Machado", [a["nome"] for a in j.interpretar(NOTICIA, incerto, self.c)["atores"]])
 
+    def test_palavra_solta_so_como_sigla_ou_local(self):
+        c = {**self.c, "atores_novos": ["Daniela", "Hotel", "UFSC", "Itacorubi", "Coqueiros"]}
+        r = respostas_falsas(c)
+        for i, tipo in enumerate(["Pessoa", "Empresa", "Organização", "Local", "Local"]):
+            r[f"ator_{i}"] = {"choice": tipo, "confidence": 0.9}
+            r[f"ator_relevante_{i}"] = {"noul": 0.9}
+        nomes = [a["nome"] for a in j.interpretar(NOTICIA, r, c)["atores"]]
+        self.assertEqual([n for n in nomes if n in c["atores_novos"]], ["UFSC", "Itacorubi"])
+
     def test_palavras_chave_sem_variantes_redundantes(self):
         c = {**self.c, "palavras": ["Centro de Saúde", "Centro de Saúde de Coqueiros", "Saúde", "Vacina"]}
         r = respostas_falsas(c)
@@ -195,7 +221,7 @@ class Interpretacao(unittest.TestCase):
     def test_completa_palavras_chave_quando_poucas_passam_o_limiar(self):
         respostas = respostas_falsas(self.c)
         for i in range(len(self.c["palavras"])):
-            respostas[f"palavra_{i}"] = {"noul": [0.7, 0.3, 0.25][i] if i < 3 else 0.05}
+            respostas[f"palavra_{i}"] = {"noul": [0.7, 0.3, 0.25, 0.25][i] if i < 4 else 0.05}
         self.assertEqual(len(j.interpretar(NOTICIA, respostas, self.c)["palavras_chave"].split(", ")), 3)
 
 

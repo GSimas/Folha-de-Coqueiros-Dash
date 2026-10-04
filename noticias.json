@@ -14,8 +14,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 870,
@@ -32,8 +31,7 @@
         "Local do Evento": "Mercadão de Coqueiros",
         "Horário do Evento": "10:00",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 871,
@@ -50,8 +48,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 872,
@@ -68,8 +65,7 @@
         "Local do Evento": "Escola Básica Municipal Almirante Carvalhal",
         "Horário do Evento": "19:00",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 873,
@@ -86,8 +82,7 @@
         "Local do Evento": "Ponte Hercílio Luz",
         "Horário do Evento": "16:00",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 874,
@@ -104,8 +99,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 875,
@@ -122,8 +116,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 876,
@@ -140,8 +133,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 877,
@@ -158,8 +150,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 868,
@@ -176,8 +167,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 866,
@@ -194,8 +184,7 @@
         "Local do Evento": "Coqueiros",
         "Horário do Evento": "15:00",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 867,
@@ -212,8 +201,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 864,
@@ -230,8 +218,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 865,
@@ -248,8 +235,7 @@
         "Local do Evento": "Praia da Saudade",
         "Horário do Evento": "15:00",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 861,
@@ -266,8 +252,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 862,
@@ -284,8 +269,7 @@
         "Local do Evento": "Centro de Saúde de Coqueiros",
         "Horário do Evento": "14:00",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 863,
@@ -302,8 +286,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 859,
@@ -320,8 +303,7 @@
         "Local do Evento": "Mercadão de Coqueiros",
         "Horário do Evento": "10:30",
         "É Pago": true,
-        "Valor do Evento": "R$40",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$40"
     },
     {
         "ID": 860,
@@ -338,8 +320,7 @@
         "Local do Evento": "Auditório do Cefid",
         "Horário do Evento": "19:00",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 856,
@@ -356,8 +337,7 @@
         "Local do Evento": "Auditório do Cefid",
         "Horário do Evento": "18:45",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 857,
@@ -374,8 +354,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 858,
@@ -392,8 +371,7 @@
         "Local do Evento": "Centro de Eventos do IFSC",
         "Horário do Evento": "19:00",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 853,
@@ -410,8 +388,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 854,
@@ -428,8 +405,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 855,
@@ -446,8 +422,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 844,
@@ -464,8 +439,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 845,
@@ -482,8 +456,7 @@
         "Local do Evento": "Fundação Hassis",
         "Horário do Evento": "18:30",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 846,
@@ -500,8 +473,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 847,
@@ -518,8 +490,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 848,
@@ -536,8 +507,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 849,
@@ -554,8 +524,7 @@
         "Local do Evento": "Museu Histórico de Santa Catarina",
         "Horário do Evento": "10:30",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 850,
@@ -572,8 +541,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 851,
@@ -590,8 +558,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 852,
@@ -608,8 +575,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 838,
@@ -626,8 +592,7 @@
         "Local do Evento": "Coqueiros",
         "Horário do Evento": "16:30",
         "É Pago": true,
-        "Valor do Evento": "R$15,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$15,00"
     },
     {
         "ID": 839,
@@ -644,8 +609,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 840,
@@ -662,8 +626,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 841,
@@ -680,8 +643,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 842,
@@ -698,8 +660,7 @@
         "Local do Evento": "Praia da Saudade",
         "Horário do Evento": "09:00",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 843,
@@ -716,8 +677,7 @@
         "Local do Evento": "SC-401",
         "Horário do Evento": "13:00",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 836,
@@ -734,8 +694,7 @@
         "Local do Evento": "Itaguaçu",
         "Horário do Evento": "13:30",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 837,
@@ -752,8 +711,7 @@
         "Local do Evento": "Coqueiros",
         "Horário do Evento": "14:00",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 835,
@@ -770,8 +728,7 @@
         "Local do Evento": "Beira-Mar Continental",
         "Horário do Evento": "14:30",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 832,
@@ -788,8 +745,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 833,
@@ -806,8 +762,7 @@
         "Local do Evento": "Itaguaçu",
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 834,
@@ -824,8 +779,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 829,
@@ -842,8 +796,7 @@
         "Local do Evento": "Outside",
         "Horário do Evento": "14:00",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 830,
@@ -860,8 +813,7 @@
         "Local do Evento": "Coqueiros",
         "Horário do Evento": "09:00",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 831,
@@ -878,8 +830,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 823,
@@ -896,8 +847,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 824,
@@ -914,8 +864,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 825,
@@ -932,8 +881,7 @@
         "Local do Evento": "Reitoria da Udesc",
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 826,
@@ -950,8 +898,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 827,
@@ -968,8 +915,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 828,
@@ -986,8 +932,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 820,
@@ -1004,8 +949,7 @@
         "Local do Evento": "Rua Santos Saraiva",
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 821,
@@ -1022,8 +966,7 @@
         "Local do Evento": "Arena Cultural Tritão",
         "Horário do Evento": "15:00",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 822,
@@ -1040,8 +983,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 819,
@@ -1058,8 +1000,7 @@
         "Local do Evento": "Ponte Hercílio Luz",
         "Horário do Evento": "16:00",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 815,
@@ -1076,8 +1017,7 @@
         "Local do Evento": "Parque de Coqueiros",
         "Horário do Evento": "10:00",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 816,
@@ -1094,8 +1034,7 @@
         "Local do Evento": "Teatro Álvaro Carvalho",
         "Horário do Evento": "19:30",
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 817,
@@ -1112,8 +1051,7 @@
         "Local do Evento": null,
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": null,
-        "Atores Extraídos": true
+        "Valor do Evento": null
     },
     {
         "ID": 818,
@@ -1130,8 +1068,7 @@
         "Local do Evento": "Edifício Maximus Residence",
         "Horário do Evento": null,
         "É Pago": false,
-        "Valor do Evento": "R$0,00",
-        "Atores Extraídos": true
+        "Valor do Evento": "R$0,00"
     },
     {
         "ID": 813,
