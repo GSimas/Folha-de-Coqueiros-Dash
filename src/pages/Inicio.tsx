@@ -110,9 +110,9 @@ export default function Inicio({
             className="mt-8 max-w-xl animate-entrada-pagina text-lg leading-relaxed text-muted"
             style={{ animationDelay: "200ms" }}
           >
-            {numeros.noticias.toLocaleString("pt-BR")} notícias do bairro lidas
-            por modelos de linguagem: quem aparece, do que se fala, o que vem
-            por aí. Escolha um caminho e aprofunde no seu ritmo.
+            Inteligência gerada sobre notícias do bairro de Coqueiros,
+            Florianópolis: quem aparece, do que se fala, o que vem por aí.
+            Escolha um caminho e aprofunde no seu ritmo.
           </p>
 
           <div

@@ -17,7 +17,8 @@ export default defineConfig({
   },
   server: {
     // Porta fixa e estrita: evita que o Vite migre em silêncio para outra porta.
-    port: 5174,
+    // PORT vem do preview do Claude Code quando a 5174 já está ocupada.
+    port: Number(process.env.PORT) || 5174,
     strictPort: true,
   },
   build: {
