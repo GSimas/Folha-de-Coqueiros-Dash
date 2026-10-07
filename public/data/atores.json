@@ -71,7 +71,8 @@
             533,
             621,
             766,
-            868
+            868,
+            878
         ]
     },
     {
@@ -125,7 +126,8 @@
         "Descricao": "Pessoa mencionada em notícias de Coqueiros",
         "Noticias": [
             13,
-            441
+            441,
+            878
         ]
     },
     {
@@ -2266,7 +2268,8 @@
             854,
             841,
             837,
-            817
+            817,
+            878
         ]
     },
     {
@@ -4229,7 +4232,8 @@
             796,
             799,
             834,
-            823
+            823,
+            878
         ]
     },
     {
@@ -6377,7 +6381,8 @@
         "Noticias": [
             858,
             820,
-            818
+            818,
+            878
         ]
     },
     {
@@ -6919,7 +6924,8 @@
         "Noticias": [
             841,
             837,
-            817
+            817,
+            878
         ]
     },
     {
@@ -7231,7 +7237,8 @@
         "Descricao": "Localizado no Edifício Coral Center, na Rua Almirante Tamandaré, o consultório também é especializado no atendimento de adultos e idosos, emissão de laudo para concurso público e acompanhamento de condições que afetam a ",
         "Noticias": [
             834,
-            823
+            823,
+            878
         ]
     },
     {
@@ -8024,6 +8031,42 @@
         "Descricao": "-Lançamento infantil com o autor Gustavo Rudolf.",
         "Noticias": [
             815
+        ]
+    },
+    {
+        "ID_Ator": 515,
+        "Nome": "Antônio Carlos de Souza",
+        "Tipo": "Pessoa",
+        "Descricao": "O zelador Antônio Carlos de Souza, mais conhecido por seu Antônio, vai se aposentar.",
+        "Noticias": [
+            878
+        ]
+    },
+    {
+        "ID_Ator": 516,
+        "Nome": "Kátia Borges",
+        "Tipo": "Pessoa",
+        "Descricao": "Ao longo desse tempo, esteve presente em tantos momentos: zelando, cuidando, organizando e mantendo os espaços sempre limpos e seguros”, coloca Kátia Borges, uma das fundadoras da instituição e que acompanha toda a sua t",
+        "Noticias": [
+            878
+        ]
+    },
+    {
+        "ID_Ator": 517,
+        "Nome": "Colégio Estadual Presidente Roosevelt",
+        "Tipo": "Organização",
+        "Descricao": "E, com orgulho, estudei no Colégio Estadual Presidente Roosevelt, do 1º ao 8º ano”, diz ao confessar que o seu desejo era ficar mais “um pouquinho” na escola, mas uma hérnia umbilical o fez recuar e se afastar do ritmo d",
+        "Noticias": [
+            878
+        ]
+    },
+    {
+        "ID_Ator": 518,
+        "Nome": "Luíza Mahin",
+        "Tipo": "Pessoa",
+        "Descricao": "Ao lado de Antonieta de Barros, de Luíza Mahin e de Carolina Maria de Jesus, seu Antônio integra a obra produzida  pelo artista Bruno Barbi.",
+        "Noticias": [
+            878
         ]
     }
 ]
