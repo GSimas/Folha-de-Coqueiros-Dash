@@ -802,7 +802,8 @@
             144,
             155,
             250,
-            815
+            815,
+            879
         ]
     },
     {
@@ -3176,7 +3177,8 @@
             836,
             833,
             819,
-            815
+            815,
+            880
         ]
     },
     {
@@ -4780,7 +4782,8 @@
             859,
             832,
             827,
-            815
+            815,
+            879
         ]
     },
     {
@@ -5489,7 +5492,8 @@
             862,
             847,
             839,
-            826
+            826,
+            880
         ]
     },
     {
@@ -5581,7 +5585,8 @@
             818,
             817,
             816,
-            815
+            815,
+            880
         ]
     },
     {
@@ -8067,6 +8072,78 @@
         "Descricao": "Ao lado de Antonieta de Barros, de Luíza Mahin e de Carolina Maria de Jesus, seu Antônio integra a obra produzida  pelo artista Bruno Barbi.",
         "Noticias": [
             878
+        ]
+    },
+    {
+        "ID_Ator": 519,
+        "Nome": "DJ Vini Fagundes",
+        "Tipo": "Pessoa",
+        "Descricao": "18h – DJ Vini Fagundes",
+        "Noticias": [
+            880
+        ]
+    },
+    {
+        "ID_Ator": 520,
+        "Nome": "Show Victor Grassi",
+        "Tipo": "Pessoa",
+        "Descricao": "12h – Show Victor Grassi",
+        "Noticias": [
+            880
+        ]
+    },
+    {
+        "ID_Ator": 521,
+        "Nome": "Show Dani Assunção",
+        "Tipo": "Pessoa",
+        "Descricao": "19h15 – Show Dani Assunção",
+        "Noticias": [
+            880
+        ]
+    },
+    {
+        "ID_Ator": 522,
+        "Nome": "Juliano Richter Pires",
+        "Tipo": "Pessoa",
+        "Descricao": "Florianópolis tem orgulho de suas raízes e está pronta para receber quem vier para viver a nossa cultura de perto”, explica Juliano Richter Pires, secretário de Turismo, Desenvolvimento Econômico e Inovação.",
+        "Noticias": [
+            880
+        ]
+    },
+    {
+        "ID_Ator": 523,
+        "Nome": "Educação Ambiental",
+        "Tipo": "Organização",
+        "Descricao": "Mais do que uma política de gestão, o conceito depende da mudança de hábitos no dia a dia e o Copo Eco transforma essa ideia em uma escolha prática para cada visitante que passa a reutilizar o mesmo copo em vez de descar",
+        "Noticias": [
+            880
+        ]
+    },
+    {
+        "ID_Ator": 524,
+        "Nome": "Daiana Bastezini",
+        "Tipo": "Pessoa",
+        "Descricao": "Mais do que uma política de gestão, o conceito depende da mudança de hábitos no dia a dia e o Copo Eco transforma essa ideia em uma escolha prática para cada visitante que passa a reutilizar o mesmo copo em vez de descar",
+        "Noticias": [
+            880
+        ]
+    },
+    {
+        "ID_Ator": 525,
+        "Nome": "Cenira de Fátima",
+        "Tipo": "Pessoa",
+        "Descricao": "Conversação sobre a Campanha do mês Outubro Rosa com a Palestrante e autora Cenira de Fátima e Lina Veira, organizadora do evento.",
+        "Noticias": [
+            879
+        ]
+    },
+    {
+        "ID_Ator": 526,
+        "Nome": "Juliana Pereira",
+        "Tipo": "Pessoa",
+        "Descricao": "Lançamento da obra de Juliana Pereira: HQ – Samanta",
+        "Noticias": [
+            879
         ]
     }
 ]
