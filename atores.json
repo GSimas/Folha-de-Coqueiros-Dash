@@ -6742,7 +6742,8 @@
             826,
             825,
             823,
-            816
+            816,
+            881
         ]
     },
     {
@@ -8144,6 +8145,33 @@
         "Descricao": "Lançamento da obra de Juliana Pereira: HQ – Samanta",
         "Noticias": [
             879
+        ]
+    },
+    {
+        "ID_Ator": 527,
+        "Nome": "Fisioterapeuta William Maia Coutinho",
+        "Tipo": "Pessoa",
+        "Descricao": "O Fisioterapeuta William Maia Coutinho, especialista no assunto e com mais de 12 anos de atendimento a idosos, está levando sua experiência e conhecimento para dentro das instituições da região Continental.",
+        "Noticias": [
+            881
+        ]
+    },
+    {
+        "ID_Ator": 528,
+        "Nome": "Casa de Repouso",
+        "Tipo": "Organização",
+        "Descricao": "No mês de setembro, William realizou capacitação da equipe de cuidadores e técnicos de enfermagem da Casa de Repouso para Idosos Weiler (@casaderepousoweiler), do bairro de Itaguaçu.",
+        "Noticias": [
+            881
+        ]
+    },
+    {
+        "ID_Ator": 529,
+        "Nome": "Idosos Weiler",
+        "Tipo": "Organização",
+        "Descricao": "No mês de setembro, William realizou capacitação da equipe de cuidadores e técnicos de enfermagem da Casa de Repouso para Idosos Weiler (@casaderepousoweiler), do bairro de Itaguaçu.",
+        "Noticias": [
+            881
         ]
     }
 ]
