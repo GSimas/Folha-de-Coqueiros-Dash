@@ -1392,7 +1392,8 @@
             826,
             823,
             819,
-            817
+            817,
+            884
         ]
     },
     {
@@ -2271,7 +2272,8 @@
             837,
             817,
             878,
-            882
+            882,
+            884
         ]
     },
     {
@@ -6946,7 +6948,8 @@
             837,
             817,
             878,
-            882
+            882,
+            884
         ]
     },
     {
@@ -8135,7 +8138,8 @@
         "Tipo": "Organização",
         "Descricao": "Mais do que uma política de gestão, o conceito depende da mudança de hábitos no dia a dia e o Copo Eco transforma essa ideia em uma escolha prática para cada visitante que passa a reutilizar o mesmo copo em vez de descar",
         "Noticias": [
-            880
+            880,
+            884
         ]
     },
     {
@@ -8299,6 +8303,15 @@
         "Descricao": "História cursou na Universidade Federal de Santa Catarina, e Arqueologia na Universidade de São Paulo.",
         "Noticias": [
             882
+        ]
+    },
+    {
+        "ID_Ator": 542,
+        "Nome": "Gabriela Goulart",
+        "Tipo": "Pessoa",
+        "Descricao": "diz a educadora ambiental, Gabriela Goulart.",
+        "Noticias": [
+            884
         ]
     }
 ]
