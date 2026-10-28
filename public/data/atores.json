@@ -1393,7 +1393,9 @@
             823,
             819,
             817,
-            884
+            884,
+            886,
+            885
         ]
     },
     {
@@ -1970,7 +1972,8 @@
         "Noticias": [
             176,
             814,
-            871
+            871,
+            885
         ]
     },
     {
@@ -2273,7 +2276,9 @@
             817,
             878,
             882,
-            884
+            884,
+            886,
+            885
         ]
     },
     {
@@ -2538,7 +2543,8 @@
             823,
             819,
             817,
-            882
+            882,
+            885
         ]
     },
     {
@@ -3182,7 +3188,8 @@
             833,
             819,
             815,
-            880
+            880,
+            885
         ]
     },
     {
@@ -5595,7 +5602,8 @@
             816,
             815,
             880,
-            883
+            883,
+            885
         ]
     },
     {
@@ -5771,7 +5779,8 @@
         "Noticias": [
             872,
             854,
-            837
+            837,
+            885
         ]
     },
     {
@@ -6148,7 +6157,8 @@
         "Tipo": "Local",
         "Descricao": "Construída no início do século XX, a conhecida Casa Rosa já se tornou a Majestade da Escola Praia do Riso, em Coqueiros.",
         "Noticias": [
-            864
+            864,
+            885
         ]
     },
     {
@@ -6157,7 +6167,8 @@
         "Tipo": "Pessoa",
         "Descricao": "“Um exemplo de reconhecimento e de respeito da comunidade escolar pelo seu valor histórico”, define a arquiteta Silvia Lenzi.",
         "Noticias": [
-            864
+            864,
+            885
         ]
     },
     {
@@ -6167,7 +6178,8 @@
         "Descricao": "Agora só falta o reconhecimento pelo Poder Público”, coloca a arquiteta, que também mora no bairro.",
         "Noticias": [
             864,
-            854
+            854,
+            885
         ]
     },
     {
@@ -6362,7 +6374,8 @@
             821,
             819,
             883,
-            882
+            882,
+            885
         ]
     },
     {
@@ -6474,7 +6487,8 @@
         "Tipo": "Pessoa",
         "Descricao": "Para conhecer um pouco mais da vegetação espalhada no terreno que abriga a instituição, entrevistamos o biólogo Rodrigo Pelágio Alves Ferreira, o conhecido Kiko, 58 anos, responsável pelo Projeto Frutificar, programa que",
         "Noticias": [
-            854
+            854,
+            885
         ]
     },
     {
@@ -6949,7 +6963,9 @@
             817,
             878,
             882,
-            884
+            884,
+            886,
+            885
         ]
     },
     {
@@ -8075,7 +8091,9 @@
         "Descricao": "Ao longo desse tempo, esteve presente em tantos momentos: zelando, cuidando, organizando e mantendo os espaços sempre limpos e seguros”, coloca Kátia Borges, uma das fundadoras da instituição e que acompanha toda a sua t",
         "Noticias": [
             878,
-            882
+            882,
+            886,
+            885
         ]
     },
     {
@@ -8139,7 +8157,8 @@
         "Descricao": "Mais do que uma política de gestão, o conceito depende da mudança de hábitos no dia a dia e o Copo Eco transforma essa ideia em uma escolha prática para cada visitante que passa a reutilizar o mesmo copo em vez de descar",
         "Noticias": [
             880,
-            884
+            884,
+            885
         ]
     },
     {
@@ -8284,7 +8303,8 @@
         "Tipo": "Organização",
         "Descricao": "“O achado paralisou a escola e, imediatamente, a coordenação comunicou o fato ao Museu de Arqueologia da Universidade Federal de Santa Catarina (MArqueE/UFSC)”, aponta Isabela da Silva Muller Guimarães, arqueóloga do Ins",
         "Noticias": [
-            882
+            882,
+            885
         ]
     },
     {
@@ -8293,7 +8313,8 @@
         "Tipo": "Organização",
         "Descricao": "“O achado paralisou a escola e, imediatamente, a coordenação comunicou o fato ao Museu de Arqueologia da Universidade Federal de Santa Catarina (MArqueE/UFSC)”, aponta Isabela da Silva Muller Guimarães, arqueóloga do Ins",
         "Noticias": [
-            882
+            882,
+            885
         ]
     },
     {
@@ -8311,7 +8332,107 @@
         "Tipo": "Pessoa",
         "Descricao": "diz a educadora ambiental, Gabriela Goulart.",
         "Noticias": [
-            884
+            884,
+            885
+        ]
+    },
+    {
+        "ID_Ator": 543,
+        "Nome": "Escola Alternativa",
+        "Tipo": "Organização",
+        "Descricao": "Em 1983, você, sua irmã Tânia, e sua mãe resolveram criar a Escola Alternativa, que foi o primeiro nome.",
+        "Noticias": [
+            886
+        ]
+    },
+    {
+        "ID_Ator": 544,
+        "Nome": "Constance Kamii",
+        "Tipo": "Pessoa",
+        "Descricao": "Constance Kamii,",
+        "Noticias": [
+            886
+        ]
+    },
+    {
+        "ID_Ator": 545,
+        "Nome": "Jean Piaget",
+        "Tipo": "Pessoa",
+        "Descricao": "Jean Piaget é um exemplo.",
+        "Noticias": [
+            886
+        ]
+    },
+    {
+        "ID_Ator": 546,
+        "Nome": "Paulo Freire",
+        "Tipo": "Pessoa",
+        "Descricao": "O Paulo Freire",
+        "Noticias": [
+            886
+        ]
+    },
+    {
+        "ID_Ator": 547,
+        "Nome": "Emília Ferreiro",
+        "Tipo": "Pessoa",
+        "Descricao": "Emília Ferreiro",
+        "Noticias": [
+            886
+        ]
+    },
+    {
+        "ID_Ator": 548,
+        "Nome": "Isabela Guimarães",
+        "Tipo": "Pessoa",
+        "Descricao": "Para tanto, a jornalista Sibyla Loureiro entrevistou profissionais envolvidos em cada área de destaque da instituição: biólogo Kiko Bungus; arquiteta Silvia Lenzi; arqueóloga Isabela Guimarães; educadora ambiental Gabrie",
+        "Noticias": [
+            885
+        ]
+    },
+    {
+        "ID_Ator": 549,
+        "Nome": "Comissão Técnica do Serviço do Patrimônio Histórico",
+        "Tipo": "Organização",
+        "Descricao": "No momento, o processo encontra-se em tramitação na Comissão Técnica do Serviço do Patrimônio Histórico, Artístico e Natural do Município (Cotesphan) e, após análise, segue para o Conselho da Cidade.",
+        "Noticias": [
+            885
+        ]
+    },
+    {
+        "ID_Ator": 550,
+        "Nome": "Kiko Bungus",
+        "Tipo": "Pessoa",
+        "Descricao": "Para tanto, a jornalista Sibyla Loureiro entrevistou profissionais envolvidos em cada área de destaque da instituição: biólogo Kiko Bungus; arquiteta Silvia Lenzi; arqueóloga Isabela Guimarães; educadora ambiental Gabrie",
+        "Noticias": [
+            885
+        ]
+    },
+    {
+        "ID_Ator": 551,
+        "Nome": "Conselho da Cidade",
+        "Tipo": "Organização",
+        "Descricao": "No momento, o processo encontra-se em tramitação na Comissão Técnica do Serviço do Patrimônio Histórico, Artístico e Natural do Município (Cotesphan) e, após análise, segue para o Conselho da Cidade.",
+        "Noticias": [
+            885
+        ]
+    },
+    {
+        "ID_Ator": 552,
+        "Nome": "Secretaria Municipal de Planejamento",
+        "Tipo": "Organização",
+        "Descricao": "Para tanto, a coordenação da escola já entrou com processo de tombamento na Secretaria Municipal de Planejamento, Habitação e Desenvolvimento Urbano (Smphdu), para reconhecer a Casa Rosa como Patrimônio Cultural do Munic",
+        "Noticias": [
+            885
+        ]
+    },
+    {
+        "ID_Ator": 553,
+        "Nome": "Natural do Município",
+        "Tipo": "Organização",
+        "Descricao": "No momento, o processo encontra-se em tramitação na Comissão Técnica do Serviço do Patrimônio Histórico, Artístico e Natural do Município (Cotesphan) e, após análise, segue para o Conselho da Cidade.",
+        "Noticias": [
+            885
         ]
     }
 ]
